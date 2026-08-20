@@ -17,6 +17,7 @@ class FacebookPublisher:
         self.page_id = page_id
         self.access_token = access_token
         self.graph_url = f"https://graph.facebook.com/v19.0/{self.page_id}"
+        self.last_alert_time = 0  # Cooldown timestamp for sentinel alerts
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
@@ -58,29 +59,41 @@ class FacebookPublisher:
                     logger.info(f"Successfully published to Facebook Page! Post ID: {res_json.get('id')}")
                     return True
                 else:
-                    error_msg = f"Graph API Error (HTTP {resp.status}): {res_json.get('error', {}).get('message', res_json)}"
+                    error_obj = res_json.get("error", {})
+                    error_msg = f"Graph API Error (HTTP {resp.status}): {error_obj.get('message', res_json)}"
                     logger.error(error_msg)
-                    # Trigger Emergency Telegram Admin Alert
-                    await self.send_telegram_admin_alert(error_msg, caption)
+                    
+                    # Suppress alert spam for temporary Facebook posting rate limit
+                    is_rate_limit = "We limit how often" in str(error_msg) or error_obj.get("code") in (368, 17, 4)
+                    if not is_rate_limit:
+                        await self.send_telegram_admin_alert(error_msg, caption)
+                    else:
+                        logger.warning("Facebook temporary posting rate limit active. Will retry on next news cycle.")
                     return False
 
         except Exception as e:
             error_msg = f"Facebook Graph API Connection Exception: {str(e)}"
             logger.error(error_msg)
-            # Trigger Emergency Telegram Admin Alert
             await self.send_telegram_admin_alert(error_msg, caption)
             return False
 
     async def send_telegram_admin_alert(self, error_details: str, failed_payload: str):
         """
         EMERGENCY SENTINEL: Automatically sends alarm message to Telegram Admin
-        when Facebook Graph API experiences failure or token deprecation.
+        with 10-minute cooldown to prevent alert spamming.
         """
+        import time
+        now = time.time()
+        if (now - self.last_alert_time) < 600:  # 10 minutes cooldown
+            logger.info("Sentinel alert suppressed by 10-minute cooldown.")
+            return
+
+        self.last_alert_time = now
         logger.warning(f"🚨 [EMERGENCY SENTINEL TRIGGERED] Sending Telegram Alert to Admin ({config.TELEGRAM_ADMIN_CHAT_ID})...")
 
         alert_message = (
             f"🚨 *[EMERGENCY SENTINEL ALERT: FACEBOOK API FAILURE]*\n\n"
-            f"❌ * Error Details:*\n`{error_details}`\n\n"
+            f"❌ *Error Details:*\n`{error_details}`\n\n"
             f"📌 *Failed News Post Payload:*\n{failed_payload[:300]}...\n\n"
             f"⚠️ *Action Required:* Please inspect Facebook Page Access Token or Graph API version."
         )
