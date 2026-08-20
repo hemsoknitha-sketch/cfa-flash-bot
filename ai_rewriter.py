@@ -188,6 +188,91 @@ class SuperBrainAIRewriter:
             formatted_telegram_post=formatted_post
         )
 
+    def rewrite_political_philosophy_news(
+        self,
+        raw_id: str,
+        title: str,
+        content: str,
+        source: str,
+        political_metrics
+    ) -> ProcessedNewsArticle:
+        """
+        Political Philosophy Rewriter:
+        Rewrites political party statements into formal Khmer political science articles that promote
+        Article 51 of the Cambodian Constitution and liberal multiparty democratic principles.
+        """
+        tenets_str = "\n".join([f"- {t}" for t in political_metrics.philosophical_tenets])
+        
+        prompt = (
+            f"=== OFFICIAL POLITICAL PARTY STATEMENT INPUT ===\n"
+            f"Political Party: {political_metrics.party_name}\n"
+            f"Source: {source}\n"
+            f"Headline: {title}\n"
+            f"Statement Details: {content}\n\n"
+            f"=== CONSTITUTIONAL & POLITICAL PHILOSOPHY FRAMEWORK ===\n"
+            f"Constitutional Law: {political_metrics.constitutional_reference}\n"
+            f"Core Tenets:\n{tenets_str}\n\n"
+            f"INSTRUCTION: Write an official Khmer Political Science & Philosophy Article (អត្ថបទវិទ្យាសាស្ត្រនយោបាយ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស) with:\n"
+            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' summarizing the official statement/event of {political_metrics.party_name}.\n"
+            f"Paragraph 2: Political philosophy analysis connecting the statement to Montesquieu, John Locke, and Tocqueville principles.\n"
+            f"Paragraph 3: Defense of Article 51 of the Cambodian Constitution, emphasizing the absolute necessity of maintaining peace, stability, and liberal multiparty democracy.\n"
+            f"Paragraph 4: Balanced journalistic conclusion upholding constitutional rule of law ending with '៕'."
+        )
+
+        status_label = f"🏛️ [POLITICAL PHILOSOPHY - គោរពគ្រឹះប្រជាធិបតេយ្យសេរីពហុបក្ស មាត្រា ៥១]"
+        
+        if self.client:
+            try:
+                model_name = getattr(config, "GEMINI_MODEL", "gemini-3.6-flash")
+                if "gemini-2.5-flash" in model_name:
+                    model_name = "gemini-3.6-flash"
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=SYSTEM_PROMPT + "\n\n" + prompt,
+                )
+                data = json.loads(response.text)
+                cred_score = float(data.get("credibility_score", 98.5))
+                headline = data.get("khmer_headline", f"សេចក្តីថ្លែងការណ៍៖ {title}")
+                body = data.get("khmer_body", content)
+                impact = data.get("impact_analysis", "លើកកម្ពស់លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស និងរដ្ឋធម្មនុញ្ញកម្ពុជា")
+
+                formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, False)
+
+                return ProcessedNewsArticle(
+                    original_id=raw_id,
+                    credibility_score=cred_score,
+                    is_unverified_leak=False,
+                    status_label=status_label,
+                    khmer_headline=headline,
+                    khmer_body=body,
+                    impact_analysis=impact,
+                    formatted_telegram_post=formatted_post
+                )
+            except Exception as e:
+                logger.error(f"Gemini Political Philosophy Rewrite failed: {e}. Using fallback.")
+
+        # Fallback
+        headline = f"សេចក្តីថ្លែងការណ៍ផ្លូវការ ៖ {title}"
+        body = (
+            f"រាជធានីភ្នំពេញ៖ {political_metrics.party_name} បានចេញផ្សាយសេចក្តីថ្លែងការណ៍ផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
+            f"ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋធម្មនុញ្ញ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិចម្រុះ គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។\n\n"
+            f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
+            f"ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕"
+        )
+        impact = "ការពាររដ្ឋធម្មនុញ្ញ មាត្រា ៥១ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស"
+        formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, 98.5, source, False)
+
+        return ProcessedNewsArticle(
+            original_id=raw_id,
+            credibility_score=98.5,
+            is_unverified_leak=False,
+            status_label=status_label,
+            khmer_headline=headline,
+            khmer_body=body,
+            impact_analysis=impact,
+            formatted_telegram_post=formatted_post
+        )
+
     def _process_with_ollama(self, raw_id: str, title: str, content: str, source: str, source_tier: int, is_unverified: bool) -> ProcessedNewsArticle:
         import requests
         logger.info(f"🤖 Calling Local Ollama ({config.OLLAMA_MODEL}) at {config.OLLAMA_HOST}...")

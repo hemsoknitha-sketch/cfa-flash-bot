@@ -162,6 +162,67 @@ async def process_public_opinion_news(news_text: str, comments: list, news_id: s
             except Exception:
                 pass
 
+async def process_political_news(news_text: str, news_id: str, source: str = "Official Political Party Statement"):
+    """
+    Super Smart Political Science & Philosophy News Pipeline:
+    1. Identifies political party & extracts Article 51 Constitution & Philosophy tenets.
+    2. Rewrites into Khmer Political Science Article via Gemini 3.6 Flash.
+    3. Renders Playwright HD Banner Image.
+    4. Broadcasts to Telegram VIP Channel & Facebook Page.
+    """
+    logger.info(f"\n============================================================")
+    logger.info(f"🏛️ [PROCESSING POLITICAL NEWS ID: {news_id}] Starting Political Philosophy Pipeline...")
+    logger.info(f"============================================================")
+
+    # 1. Analyze Political Statement & Philosophy
+    from political_analyzer import PoliticalPartyAnalyzer
+    political_engine = PoliticalPartyAnalyzer()
+    political_metrics = political_engine.analyze_statement(news_text)
+
+    logger.info(f"Step 1: Political Analysis -> Party: {political_metrics.party_name} | Constitutional Alignment: {political_metrics.democratic_alignment_score}%")
+
+    # 2. Political Science Rewriting
+    processed_article = pipeline_engine.ai_rewriter.rewrite_political_philosophy_news(
+        raw_id=news_id,
+        title=news_text[:100],
+        content=news_text,
+        source=source,
+        political_metrics=political_metrics
+    )
+
+    # 3. Banner Image Rendering
+    image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
+
+    try:
+        # 4. Broadcast to Telegram VIP & Admin
+        tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
+            message_text=processed_article.formatted_telegram_post,
+            image_path=image_path
+        )
+        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789"):
+            await pipeline_engine.broadcaster.broadcast_to_vip_channel(
+                message_text=processed_article.formatted_telegram_post,
+                image_path=image_path,
+                target_chat_id=config.TELEGRAM_ADMIN_CHAT_ID
+            )
+
+        # 5. Publish to Facebook Page
+        fb_success = await pipeline_engine.fb_publisher.publish_news(
+            caption=processed_article.formatted_telegram_post,
+            image_path=image_path
+        )
+
+        if tg_success or fb_success:
+            pipeline_engine.dedup_store.add_item(news_id, news_text)
+            logger.info(f"🚀 [POLITICAL PHILOSOPHY NEWS PUBLISHED TO TELEGRAM & FACEBOOK] Item ID: {news_id}\n")
+    finally:
+        import os
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except Exception:
+                pass
+
 async def process_batch_news():
     """Fetch and process incoming news items from RSS feeds in batch."""
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
