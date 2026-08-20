@@ -204,7 +204,8 @@ class SuperBrainAIRewriter:
         tenets_str = "\n".join([f"- {t}" for t in political_metrics.philosophical_tenets])
         
         prompt = (
-            f"=== OFFICIAL POLITICAL PARTY STATEMENT INPUT ===\n"
+            f"=== OFFICIAL POLITICAL STATEMENT / LEADER MESSAGE INPUT ===\n"
+            f"Political Leader / Figure: {political_metrics.figure_name}\n"
             f"Political Party: {political_metrics.party_name}\n"
             f"Source: {source}\n"
             f"Headline: {title}\n"
@@ -212,10 +213,10 @@ class SuperBrainAIRewriter:
             f"=== CONSTITUTIONAL & POLITICAL PHILOSOPHY FRAMEWORK ===\n"
             f"Constitutional Law: {political_metrics.constitutional_reference}\n"
             f"Core Tenets:\n{tenets_str}\n\n"
-            f"INSTRUCTION: Write an official Khmer Political Science & Philosophy Article (អត្ថបទវិទ្យាសាស្ត្រនយោបាយ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស) with:\n"
-            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' summarizing the official statement/event of {political_metrics.party_name}.\n"
-            f"Paragraph 2: Political philosophy analysis connecting the statement to Montesquieu, John Locke, and Tocqueville principles.\n"
-            f"Paragraph 3: Defense of Article 51 of the Cambodian Constitution, emphasizing the absolute necessity of maintaining peace, stability, and liberal multiparty democracy.\n"
+            f"INSTRUCTION: Write an official Khmer Political Science & Statesmanship Article (អត្ថបទសារលិខិតឥស្សរជននយោបាយ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស) with:\n"
+            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' summarizing the official message/statement of {political_metrics.figure_name} ({political_metrics.party_name}).\n"
+            f"Paragraph 2: Statesmanship and political philosophy analysis connecting the message to Cicero, Marcus Aurelius civic duty, Montesquieu, and John Locke principles.\n"
+            f"Paragraph 3: Defense of Article 51 of the Cambodian Constitution, emphasizing the absolute necessity of maintaining peace, stability, national unity, and liberal multiparty democracy.\n"
             f"Paragraph 4: Balanced journalistic conclusion upholding constitutional rule of law ending with '៕'."
         )
 
@@ -232,7 +233,7 @@ class SuperBrainAIRewriter:
                 )
                 data = json.loads(response.text)
                 cred_score = float(data.get("credibility_score", 98.5))
-                headline = data.get("khmer_headline", f"សេចក្តីថ្លែងការណ៍៖ {title}")
+                headline = data.get("khmer_headline", f"សារលិខិតផ្លូវការ ៖ {title}")
                 body = data.get("khmer_body", content)
                 impact = data.get("impact_analysis", "លើកកម្ពស់លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស និងរដ្ឋធម្មនុញ្ញកម្ពុជា")
 
@@ -252,10 +253,10 @@ class SuperBrainAIRewriter:
                 logger.error(f"Gemini Political Philosophy Rewrite failed: {e}. Using fallback.")
 
         # Fallback
-        headline = f"សេចក្តីថ្លែងការណ៍ផ្លូវការ ៖ {title}"
+        headline = f"សារលិខិតផ្លូវការ ៖ {title}"
         body = (
-            f"រាជធានីភ្នំពេញ៖ {political_metrics.party_name} បានចេញផ្សាយសេចក្តីថ្លែងការណ៍ផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
-            f"ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋធម្មនុញ្ញ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិចម្រុះ គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។\n\n"
+            f"រាជធានីភ្នំពេញ៖ {political_metrics.figure_name} នៃ {political_metrics.party_name} បានចេញផ្សាយសារលិខិតផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
+            f"ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋបាលដឹកនាំរដ្ឋ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិចម្រុះ គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។\n\n"
             f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
             f"ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕"
         )
