@@ -323,7 +323,7 @@ class SuperSmartTelegramBot:
                 await self.send_message(chat_id, help_text)
 
     async def flush_old_updates(self):
-        """Flushes all old unconfirmed updates from Telegram servers on startup."""
+        """Flushes all old unconfirmed updates from Telegram servers on startup to prevent old message replay."""
         try:
             session = await self.get_session()
             url = f"{self.api_url}/deleteWebhook?drop_pending_updates=true"
@@ -331,14 +331,18 @@ class SuperSmartTelegramBot:
                 res = await resp.json()
                 logger.info(f"Flushed pending Telegram updates: {res}")
             
-            # Fetch latest offset to ignore stale messages
+            # Fetch latest offset and mark all pending updates read
             get_url = f"{self.api_url}/getUpdates?offset=-1"
             async with session.get(get_url) as resp:
                 res = await resp.json()
                 if res.get("ok") and res.get("result"):
                     latest_id = res["result"][-1]["update_id"]
                     self.offset = latest_id + 1
-                    logger.info(f"Initialized Telegram Bot offset to: {self.offset}")
+                    # Send getUpdates with self.offset to confirm all pending updates with Telegram API
+                    ack_url = f"{self.api_url}/getUpdates?offset={self.offset}&limit=1"
+                    async with session.get(ack_url) as ack_resp:
+                        await ack_resp.json()
+                    logger.info(f"Initialized Telegram Bot offset to: {self.offset} (All historical messages marked read).")
         except Exception as e:
             logger.error(f"Error flushing old updates: {e}")
 
@@ -348,6 +352,7 @@ class SuperSmartTelegramBot:
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
+        processed_update_ids = set()
         while True:
             try:
                 timeout_config = aiohttp.ClientTimeout(total=35)
@@ -358,8 +363,15 @@ class SuperSmartTelegramBot:
                             res = await resp.json()
                             if res.get("ok"):
                                 for update in res.get("result", []):
-                                    self.offset = update["update_id"] + 1
-                                    asyncio.create_task(self.handle_update(update))
+                                    up_id = update.get("update_id")
+                                    if up_id:
+                                        self.offset = up_id + 1
+                                        if up_id not in processed_update_ids:
+                                            processed_update_ids.add(up_id)
+                                            # Keep processed set small
+                                            if len(processed_update_ids) > 1000:
+                                                processed_update_ids.clear()
+                                            await self.handle_update(update)
                         else:
                             logger.warning(f"Telegram API getUpdates returned status: {resp.status} | URL: '{url}'")
                             await asyncio.sleep(2)
