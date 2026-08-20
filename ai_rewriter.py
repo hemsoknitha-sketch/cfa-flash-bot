@@ -68,8 +68,11 @@ class SuperBrainAIRewriter:
         if self.client:
             try:
                 prompt = f"Source: {source} (Tier {source_tier})\nIs Unverified Flag: {is_unverified}\nTitle: {title}\nContent: {content}"
+                model_name = getattr(config, "GEMINI_MODEL", "gemini-3.6-flash")
+                if "gemini-2.5-flash" in model_name:
+                    model_name = "gemini-3.6-flash"
                 response = self.client.models.generate_content(
-                    model=config.GEMINI_MODEL,
+                    model=model_name,
                     contents=SYSTEM_PROMPT + "\n\nRaw News Input:\n" + prompt,
                 )
                 data = json.loads(response.text)

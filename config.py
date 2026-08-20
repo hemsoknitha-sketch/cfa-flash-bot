@@ -19,7 +19,7 @@ class Config:
 
     # Gemini AI settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
-    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-2.5-flash")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
 
     # Local Ollama LLM settings (Qwen 2.5 3B)
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")
