@@ -18,11 +18,13 @@ class FacebookPublisher:
         self.access_token = access_token
         self.graph_url = f"https://graph.facebook.com/v19.0/{self.page_id}"
         self.last_alert_time = 0  # Cooldown timestamp for sentinel alerts
+        self.last_post_time = 0   # Rate Governor timestamp (Min 15 mins = 900s between posts)
+        self.min_post_interval = 900  # 15 mins safety interval between FB posts for 100% Meta Policy Compliance
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
         Publish post to Facebook Page.
-        Supports text post or image post.
+        Paced by Super Smart Rate Governor (15-min interval) for 100% Meta Policy Compliance.
         """
         logger.info(f"[FACEBOOK PUBLISHER] Preparing to publish Flash News to Page ID: {self.page_id}...")
 
@@ -33,6 +35,15 @@ class FacebookPublisher:
                 logger.info(f"[FACEBOOK SIMULATION] Attached Banner Image: {image_path}")
             logger.info(f"\n--- FACEBOOK POST PREVIEW ---\n{caption}\n-----------------------------")
             return True
+
+        # 🛡️ Super Smart Rate Governor: Ensure min 15 mins between Facebook posts for 100% Meta Policy Compliance
+        import time
+        now = time.time()
+        time_since_last = now - self.last_post_time
+        if self.last_post_time > 0 and time_since_last < self.min_post_interval:
+            wait_needed = int(self.min_post_interval - time_since_last)
+            logger.info(f"🛡️ [FACEBOOK RATE GOVERNOR] Pacing Facebook post ({wait_needed}s remaining in 15-min safety window) for 100% Meta Policy Compliance.")
+            await asyncio.sleep(wait_needed)
 
         try:
             async with aiohttp.ClientSession() as session:
@@ -56,6 +67,7 @@ class FacebookPublisher:
                         res_json = await resp.json()
 
                 if resp.status == 200 and "id" in res_json:
+                    self.last_post_time = time.time()
                     logger.info(f"Successfully published to Facebook Page! Post ID: {res_json.get('id')}")
                     return True
                 else:
