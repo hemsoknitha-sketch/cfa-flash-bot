@@ -266,8 +266,30 @@ class SuperSmartTelegramBot:
                 )
                 await self.send_message(chat_id, help_text)
 
+    async def flush_old_updates(self):
+        """Flushes all old unconfirmed updates from Telegram servers on startup."""
+        try:
+            url = f"{self.api_url}/deleteWebhook?drop_pending_updates=true"
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as resp:
+                    res = await resp.json()
+                    logger.info(f"Flushed pending Telegram updates: {res}")
+            
+            # Fetch latest offset to ignore stale messages
+            get_url = f"{self.api_url}/getUpdates?offset=-1"
+            async with aiohttp.ClientSession() as session:
+                async with session.get(get_url) as resp:
+                    res = await resp.json()
+                    if res.get("ok") and res.get("result"):
+                        latest_id = res["result"][-1]["update_id"]
+                        self.offset = latest_id + 1
+                        logger.info(f"Initialized Telegram Bot offset to: {self.offset}")
+        except Exception as e:
+            logger.error(f"Error flushing old updates: {e}")
+
     async def poll_updates_loop(self):
         """Long-polling loop for receiving user updates asynchronously."""
+        await self.flush_old_updates()
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
