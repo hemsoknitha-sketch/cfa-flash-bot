@@ -286,6 +286,19 @@ class SuperBrainAIRewriter:
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
         clean_headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
 
+        # Load LOGO.png if available
+        logo_path = os.path.abspath("LOGO.png")
+        if os.path.exists(logo_path):
+            import base64
+            try:
+                with open(logo_path, "rb") as f:
+                    logo_b64 = base64.b64encode(f.read()).decode("utf-8")
+                    logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 36px; width: auto; vertical-align: middle; border-radius: 6px;" />'
+            except Exception:
+                logo_html = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
+        else:
+            logo_html = '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
+
         # Method 1: High-Definition Playwright HTML5 HarfBuzz OpenType Engine
         try:
             from playwright.async_api import async_playwright
@@ -302,27 +315,35 @@ body {{
     padding: 0;
     width: 1200px;
     height: 630px;
-    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    background: linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #3a506b 100%);
     font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
     color: #f8fafc;
     box-sizing: border-box;
     display: flex;
     flex-direction: column;
     justify-content: space-between;
-    padding: 60px;
-    border-top: 16px solid #ef4444;
+    padding: 55px 60px;
+    border-top: 14px solid #ef4444;
+}}
+
+.header-container {{
+    display: flex;
+    align-items: center;
+    gap: 16px;
 }}
 
 .badge {{
     background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    font-family: 'Outfit', sans-serif;
+    font-family: 'Battambang', 'Outfit', sans-serif;
     font-size: 24px;
-    font-weight: 800;
-    padding: 12px 28px;
+    font-weight: 700;
+    padding: 10px 24px;
     border-radius: 50px;
-    display: inline-block;
-    letter-spacing: 1.5px;
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    letter-spacing: 0.5px;
     box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
     width: fit-content;
 }}
@@ -331,8 +352,9 @@ body {{
     font-family: 'Moul', 'Khmer OS Muol', serif;
     color: #ef4444;
     font-size: 38px;
-    margin-top: 30px;
-    margin-bottom: 20px;
+    margin-top: 25px;
+    margin-bottom: 18px;
+    text-shadow: 0 2px 10px rgba(239, 68, 68, 0.3);
 }}
 
 .news-headline {{
@@ -340,7 +362,7 @@ body {{
     line-height: 1.6;
     font-weight: 700;
     color: #f8fafc;
-    text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+    text-shadow: 0 2px 10px rgba(0,0,0,0.6);
     display: -webkit-box;
     -webkit-line-clamp: 3;
     -webkit-box-orient: vertical;
@@ -348,8 +370,8 @@ body {{
 }}
 
 .footer {{
-    border-top: 2px solid #334155;
-    padding-top: 25px;
+    border-top: 2px solid rgba(255, 255, 255, 0.15);
+    padding-top: 22px;
     font-size: 20px;
     color: #94a3b8;
     display: flex;
@@ -358,20 +380,36 @@ body {{
 }}
 
 .footer-brand {{
+    font-family: 'Outfit', sans-serif;
+    font-size: 22px;
+    font-weight: 800;
+    color: #f8fafc;
+    letter-spacing: 1px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}}
+
+.bot-tag {{
+    color: #38bdf8;
     font-weight: 700;
-    color: #cbd5e1;
 }}
 </style>
 </head>
 <body>
     <div>
-        <div class='badge'>⚡ SUPER VIP FLASH NEWS</div>
+        <div class='header-container'>
+            <div class='badge'>
+                {logo_html}
+                សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA
+            </div>
+        </div>
         <div class='category-title'>ព័ត៌មានទាន់ហេតុការណ៍</div>
         <div class='news-headline'>{clean_headline}</div>
     </div>
     <div class='footer'>
-        <span class='footer-brand'>SUPER VIP FLASH NEWS AI SYSTEM</span>
-        <span>REAL-TIME FINANCIAL & MARKET FEED</span>
+        <span class='footer-brand'>APEX SUPER BRAIN AI SYSTEM</span>
+        <span><span class='bot-tag'>@CFAflashBot</span> | REAL-TIME FINANCIAL & MARKET FEED</span>
     </div>
 </body>
 </html>"""
