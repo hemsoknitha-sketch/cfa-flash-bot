@@ -56,7 +56,7 @@ class SuperSmartTelegramBot:
         }
 
     async def send_message(self, chat_id: int, text: str, reply_markup=None):
-        """Send message via Telegram API."""
+        """Send message via Telegram API with robust Markdown fallback."""
         payload = {
             "chat_id": chat_id,
             "text": text,
@@ -66,9 +66,16 @@ class SuperSmartTelegramBot:
         try:
             async with aiohttp.ClientSession() as session:
                 async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp:
-                    return await resp.json()
+                    res = await resp.json()
+                    if not res.get("ok"):
+                        logger.warning(f"Telegram Markdown send failed ({res.get('description')}). Retrying as Plain Text...")
+                        payload.pop("parse_mode", None)
+                        async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp_fallback:
+                            return await resp_fallback.json()
+                    return res
         except Exception as e:
             logger.error(f"Error sending message to {chat_id}: {e}")
+            return None
 
     async def handle_update(self, update: dict):
         """Route incoming messages and callback queries."""
@@ -349,19 +356,24 @@ class SuperSmartTelegramBot:
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
-        while True:
-            try:
-                url = f"{self.api_url}/getUpdates?offset={self.offset}&timeout=30"
-                async with aiohttp.ClientSession() as session:
+        timeout_config = aiohttp.ClientTimeout(total=40)
+        async with aiohttp.ClientSession(timeout=timeout_config) as session:
+            while True:
+                try:
+                    url = f"{self.api_url}/getUpdates?offset={self.offset}&timeout=25"
                     async with session.get(url) as resp:
-                        res = await resp.json()
-                        if res.get("ok"):
-                            for update in res.get("result", []):
-                                self.offset = update["update_id"] + 1
-                                asyncio.create_task(self.handle_update(update))
-            except Exception as e:
-                logger.error(f"Error in polling loop: {e}")
-                await asyncio.sleep(2)
+                        if resp.status == 200:
+                            res = await resp.json()
+                            if res.get("ok"):
+                                for update in res.get("result", []):
+                                    self.offset = update["update_id"] + 1
+                                    asyncio.create_task(self.handle_update(update))
+                        else:
+                            logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
+                            await asyncio.sleep(2)
+                except Exception as e:
+                    logger.error(f"Error in polling loop: {e}")
+                    await asyncio.sleep(2)
 
 if __name__ == "__main__":
     bot = SuperSmartTelegramBot()
