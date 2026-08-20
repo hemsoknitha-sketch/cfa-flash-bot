@@ -106,10 +106,10 @@ async def process_batch_news():
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
     news_items = pipeline_engine.ingestion.fetch_from_rss()
     if not news_items:
-        logger.info("Generating mock news items for testing...")
-        news_items = pipeline_engine.ingestion.generate_mock_breaking_news()
+        logger.info("No new live RSS news items found in this 60s cycle. Waiting for next scan...")
+        return
 
-    logger.info(f"Retrieved {len(news_items)} news items to process.")
+    logger.info(f"Retrieved {len(news_items)} live news items to process.")
     for item in news_items:
         full_text = f"{item.title} - {item.content}"
         await process_news(news_text=full_text, news_id=item.id)

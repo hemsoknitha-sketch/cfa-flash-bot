@@ -23,8 +23,9 @@ class VectorDeduplicator:
         self.collection_name = "news_vectors"
         self.vector_size = config.QDRANT_VECTOR_SIZE  # 1024 for BAAI/bge-m3
 
-        # Fallback memory store
+        # Fallback memory store & content hash cache
         self.history: List[Dict] = []
+        self.seen_hashes: set = set()
 
         self._init_qdrant()
 
@@ -70,15 +71,24 @@ class VectorDeduplicator:
 
     def is_duplicate(self, text: str) -> Tuple[bool, float, str]:
         """
-        Check if text is duplicate (similarity >= threshold).
+        Check if text is duplicate (similarity >= threshold or exact SHA256 hash match).
         Returns: (is_dup: bool, max_similarity: float, matched_id: str)
         """
+        import hashlib
+        content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
+        if content_hash in self.seen_hashes:
+            return True, 1.0, f"hash_{content_hash[:8]}"
+
         if self.qdrant_enabled:
             return self._is_duplicate_qdrant(text)
         return self._is_duplicate_tfidf(text)
 
     def add_item(self, item_id: str, text: str):
-        """Add a processed news item to the vector history."""
+        """Add a processed news item to the vector history and content hash cache."""
+        import hashlib
+        content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
+        self.seen_hashes.add(content_hash)
+
         if self.qdrant_enabled:
             self._add_item_qdrant(item_id, text)
         else:
