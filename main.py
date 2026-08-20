@@ -109,7 +109,7 @@ async def main():
     
     # 1. Run single emergency test news item through the 5-step pipeline
     test_id = f"news_{int(time.time())}"
-    test_content = "Federal Reserve announces unexpected emergency interest rate cut of 50 basis points to support economic liquidity."
+    test_content = "Cambodia strengthens international joint operations to crackdown online scam networks, safeguarding human rights, social justice, and national rule of law."
     await process_news(news_text=test_content, news_id=test_id)
 
     # 2. Run batch news processing

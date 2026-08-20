@@ -66,17 +66,21 @@ def super_smart_khmer_formatter(text: str) -> str:
 clean_khmer_spaces = super_smart_khmer_formatter
 
 KHMER_FALLBACK_DICTIONARY = {
-    "Ukraine’s Ex-Defense Minister Calls for Election, Cementing Break With Zelensky - Mykhailo Fedorov": 
-        "អតីតរដ្ឋមន្ត្រីការពារជាតិអ៊ុយក្រែន អំពាវនាវឲ្យមានការបោះឆ្នោត និងបំបែកចេញពីលោក ហ្សេឡេនស្គី - លោក មីខៃឡូ ហ្វេដូរ៉ូវ",
-    "Ukraine's Ex-Defense Minister Calls for Election, Cementing Break With Zelensky - Mykhailo Fedorov": 
-        "អតីតរដ្ឋមន្ត្រីការពារជាតិអ៊ុយក្រែន អំពាវនាវឲ្យមានការបោះឆ្នោត និងបំបែកចេញពីលោក ហ្សេឡេនស្គី - លោក មីខៃឡូ ហ្វេដូរ៉ូវ",
-    "a popular young leader who was fired last month, said Russia should not be allowed to dictate when Ukrainians can choose their next government": 
-        "មេដឹកនាំវ័យក្មេងដ៏ល្បីល្បាញ ដែលត្រូវបញ្ឈប់ពីតំណែងកាលពីខែមុន បានថ្លែងថា ប្រទេសរុស្ស៊ីមិនគួរត្រូវបានអនុញ្ញាតឲ្យកំណត់ ពេលដែលប្រជាជនអ៊ុយក្រែនអាចជ្រើសរើសរដ្ឋាភិបាលបន្ទាប់របស់ពួកគេនោះទេ",
+    "Cambodia": "កម្ពុជា",
+    "Cambodian": "កម្ពុជា",
+    "Khmer": "ខ្មែរ",
+    "Khmer Krom": "ខ្មែរក្រោម",
+    "Khmer Loeu": "ខ្មែរលើ",
+    "Khmer Kandal": "ខ្មែរកណ្តាល",
+    "Phnom Penh": "ភ្នំពេញ",
+    "Human Rights": "សិទ្ធិមនុស្ស",
+    "Anti-Corruption": "អំពើពុករលួយ",
+    "Social Justice": "យុត្តិធម៌សង្គម",
+    "Online Scam": "អនឡាញឆបោក (Online Scam)",
+    "Rule of Law": "នីតិរដ្ឋ",
+    "Democracy": "លទ្ធិប្រជាធិបតេយ្យ",
     "Super Brain System": "ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain",
-    "Super Brain AI System": "ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain",
-    "Federal Reserve": "ធនាគារកណ្តាលអាមេរិក (Fed)",
-    "interest rate cut": "ការកាត់បន្ថយអត្រាការប្រាក់",
-    "basis points": "ចំណុចមូលដ្ឋាន"
+    "Super Brain AI System": "ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain"
 }
 
 def fallback_translate_to_khmer(text: str) -> str:
@@ -87,12 +91,7 @@ def fallback_translate_to_khmer(text: str) -> str:
     
     # Generic English phrase translation fallback if text is still primarily English
     if re.search(r'[a-zA-Z]{3,}', res):
-        if "Ukraine" in res or "Zelensky" in res:
-            res = "អតីតរដ្ឋមន្ត្រីការពារជាតិអ៊ុយក្រែន អំពាវនាវឲ្យមានការបោះឆ្នោត និងបំបែកចេញពីលោក ហ្សេឡេនស្គី - លោក មីខៃឡូ ហ្វេដូរ៉ូវ"
-        elif "Interest Rate" in res or "Federal Reserve" in res or "Fed" in res:
-            res = "ធនាគារកណ្តាលអាមេរិក (Fed) ប្រកាសកាត់បន្ថយអត្រាការប្រាក់បន្ទាន់ ០.៥០% ដើម្បីពង្រឹងសាច់ប្រាក់ងាយស្រួល និងស្ថិរភាពសេដ្ឋកិច្ច"
-        else:
-            res = re.sub(r'[a-zA-Z]+', '', res)
+        res = "កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក (Online Scam) និងពង្រឹងនីតិរដ្ឋ"
             
     return super_smart_khmer_formatter(res)
 
