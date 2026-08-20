@@ -24,7 +24,7 @@ Your mission is to evaluate incoming news from all global social networks and ne
 STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
 2. PARAGRAPH 1 (DATELINE & LEAD): Start with "រាជធានីភ្នំពេញ៖ " followed by the lead news story.
-3. PARAGRAPH 2 (SUPER BRAIN & RULE OF LAW): Reference Super Brain ("យោងតាមប្រភពព័ត៌មានពីប្រព័ន្ធខួរក្បាលឆ្លាតវៃ (Super Brain) បានបញ្ជាក់ឱ្យដឹងថា...") and connect to human rights, anti-corruption, or rule of law.
+3. PARAGRAPH 2 (SUPER BRAIN DYNAMIC SOURCE): MUST start with: "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា..." followed by details connecting to human rights, anti-corruption, or rule of law.
 4. PARAGRAPH 3 & 4 (IMPACT & CONCLUSION): Write fluid, elegant Khmer prose paragraphs analyzing the positive social impact, benefits to citizens, and national prestige. End the final paragraph with the official Khmer full stop "៕".
 5. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
 
@@ -135,15 +135,17 @@ class SuperBrainAIRewriter:
             raise Exception(f"Ollama returned HTTP status {resp.status_code}: {resp.text}")
 
     def _rule_based_fallback(self, raw_id: str, title: str, content: str, source: str, source_tier: int, is_unverified: bool) -> ProcessedNewsArticle:
+        from translator import fallback_translate_to_khmer
         cred_score = 95.0 if source_tier == 1 and not is_unverified else 70.0
         is_leak = is_unverified
         status_label = "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ" if not is_leak else "⚠️ UNVERIFIED MARKET LEAK - ព័ត៌មានបែកធ្លាយមិនទាន់ផ្លូវការ"
 
         headline = "កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិ បើកយុទ្ធនាការក្ដៅគគុកបង្រ្កាបបទល្មើសឆបោកតាមប្រព័ន្ធអនឡាញ និងលើកកម្ពស់នីតិរដ្ឋ"
         
+        source_name = fallback_translate_to_khmer(source) if source and "Super Brain" not in source else "ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain"
         body = (
             "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
-            "យោងតាមប្រភពព័ត៌មានពីប្រព័ន្ធខួរក្បាលឆ្លាតវៃ (Super Brain) បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះមិនត្រឹមតែផ្តោតសំខាន់លើការផ្ដន្ទាទោសឧក្រិដ្ឋជនបច្ចេកវិទ្យាប៉ុណ្ណោះទេ ប៉ុន្តែក៏បានផ្សារភ្ជាប់យ៉ាងស្អិតរមួតទៅនឹងការលើកកម្ពស់ការគោរពសិទ្ធិមនុស្ស និងការពង្រឹងនីតិរដ្ឋយ៉ាងម៉ឺងម៉ាត់នៅកម្ពុជាផងដែរ។ ការបោះជំហាននេះ ឆ្លុះបញ្ចាំងពីឆន្ទៈមោះមុតរបស់អាជ្ញាធរ ក្នុងការកម្ចាត់ភាពអសកម្ម និងធានានូវយុត្តិធម៌សង្គមប្រកបដោយតម្លាភាព។\n\n"
+            f"យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះមិនត្រឹមតែផ្តោតសំខាន់លើការផ្ដន្ទាទោសឧក្រិដ្ឋជនបច្ចេកវិទ្យាប៉ុណ្ណោះទេ ប៉ុន្តែក៏បានផ្សារភ្ជាប់យ៉ាងស្អិតរមួតទៅនឹងការលើកកម្ពស់ការគោរពសិទ្ធិមនុស្ស និងការពង្រឹងនីតិរដ្ឋយ៉ាងម៉ឺងម៉ាត់នៅកម្ពុជាផងដែរ។ ការបោះជំហាននេះ ឆ្លុះបញ្ចាំងពីឆន្ទៈមោះមុតរបស់អាជ្ញាធរ ក្នុងការកម្ចាត់ភាពអសកម្ម និងធានានូវយុត្តិធម៌សង្គមប្រកបដោយតម្លាភាព។\n\n"
             "ជុំវិញការរឹតបន្តឹងវិធានការច្បាប់នេះ អ្នកជំនាញបានធ្វើការវិភាគយ៉ាងច្បាស់លាស់ពីផលប្រយោជន៍ និងឥទ្ធិពលជាវិជ្ជមាននៃយុទ្ធនាការនេះ។ ជាបឋម ប្រតិបត្តិការដ៏ក្តៅគគុកនេះបានចូលរួមចំណែកយ៉ាងសកម្មក្នុងការកាត់បន្ថយ និងទប់ស្កាត់ហានិភ័យនៃបទល្មើសឆបោកតាមប្រព័ន្ធបច្ចេកវិទ្យាឌីជីថល ដែលកំពុងគំរាមកំហែងដល់ប្រជាពលរដ្ឋស្លូតត្រង់ទូទាំងសកលលោក។ តាមរយៈការវាយបំបែកសំបុកឧក្រិដ្ឋជនទាំងនេះ វាបានជួយស្តារ និងបង្កើនទំនុកចិត្តយ៉ាងរឹងមាំ ព្រមទាំងធានាបាននូវសន្តិសុខសុវត្ថិភាពសង្គមជូនប្រជាពលរដ្ឋកម្ពុជាឱ្យរស់នៅដោយភាពកក់ក្តៅ។\n\n"
             "លើសពីនេះទៅទៀត ភាពជោគជ័យនៃកិច្ចសហប្រតិបត្តិការជាមួយសហគមន៍អន្តរជាតិនេះ បានផ្តល់នូវផលប្រយោជន៍ជាយុទ្ធសាស្ត្រយ៉ាងធំធេង ដោយបានរួមចំណែកយ៉ាងសំខាន់ក្នុងការលើកស្ទួយកិត្តិយស និងកិត្យានុភាពរបស់ប្រទេសកម្ពុជានៅលើឆាកអន្តរជាតិ ក្នុងនាមជារដ្ឋអធិបតេយ្យដែលប្រកាន់ខ្ជាប់នូវច្បាប់ និងសណ្តាប់ធ្នាប់សាធារណៈយ៉ាងខ្ជាប់ខ្ជួន៕"
         )
