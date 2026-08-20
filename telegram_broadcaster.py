@@ -41,28 +41,49 @@ class TelegramBroadcaster:
 
             async with aiohttp.ClientSession() as session:
                 if image_path and os.path.exists(image_path):
-                    # Photo Post via sendPhoto API
-                    url = f"https://api.telegram.org/bot{self.bot_token}/sendPhoto"
-                    data = aiohttp.FormData()
-                    data.add_field("chat_id", str(dest_chat_id))
-                    data.add_field("caption", message_text)
-                    data.add_field("parse_mode", "Markdown")
-                    data.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
-                    async with session.post(url, data=data) as resp:
-                        res_json = await resp.json()
-                else:
-                    # Text Post via sendMessage API
-                    url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
-                    payload = {
-                        "chat_id": str(dest_chat_id),
-                        "text": message_text,
-                        "parse_mode": "Markdown"
-                    }
-                    async with session.post(url, json=payload) as resp:
-                        res_json = await resp.json()
+                    # Photo Post via sendPhoto API (Caption capped at 1000 chars to satisfy Telegram API limits)
+                    photo_url = f"https://api.telegram.org/bot{self.bot_token}/sendPhoto"
+                    photo_data = aiohttp.FormData()
+                    photo_data.add_field("chat_id", str(dest_chat_id))
+                    
+                    caption_text = message_text if len(message_text) <= 1000 else message_text[:990] + "..."
+                    photo_data.add_field("caption", caption_text)
+                    photo_data.add_field("parse_mode", "Markdown")
+                    photo_data.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
+                    
+                    async with session.post(photo_url, data=photo_data) as photo_resp:
+                        res_json = await photo_resp.json()
+                        if photo_resp.status == 200 and res_json.get("ok"):
+                            logger.info(f"Successfully delivered Photo Banner to Telegram Chat {dest_chat_id}.")
+                            # If full article was truncated for photo caption, send complete text via sendMessage
+                            if len(message_text) > 1000:
+                                text_url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
+                                text_payload = {
+                                    "chat_id": str(dest_chat_id),
+                                    "text": message_text,
+                                    "parse_mode": "Markdown"
+                                }
+                                async with session.post(text_url, json=text_payload) as text_resp:
+                                    text_res = await text_resp.json()
+                                    if not text_res.get("ok"):
+                                        text_payload.pop("parse_mode", None)
+                                        await session.post(text_url, json=text_payload)
+                            return True
+                        else:
+                            logger.warning(f"sendPhoto failed ({res_json.get('description')}). Falling back to sendMessage text post...")
+
+                # Standard Text Post via sendMessage API
+                url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
+                payload = {
+                    "chat_id": str(dest_chat_id),
+                    "text": message_text,
+                    "parse_mode": "Markdown"
+                }
+                async with session.post(url, json=payload) as resp:
+                    res_json = await resp.json()
 
                 if resp.status == 200 and res_json.get("ok"):
-                    logger.info(f"Successfully delivered to Telegram Chat {dest_chat_id}.")
+                    logger.info(f"Successfully delivered text article to Telegram Chat {dest_chat_id}.")
                     return True
                 elif resp.status == 429:
                     retry_after = res_json.get("parameters", {}).get("retry_after", 5)
@@ -71,7 +92,11 @@ class TelegramBroadcaster:
                     return await self.broadcast_to_vip_channel(message_text, image_path, target_chat_id)
                 else:
                     logger.error(f"Telegram API Error: {res_json}")
-                    return False
+                    # Try plain text fallback
+                    payload.pop("parse_mode", None)
+                    async with session.post(url, json=payload) as fallback_resp:
+                        fallback_res = await fallback_resp.json()
+                        return bool(fallback_resp.status == 200 and fallback_res.get("ok"))
         except Exception as e:
             logger.error(f"Failed to publish to Telegram Chat {dest_chat_id}: {e}")
             return False
