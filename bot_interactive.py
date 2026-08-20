@@ -171,6 +171,7 @@ class SuperSmartTelegramBot:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
             text = msg.get("text", "").strip()
+            logger.info(f"📩 [TELEGRAM BOT RECEIVED MESSAGE] Chat ID: {chat_id} | Text: '{text}'")
 
             if text.startswith("/start"):
                 welcome_text = (
@@ -209,7 +210,7 @@ class SuperSmartTelegramBot:
 
             elif text.startswith("/help"):
                 help_text = (
-                    "❓ *การណែនាំអំពី CFA FLASH NEWS BOT*\n\n"
+                    "❓ *ការណែនាំអំពី CFA FLASH NEWS BOT*\n\n"
                     "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
                     "• /start - បើកម៉ឺនុយមេ\n"
                     "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
@@ -220,6 +221,14 @@ class SuperSmartTelegramBot:
                     "• Facebook Page: សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA"
                 )
                 await self.send_message(chat_id, help_text)
+            else:
+                welcome_text = (
+                    "⚡ *CFA FLASH NEWS AI SYSTEM*\n\n"
+                    "សួស្តី! ខ្ញុំគឺជា *CFA Flash News AI Bot* 🤖\n"
+                    "ប្រព័ន្ធព័ត៌មានទាន់ហេតុការណ៍ហិរញ្ញវត្ថុ & ទីផ្សារ ២៤/៧ ៣៦៥។\n\n"
+                    "សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់៖"
+                )
+                await self.send_message(chat_id, welcome_text)
 
         # 2. Inline Callback Query Handling
         elif "callback_query" in update:
