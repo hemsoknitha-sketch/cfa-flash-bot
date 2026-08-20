@@ -356,10 +356,10 @@ class SuperSmartTelegramBot:
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
-        timeout_config = aiohttp.ClientTimeout(total=40)
-        async with aiohttp.ClientSession(timeout=timeout_config) as session:
-            while True:
-                try:
+        while True:
+            try:
+                timeout_config = aiohttp.ClientTimeout(total=35)
+                async with aiohttp.ClientSession(timeout=timeout_config) as session:
                     url = f"{self.api_url}/getUpdates?offset={self.offset}&timeout=25"
                     async with session.get(url) as resp:
                         if resp.status == 200:
@@ -371,9 +371,9 @@ class SuperSmartTelegramBot:
                         else:
                             logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
                             await asyncio.sleep(2)
-                except Exception as e:
-                    logger.error(f"Error in polling loop: {e}")
-                    await asyncio.sleep(2)
+            except Exception as e:
+                logger.error(f"Error in polling loop: {e}")
+                await asyncio.sleep(2)
 
 if __name__ == "__main__":
     bot = SuperSmartTelegramBot()

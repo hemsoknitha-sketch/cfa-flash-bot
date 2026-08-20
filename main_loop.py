@@ -11,14 +11,16 @@ logging.basicConfig(
 logger = logging.getLogger("24/7_Daemon")
 
 def start_interactive_bot_thread():
-    """Runs the Interactive Telegram Bot Menu Listener in its own dedicated thread."""
-    bot = SuperSmartTelegramBot()
-    loop = asyncio.new_event_loop()
-    asyncio.set_event_loop(loop)
-    try:
-        loop.run_until_complete(bot.poll_updates_loop())
-    except Exception as e:
-        logger.error(f"Error in interactive bot thread: {e}")
+    """Runs the Interactive Telegram Bot Menu Listener in its own dedicated thread with auto-restart."""
+    while True:
+        try:
+            bot = SuperSmartTelegramBot()
+            loop = asyncio.new_event_loop()
+            asyncio.set_event_loop(loop)
+            loop.run_until_complete(bot.poll_updates_loop())
+        except Exception as e:
+            logger.error(f"Error in interactive bot thread: {e}. Restarting listener thread in 3s...")
+            time.sleep(3)
 
 async def run_news_ingestion_loop(interval_seconds: int = 60):
     """Continuous News Ingestion & Publishing Loop."""
