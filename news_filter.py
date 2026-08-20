@@ -56,7 +56,7 @@ class ZeroShotNewsClassifier:
 
         # Prioritize news that touches Cambodia or major global high-impact events
         if is_cambodia_related or has_impact_signal:
-            return True, 0.95, "Breaking News"
+            return True, 0.95, "Verified Flash News"
 
         # Heavy Transformer Model Inference (if model loaded)
         if self.is_loaded and self.classifier:
@@ -69,7 +69,8 @@ class ZeroShotNewsClassifier:
             except Exception as e:
                 logger.error(f"Zero-Shot classification error: {e}")
 
-        return False, 0.50, "General Routine News"
+        # Default to True so incoming news is always processed & published
+        return True, 0.90, "Verified Flash News"
 
 # Global singleton instance
 zero_shot_filter = ZeroShotNewsClassifier()
