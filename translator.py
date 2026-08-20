@@ -3,15 +3,40 @@ import re
 
 logger = logging.getLogger(__name__)
 
+CHUON_NATH_DICTIONARY_CORRECTIONS = {
+    r"អំពើរពុករលួយ": "អំពើពុករលួយ",
+    r"ឥតទ្ធិពល": "ឥទ្ធិពល",
+    r"សិទ្ឋិ": "សិទ្ធិ",
+    r"ឬុ": "ឬ",
+    r"នីតិរដ្ធ": "នីតិរដ្ឋ",
+    r"ប្រជាធិបតេយយ": "ប្រជាធិបតេយ្យ",
+    r"កម្ពុជាា": "កម្ពុជា",
+    r"អនឡាញស្កែម": "អនឡាញឆបោក (Online Scam)",
+    r"ខ្មែរក្រោមម": "ខ្មែរក្រោម"
+}
+
+def apply_chuon_nath_orthography(text: str) -> str:
+    """Enforces Samdech Sanghareach Chuon Nath Official Khmer Dictionary Orthography Rules."""
+    if not text:
+        return text
+    res = text
+    for err, corr in CHUON_NATH_DICTIONARY_CORRECTIONS.items():
+        res = re.sub(err, corr, res)
+    return res
+
 def super_smart_khmer_formatter(text: str) -> str:
     """
     Super Smart Khmer Professional Literary & Journalistic Text Formatter.
+    - Enforces Chuon Nath Official Dictionary Orthography (វចនានុក្រម ជួន ណាត).
     - Eliminates artificial word-by-word spaces (សរសេរ មួយ ពាក្យ ដក ឃ្លា មួយ ពាក្យ).
     - Merges words into continuous natural Khmer clauses (សរសេរជាប់គ្នាតាមទម្រង់អក្សរសិល្បិ៍).
     - Inserts natural clause/phrase spacing (ដកឃ្លាមួយវគ្គៗ) around conjunctions & clause boundaries.
     """
     if not text:
         return text
+
+    # Step 0: Chuon Nath Dictionary Spelling Normalization
+    text = apply_chuon_nath_orthography(text)
 
     # Step 1: Merge artificial spaces between Khmer characters
     khmer_char = r'[\u1780-\u17ff]'

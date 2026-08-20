@@ -36,16 +36,27 @@ class ZeroShotNewsClassifier:
             candidate_labels = ["Breaking News", "General Routine News"]
 
         text_lower = text.lower()
-        breaking_keywords = [
-            "breaking", "emergency", "surprise", "unprecedented", "urgent", "leak", "cut", "rate cut", 
-            "fed", "election", "minister", "ukraine", "russia", "market", "stock", "crypto", "war", 
-            "president", "bank", "financial", "economy", "trade", "price", "report", "sec", "inflation", 
-            "cpi", "gdp", "china", "biden", "trump", "oil", "gas", "tech", "ai", "dollar", "yuan"
+        
+        # 1. Cambodia & Khmer Specific Domain Signals
+        cambodia_keywords = [
+            "cambodia", "khmer", "phnom penh", "khmer krom", "khmer loeu", "khmer kandal", 
+            "cambodian", "កម្ពុជា", "ខ្មែរ", "ភ្នំពេញ", "ខ្មែរក្រោម", "ខ្មែរលើ", "ខ្មែរកណ្តាល"
         ]
-        has_breaking_signal = any(k in text_lower for k in breaking_keywords)
+        
+        # 2. High-Impact Social, Rights & Policy Domains
+        impact_keywords = [
+            "human rights", "corruption", "social justice", "online scam", "scam", "rule of law", 
+            "democracy", "constitution", "international law", "policy", "foreign policy", 
+            "សិទ្ធិមនុស្ស", "អំពើពុករលួយ", "យុត្តិធម៌សង្គម", "ឆបោក", "នីតិរដ្ឋ", "លទ្ធិប្រជាធិបតេយ្យ", 
+            "នយោបាយ", "ច្បាប់អន្តរជាតិ", "ច្បាប់ជាតិ", "breaking", "emergency", "urgent"
+        ]
 
-        if has_breaking_signal:
-            return True, 0.92, "Breaking News"
+        is_cambodia_related = any(k in text_lower for k in cambodia_keywords)
+        has_impact_signal = any(k in text_lower for k in impact_keywords)
+
+        # Prioritize news that touches Cambodia or major global high-impact events
+        if is_cambodia_related or has_impact_signal:
+            return True, 0.95, "Breaking News"
 
         # Heavy Transformer Model Inference (if model loaded)
         if self.is_loaded and self.classifier:
