@@ -171,6 +171,7 @@ class SuperBrainAIRewriter:
 
         headline_clean = clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
         body_clean = clean_khmer_spaces(body)
+        impact_clean = clean_khmer_spaces(impact or "")
         impact_lines = [line.strip() for line in impact_clean.split("\n") if line.strip()]
         formatted_impact = "\n".join([f"• {line}" if not line.startswith("•") else line for line in impact_lines])
 
