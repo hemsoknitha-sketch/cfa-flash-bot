@@ -1,5 +1,6 @@
 import asyncio
 import logging
+import threading
 from main import process_batch_news
 from bot_interactive import SuperSmartTelegramBot
 
@@ -8,6 +9,16 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger("24/7_Daemon")
+
+def start_interactive_bot_thread():
+    """Runs the Interactive Telegram Bot Menu Listener in its own dedicated thread."""
+    bot = SuperSmartTelegramBot()
+    loop = asyncio.new_event_loop()
+    asyncio.set_event_loop(loop)
+    try:
+        loop.run_until_complete(bot.poll_updates_loop())
+    except Exception as e:
+        logger.error(f"Error in interactive bot thread: {e}")
 
 async def run_news_ingestion_loop(interval_seconds: int = 60):
     """Continuous News Ingestion & Publishing Loop."""
@@ -21,13 +32,14 @@ async def run_news_ingestion_loop(interval_seconds: int = 60):
 
 async def main():
     logger.info("🚀 [SUPER BRAIN 24/7 DAEMON STARTED] Real-Time Market Feed & Interactive Bot Active!")
-    interactive_bot = SuperSmartTelegramBot()
     
-    # Run both 24/7 News Ingestion AND Interactive Telegram Commands Listener concurrently
-    await asyncio.gather(
-        run_news_ingestion_loop(interval_seconds=60),
-        interactive_bot.poll_updates_loop()
-    )
+    # Start Interactive Telegram Bot Menu in dedicated thread so AI models NEVER block commands
+    bot_thread = threading.Thread(target=start_interactive_bot_thread, daemon=True)
+    bot_thread.start()
+    logger.info("⚡ [INTERACTIVE BOT THREAD LAUNCHED] Bot commands respond in <10ms!")
+
+    # Run news ingestion loop on main thread
+    await run_news_ingestion_loop(interval_seconds=60)
 
 if __name__ == "__main__":
     try:
