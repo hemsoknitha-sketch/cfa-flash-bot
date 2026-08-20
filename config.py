@@ -9,8 +9,8 @@ load_dotenv(dotenv_path=env_path)
 class Config:
     # Telegram settings
     TELEGRAM_BOT_TOKEN: str = os.getenv("TELEGRAM_BOT_TOKEN", "MOCK_TELEGRAM_BOT_TOKEN")
-    TELEGRAM_VIP_CHANNEL_ID: str = os.getenv("TELEGRAM_VIP_CHANNEL_ID", "@super_vip_flash_news")
-    TELEGRAM_ADMIN_CHAT_ID: str = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "123456789")
+    TELEGRAM_VIP_CHANNEL_ID: str = os.getenv("TELEGRAM_VIP_CHANNEL_ID", "859271875")
+    TELEGRAM_ADMIN_CHAT_ID: str = os.getenv("TELEGRAM_ADMIN_CHAT_ID", "859271875")
     TELEGRAM_MAX_MSG_PER_SEC: int = int(os.getenv("TELEGRAM_MAX_MSG_PER_SEC", "25"))
 
     # Facebook settings
