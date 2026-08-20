@@ -8,3 +8,4 @@ test_*.jpg
 .system_generated/
 venv/
 qdrant_storage/
+seen_hashes.json

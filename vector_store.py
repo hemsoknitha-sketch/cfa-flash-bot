@@ -24,10 +24,35 @@ class VectorDeduplicator:
         self.vector_size = config.QDRANT_VECTOR_SIZE  # 1024 for BAAI/bge-m3
 
         # Fallback memory store & content hash cache
+        import os
+        import json
         self.history: List[Dict] = []
-        self.seen_hashes: set = set()
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.cache_file = os.path.join(base_dir, "seen_hashes.json")
+        self.seen_hashes: set = self._load_seen_hashes()
 
         self._init_qdrant()
+
+    def _load_seen_hashes(self) -> set:
+        import os
+        import json
+        if os.path.exists(self.cache_file):
+            try:
+                with open(self.cache_file, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                    logger.info(f"Loaded {len(data)} cached news hashes from seen_hashes.json.")
+                    return set(data)
+            except Exception as e:
+                logger.error(f"Error loading seen_hashes.json: {e}")
+        return set()
+
+    def _save_seen_hashes(self):
+        import json
+        try:
+            with open(self.cache_file, "w", encoding="utf-8") as f:
+                json.dump(list(self.seen_hashes), f)
+        except Exception as e:
+            logger.error(f"Error saving seen_hashes.json: {e}")
 
     def _init_qdrant(self):
         """Initialize Qdrant Vector DB & BAAI/bge-m3 SentenceTransformer model."""
@@ -88,6 +113,7 @@ class VectorDeduplicator:
         import hashlib
         content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
         self.seen_hashes.add(content_hash)
+        self._save_seen_hashes()
 
         if self.qdrant_enabled:
             self._add_item_qdrant(item_id, text)
