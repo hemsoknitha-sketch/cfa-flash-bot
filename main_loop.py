@@ -32,6 +32,8 @@ async def run_news_ingestion_loop(interval_seconds: int = 60):
             logger.error(f"❌ Error in news processing cycle: {e}")
         await asyncio.sleep(interval_seconds)
 
+from backup_engine import run_daily_2am_backup_loop
+
 async def main():
     logger.info("🚀 [SUPER BRAIN 24/7 DAEMON STARTED] Real-Time Market Feed & Interactive Bot Active!")
     
@@ -40,8 +42,11 @@ async def main():
     bot_thread.start()
     logger.info("⚡ [INTERACTIVE BOT THREAD LAUNCHED] Bot commands respond in <10ms!")
 
-    # Run news ingestion loop on main thread
-    await run_news_ingestion_loop(interval_seconds=60)
+    # Run news ingestion loop and daily 2:00 AM Phnom Penh time backup scheduler concurrently
+    await asyncio.gather(
+        run_news_ingestion_loop(interval_seconds=60),
+        run_daily_2am_backup_loop()
+    )
 
 if __name__ == "__main__":
     try:

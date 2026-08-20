@@ -106,6 +106,15 @@ class SuperSmartTelegramBot:
                     "សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់៖"
                 )
                 await self.send_message(chat_id, welcome_text)
+            elif text.startswith("/backup"):
+                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
+                from backup_engine import create_project_zip_backup, send_backup_to_admin
+                zip_path = create_project_zip_backup()
+                success = await send_backup_to_admin(zip_path)
+                if success:
+                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
+                else:
+                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
 
     def get_vps_status_report(self) -> str:
         """Calculates real-time VPS Server hardware telemetry (RAM, Disk, CPU) and Security status."""
