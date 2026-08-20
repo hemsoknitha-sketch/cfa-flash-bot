@@ -51,6 +51,9 @@ class SuperBrainAIRewriter:
             except Exception as e:
                 logger.error(f"Failed to initialize Gemini API client: {e}")
 
+    def process_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
+        return self.rewrite_news(raw_id, title, content, source, source_tier, is_unverified)
+
     def rewrite_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
         """Processes raw breaking news, evaluates credibility score, and rewrites into professional Khmer post."""
         
