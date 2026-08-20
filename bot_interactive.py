@@ -16,8 +16,11 @@ class SuperSmartTelegramBot:
     Handles /start, /status, /latest, /ping, /help & Inline Button Callbacks.
     Response speed: < 10ms.
     """
-    def __init__(self, token: str = config.TELEGRAM_BOT_TOKEN):
-        self.token = token
+    def __init__(self, token: str = None):
+        raw_token = (token or config.TELEGRAM_BOT_TOKEN or "").strip().strip('"').strip("'")
+        if raw_token.lower().startswith("bot"):
+            raw_token = raw_token[3:]
+        self.token = raw_token
         self.api_url = f"https://api.telegram.org/bot{self.token}"
         self.offset = 0
 
