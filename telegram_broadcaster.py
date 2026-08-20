@@ -25,6 +25,8 @@ class TelegramBroadcaster:
         Supports both sendPhoto (with image) and sendMessage (text only).
         """
         dest_chat_id = target_chat_id or self.channel_id
+        if dest_chat_id == "@your_vip_channel_id_or_chat_id" or not dest_chat_id:
+            dest_chat_id = config.TELEGRAM_ADMIN_CHAT_ID
         logger.info(f"[TELEGRAM FAST-PATH] Broadcasting Flash News to {dest_chat_id} (Image: {image_path})...")
 
         if self.bot_token == "MOCK_TELEGRAM_BOT_TOKEN":

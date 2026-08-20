@@ -35,9 +35,13 @@ class ZeroShotNewsClassifier:
         if candidate_labels is None:
             candidate_labels = ["Breaking News", "General Routine News"]
 
-        # Fast Heuristic Keyword & Signal Check for instant execution
         text_lower = text.lower()
-        breaking_keywords = ["breaking", "emergency", "surprise", "unprecedented", "urgent", "leak", "cut", "rate cut", "fed"]
+        breaking_keywords = [
+            "breaking", "emergency", "surprise", "unprecedented", "urgent", "leak", "cut", "rate cut", 
+            "fed", "election", "minister", "ukraine", "russia", "market", "stock", "crypto", "war", 
+            "president", "bank", "financial", "economy", "trade", "price", "report", "sec", "inflation", 
+            "cpi", "gdp", "china", "biden", "trump", "oil", "gas", "tech", "ai", "dollar", "yuan"
+        ]
         has_breaking_signal = any(k in text_lower for k in breaking_keywords)
 
         if has_breaking_signal:
