@@ -372,7 +372,7 @@ class SuperSmartTelegramBot:
                                     self.offset = update["update_id"] + 1
                                     asyncio.create_task(self.handle_update(update))
                         else:
-                            logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
+                            logger.warning(f"Telegram API getUpdates returned status: {resp.status} | URL: '{url}'")
                             await asyncio.sleep(2)
             except Exception as e:
                 logger.error(f"Error in polling loop: {e}")
