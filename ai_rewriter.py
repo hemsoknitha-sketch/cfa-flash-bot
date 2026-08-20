@@ -101,6 +101,93 @@ class SuperBrainAIRewriter:
         # Option C: Intelligent Rule-Based Fallback Engine
         return self._rule_based_fallback(raw_id, title, content, source, source_tier, is_unverified)
 
+    def rewrite_public_opinion_news(
+        self,
+        raw_id: str,
+        title: str,
+        content: str,
+        source: str,
+        sentiment_metrics
+    ) -> ProcessedNewsArticle:
+        """
+        Public Opinion Journalism Rewriter:
+        Rewrites viral hot posts into Khmer Public Opinion Journalism articles incorporating public sentiment % and citizen quotes.
+        """
+        quotes_str = "\n".join([f"- {q}" for q in sentiment_metrics.representative_quotes]) if sentiment_metrics.representative_quotes else "- មហាជនសម្តែងការគាំទ្រយ៉ាងពេញទំហឹង"
+        
+        prompt = (
+            f"=== HOT VIRAL EVENT PUBLIC OPINION INPUT ===\n"
+            f"Source: {source}\n"
+            f"Headline Event: {title}\n"
+            f"Story Details: {content}\n\n"
+            f"=== PUBLIC SENTIMENT METRICS ===\n"
+            f"Support (គាំទ្រ): {sentiment_metrics.support_pct}%\n"
+            f"Concern (បារម្ភ/រិះគន់): {sentiment_metrics.concern_pct}%\n"
+            f"Proposal/Neutral (ស្នើសុំ/អព្យាក្រឹត): {sentiment_metrics.proposal_pct}%\n"
+            f"Trending Score: {sentiment_metrics.trending_score}\n\n"
+            f"=== REPRESENTATIVE CITIZEN QUOTES ===\n"
+            f"{quotes_str}\n\n"
+            f"INSTRUCTION: Write an official Khmer Public Opinion Journalistic Article (អត្ថបទសារព័ត៌មានមតិសាធារណៈផ្លូវការ) with:\n"
+            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' and lead viral event.\n"
+            f"Paragraph 2: Public sentiment breakdown (% Support, % Concern) connecting to rule of law and human rights.\n"
+            f"Paragraph 3: Representative citizen quotes and public reactions.\n"
+            f"Paragraph 4: Balanced journalistic conclusion ending with '៕'."
+        )
+
+        status_label = f"🔥 [HOT VIRAL NEWS - មតិមហាជនគាំទ្រ {sentiment_metrics.support_pct}%]"
+        
+        if self.client:
+            try:
+                model_name = getattr(config, "GEMINI_MODEL", "gemini-3.6-flash")
+                if "gemini-2.5-flash" in model_name:
+                    model_name = "gemini-3.6-flash"
+                response = self.client.models.generate_content(
+                    model=model_name,
+                    contents=SYSTEM_PROMPT + "\n\n" + prompt,
+                )
+                data = json.loads(response.text)
+                cred_score = float(data.get("credibility_score", 96.5))
+                headline = data.get("khmer_headline", title)
+                body = data.get("khmer_body", content)
+                impact = data.get("impact_analysis", f"ការបញ្ចេញមតិរបស់មហាជន គាំទ្រ {sentiment_metrics.support_pct}% លើកកម្ពស់តម្លាភាពសង្គម")
+
+                formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, False)
+
+                return ProcessedNewsArticle(
+                    original_id=raw_id,
+                    credibility_score=cred_score,
+                    is_unverified_leak=False,
+                    status_label=status_label,
+                    khmer_headline=headline,
+                    khmer_body=body,
+                    impact_analysis=impact,
+                    formatted_telegram_post=formatted_post
+                )
+            except Exception as e:
+                logger.error(f"Gemini Public Opinion Rewrite failed: {e}. Using fallback.")
+
+        # Fallback
+        headline = f"មហាជនសម្តែងការចាប់អារម្មណ៍យ៉ាងខ្លាំងលើ ៖ {title}"
+        body = (
+            f"រាជធានីភ្នំពេញ៖ ព្រឹត្តិការណ៍ក្តៅគគុកអំពី «{title}» កំពុងផ្ទុះការចាប់អារម្មណ៍ និងពិភាក្សាយ៉ាងផុសផុលពីសំណាក់មហាជនលើបណ្តាញសង្គម។\n\n"
+            f"យោងតាមការបញ្ជាក់ពីប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ដែលបានធ្វើការស្កេនមតិមហាជន បានបង្ហាញឱ្យដឹងថា មហាជនរហូតដល់ {sentiment_metrics.support_pct}% បានសម្តែងការគាំទ្រ និងស្វាគមន៍យ៉ាងពេញទំហឹង  ខណៈ {sentiment_metrics.concern_pct}% សម្តែងការបារម្ភ និងស្នើសុំឱ្យមានការយកចិត្តទុកដាក់បន្ថែម។\n\n"
+            f"ចំពោះមតិតំណាងរបស់ប្រជាពលរដ្ឋបានបញ្ជាក់ថា៖ «{sentiment_metrics.representative_quotes[0] if sentiment_metrics.representative_quotes else 'ការរួមចំណែករបស់មហាជន គឺជាកម្លាំងចលករយ៉ាងសំខាន់ក្នុងការលើកកម្ពស់សង្គម'}»។\n\n"
+            f"ជាការសន្និដ្ឋាន ការបញ្ចេញមតិយ៉ាងសកម្មរបស់សាធារណជន ឆ្លុះបញ្ចាំងពីការយល់ដឹង និងការចូលរួមយ៉ាងសកម្មក្នុងការលើកកម្ពស់តម្លាភាព និងនីតិរដ្ឋនៅកម្ពុជា៕"
+        )
+        impact = f"មតិមហាជន គាំទ្រ {sentiment_metrics.support_pct}%, បារម្ភ {sentiment_metrics.concern_pct}%"
+        formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, 96.5, source, False)
+
+        return ProcessedNewsArticle(
+            original_id=raw_id,
+            credibility_score=96.5,
+            is_unverified_leak=False,
+            status_label=status_label,
+            khmer_headline=headline,
+            khmer_body=body,
+            impact_analysis=impact,
+            formatted_telegram_post=formatted_post
+        )
+
     def _process_with_ollama(self, raw_id: str, title: str, content: str, source: str, source_tier: int, is_unverified: bool) -> ProcessedNewsArticle:
         import requests
         logger.info(f"🤖 Calling Local Ollama ({config.OLLAMA_MODEL}) at {config.OLLAMA_HOST}...")

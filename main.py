@@ -101,6 +101,67 @@ async def process_news(news_text: str, news_id: str):
             except Exception as e:
                 logger.error(f"Failed to delete temp image {image_path}: {e}")
 
+async def process_public_opinion_news(news_text: str, comments: list, news_id: str, source: str = "Social Media Hot Post"):
+    """
+    Super Smart Social Listening & Public Sentiment News Pipeline:
+    1. Analyzes public comment stream (Engagement Velocity, Sentiment %, Representative Quotes).
+    2. Rewrites into Khmer Public Opinion Journalism Article via Gemini 3.6 Flash.
+    3. Renders Playwright HD Banner Image.
+    4. Broadcasts to Telegram VIP Channel & Facebook Page.
+    """
+    logger.info(f"\n============================================================")
+    logger.info(f"🔥 [PROCESSING PUBLIC SENTIMENT NEWS ID: {news_id}] Starting Public Opinion Pipeline...")
+    logger.info(f"============================================================")
+
+    # 1. Analyze Public Sentiment & Comments
+    from sentiment_analyzer import PublicSentimentEngine
+    sentiment_engine = PublicSentimentEngine()
+    sentiment_metrics = sentiment_engine.analyze_comment_stream(comments)
+
+    logger.info(f"Step 1: Sentiment Analysis -> Support: {sentiment_metrics.support_pct}% | Concern: {sentiment_metrics.concern_pct}% | Trending Score: {sentiment_metrics.trending_score}")
+
+    # 2. Public Opinion Journalistic Rewriting
+    processed_article = pipeline_engine.ai_rewriter.rewrite_public_opinion_news(
+        raw_id=news_id,
+        title=news_text[:100],
+        content=news_text,
+        source=source,
+        sentiment_metrics=sentiment_metrics
+    )
+
+    # 3. Banner Image Rendering
+    image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
+
+    try:
+        # 4. Broadcast to Telegram VIP & Admin
+        tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
+            message_text=processed_article.formatted_telegram_post,
+            image_path=image_path
+        )
+        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789"):
+            await pipeline_engine.broadcaster.broadcast_to_vip_channel(
+                message_text=processed_article.formatted_telegram_post,
+                image_path=image_path,
+                target_chat_id=config.TELEGRAM_ADMIN_CHAT_ID
+            )
+
+        # 5. Publish to Facebook Page
+        fb_success = await pipeline_engine.fb_publisher.publish_news(
+            caption=processed_article.formatted_telegram_post,
+            image_path=image_path
+        )
+
+        if tg_success or fb_success:
+            pipeline_engine.dedup_store.add_item(news_id, news_text)
+            logger.info(f"🚀 [PUBLIC OPINION NEWS PUBLISHED TO TELEGRAM & FACEBOOK] Item ID: {news_id}\n")
+    finally:
+        import os
+        if image_path and os.path.exists(image_path):
+            try:
+                os.remove(image_path)
+            except Exception:
+                pass
+
 async def process_batch_news():
     """Fetch and process incoming news items from RSS feeds in batch."""
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
