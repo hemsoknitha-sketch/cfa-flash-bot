@@ -21,6 +21,8 @@ class RawNewsItem(BaseModel):
 class IngestionEngine:
     def __init__(self, rss_urls: Optional[List[str]] = None):
         self.rss_urls = rss_urls or [
+            "https://www.khmertimeskh.com/feed/",
+            "https://www.phnompenhpost.com/rss.xml",
             "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
             "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
         ]
