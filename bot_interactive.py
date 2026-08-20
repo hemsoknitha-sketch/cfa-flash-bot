@@ -23,6 +23,14 @@ class SuperSmartTelegramBot:
         self.token = raw_token
         self.api_url = f"https://api.telegram.org/bot{self.token}"
         self.offset = 0
+        self._session = None
+
+    async def get_session(self):
+        """Reuses persistent HTTP TCP Keep-Alive session for < 50ms responses."""
+        if self._session is None or self._session.closed:
+            connector = aiohttp.TCPConnector(limit=30, ttl_dns_cache=300, keepalive_timeout=120)
+            self._session = aiohttp.ClientSession(connector=connector)
+        return self._session
 
     async def set_commands_menu(self):
         """Register Telegram Bot Menu Button Commands."""
@@ -34,10 +42,10 @@ class SuperSmartTelegramBot:
             {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់"}
         ]
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"{self.api_url}/setMyCommands", json={"commands": commands}) as resp:
-                    res = await resp.json()
-                    logger.info(f"Telegram Commands Menu Registered: {res.get('ok')}")
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/setMyCommands", json={"commands": commands}) as resp:
+                res = await resp.json()
+                logger.info(f"Telegram Commands Menu Registered: {res.get('ok')}")
         except Exception as e:
             logger.error(f"Failed to register bot commands: {e}")
 
@@ -59,7 +67,7 @@ class SuperSmartTelegramBot:
         }
 
     async def send_message(self, chat_id: int, text: str, reply_markup=None):
-        """Send message via Telegram API with robust Markdown fallback."""
+        """Send message via Telegram API with persistent HTTP Keep-Alive socket."""
         payload = {
             "chat_id": chat_id,
             "text": text,
@@ -67,15 +75,15 @@ class SuperSmartTelegramBot:
             "reply_markup": reply_markup or self._build_inline_keyboard()
         }
         try:
-            async with aiohttp.ClientSession() as session:
-                async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp:
-                    res = await resp.json()
-                    if not res.get("ok"):
-                        logger.warning(f"Telegram Markdown send failed ({res.get('description')}). Retrying as Plain Text...")
-                        payload.pop("parse_mode", None)
-                        async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp_fallback:
-                            return await resp_fallback.json()
-                    return res
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp:
+                res = await resp.json()
+                if not res.get("ok"):
+                    logger.warning(f"Telegram Markdown send failed ({res.get('description')}). Retrying as Plain Text...")
+                    payload.pop("parse_mode", None)
+                    async with session.post(f"{self.api_url}/sendMessage", json=payload) as resp_fallback:
+                        return await resp_fallback.json()
+                return res
         except Exception as e:
             logger.error(f"Error sending message to {chat_id}: {e}")
             return None
@@ -284,21 +292,20 @@ class SuperSmartTelegramBot:
     async def flush_old_updates(self):
         """Flushes all old unconfirmed updates from Telegram servers on startup."""
         try:
+            session = await self.get_session()
             url = f"{self.api_url}/deleteWebhook?drop_pending_updates=true"
-            async with aiohttp.ClientSession() as session:
-                async with session.get(url) as resp:
-                    res = await resp.json()
-                    logger.info(f"Flushed pending Telegram updates: {res}")
+            async with session.get(url) as resp:
+                res = await resp.json()
+                logger.info(f"Flushed pending Telegram updates: {res}")
             
             # Fetch latest offset to ignore stale messages
             get_url = f"{self.api_url}/getUpdates?offset=-1"
-            async with aiohttp.ClientSession() as session:
-                async with session.get(get_url) as resp:
-                    res = await resp.json()
-                    if res.get("ok") and res.get("result"):
-                        latest_id = res["result"][-1]["update_id"]
-                        self.offset = latest_id + 1
-                        logger.info(f"Initialized Telegram Bot offset to: {self.offset}")
+            async with session.get(get_url) as resp:
+                res = await resp.json()
+                if res.get("ok") and res.get("result"):
+                    latest_id = res["result"][-1]["update_id"]
+                    self.offset = latest_id + 1
+                    logger.info(f"Initialized Telegram Bot offset to: {self.offset}")
         except Exception as e:
             logger.error(f"Error flushing old updates: {e}")
 
