@@ -38,6 +38,7 @@ class SuperSmartTelegramBot:
             {"command": "start", "description": "⚡ បើកម៉ឺនុយមេ (Main Menu)"},
             {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាពប្រព័ន្ធ AI Server"},
             {"command": "latest", "description": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
+            {"command": "backup", "description": "📦 ទាញយក ZIP Backup ប្រព័ន្ធ"},
             {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
             {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់"}
         ]
@@ -58,9 +59,10 @@ class SuperSmartTelegramBot:
                 ],
                 [
                     {"text": "🟢 ស្ថានភាពប្រព័ន្ធ Server", "callback_data": "cmd_status"},
-                    {"text": "⚡ ពិនិត្យល្បឿន Ping", "callback_data": "cmd_ping"}
+                    {"text": "📦 ZIP Backup ប្រព័ន្ធ", "callback_data": "cmd_backup"}
                 ],
                 [
+                    {"text": "⚡ ពិនិត្យល្បឿន Ping", "callback_data": "cmd_ping"},
                     {"text": "❓ ការណែនាំប្រើប្រាស់", "callback_data": "cmd_help"}
                 ]
             ]
@@ -230,6 +232,16 @@ class SuperSmartTelegramBot:
                 )
                 await self.send_message(chat_id, latest_text)
 
+            elif text.startswith("/backup"):
+                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
+                from backup_engine import create_project_zip_backup, send_backup_to_admin
+                zip_path = create_project_zip_backup()
+                success = await send_backup_to_admin(zip_path)
+                if success:
+                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
+                else:
+                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
+
             elif text.startswith("/ping"):
                 latency_ms = int((time.time() - start_time) * 1000)
                 ping_text = f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀"
@@ -242,6 +254,7 @@ class SuperSmartTelegramBot:
                     "• /start - បើកម៉ឺនុយមេ\n"
                     "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
                     "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ថ្មីៗ\n"
+                    "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
                     "• /ping - ពិនិត្យមើលល្បឿន Bot\n\n"
                     "២. *ប្រព័ន្ធផ្សព្វផ្សាយផ្លូវការ៖*\n"
                     "• Telegram Channel: CFA Flash News\n"
@@ -283,6 +296,15 @@ class SuperSmartTelegramBot:
             elif data == "cmd_status":
                 status_text = self.get_vps_status_report()
                 await self.send_message(chat_id, status_text)
+            elif data == "cmd_backup":
+                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
+                from backup_engine import create_project_zip_backup, send_backup_to_admin
+                zip_path = create_project_zip_backup()
+                success = await send_backup_to_admin(zip_path)
+                if success:
+                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
+                else:
+                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
             elif data == "cmd_ping":
                 latency_ms = int((time.time() - start_time) * 1000)
                 await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
