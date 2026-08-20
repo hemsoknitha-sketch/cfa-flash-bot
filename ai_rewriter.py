@@ -392,7 +392,8 @@ body {{
 
 .bot-tag {{
     color: #38bdf8;
-    font-weight: 700;
+    font-weight: 800;
+    text-shadow: 0 0 12px rgba(56, 189, 248, 0.7);
 }}
 </style>
 </head>
@@ -409,7 +410,7 @@ body {{
     </div>
     <div class='footer'>
         <span class='footer-brand'>APEX SUPER BRAIN AI SYSTEM</span>
-        <span><span class='bot-tag'>@CFAflashBot</span> | REAL-TIME FINANCIAL & MARKET FEED</span>
+        <span><span class='bot-tag'>@CFAflashBot</span> | REAL-TIME FLASH FEED</span>
     </div>
 </body>
 </html>"""
