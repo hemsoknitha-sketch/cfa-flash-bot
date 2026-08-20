@@ -1,0 +1,10 @@
+.env
+*.pyc
+__pycache__/
+*.jpg
+temp_*.html
+test_*.jpg
+.tempmediaStorage/
+.system_generated/
+venv/
+qdrant_storage/

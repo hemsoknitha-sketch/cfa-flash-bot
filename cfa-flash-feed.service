@@ -1,0 +1,15 @@
+[Unit]
+Description=CFA Flash Feed AI News Bot 24/7 Service
+After=network.target
+
+[Service]
+Type=simple
+User=ubuntu
+WorkingDirectory=/home/ubuntu/CFA-Flash-Feed
+ExecStart=/home/ubuntu/CFA-Flash-Feed/venv/bin/python main_loop.py
+Restart=always
+RestartSec=10
+EnvironmentFile=/home/ubuntu/CFA-Flash-Feed/.env
+
+[Install]
+WantedBy=multi-user.target
