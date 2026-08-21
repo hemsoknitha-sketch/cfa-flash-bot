@@ -235,6 +235,7 @@ async def process_batch_news():
     for item in news_items:
         full_text = f"{item.title} - {item.content}"
         await process_news(news_text=full_text, news_id=item.id)
+        await asyncio.sleep(3)  # Pacing delay to prevent Gemini 429 Rate Limits
 
 async def main():
     logger.info("⚡ [STARTING SUPER BRAIN AI SYSTEM] Initializing 24/7 Dual-Thread Orchestrator...")

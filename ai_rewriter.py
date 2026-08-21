@@ -167,7 +167,37 @@ class SuperBrainAIRewriter:
                     formatted_telegram_post=formatted_post
                 )
             except Exception as e:
-                logger.error(f"Gemini API call failed: {e}. Switching to Rule-based AI Fallback engine.")
+                err_str = str(e)
+                if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                    logger.warning("⚠️ [RATE LIMIT PROTECTION] Gemini 429 hit. Retrying in 7s...")
+                    time.sleep(7)
+                    try:
+                        response = self.client.models.generate_content(
+                            model=model_name,
+                            contents=SYSTEM_PROMPT + "\n\nRaw News Input:\n" + prompt,
+                        )
+                        data = json.loads(response.text)
+                        cred_score = float(data.get("credibility_score", 95.0))
+                        is_leak = data.get("is_unverified_leak", is_unverified)
+                        status_label = data.get("status_label", "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ")
+                        headline = data.get("khmer_headline", title)
+                        body = data.get("khmer_body", content)
+                        impact = data.get("impact_analysis", "លើកកម្ពស់សិទ្ធិមនុស្ស និងនីតិរដ្ឋនៅកម្ពុជា")
+                        formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, is_leak)
+                        return ProcessedNewsArticle(
+                            original_id=raw_id,
+                            credibility_score=cred_score,
+                            is_unverified_leak=is_leak,
+                            status_label=status_label,
+                            khmer_headline=headline,
+                            khmer_body=body,
+                            impact_analysis=impact,
+                            formatted_telegram_post=formatted_post
+                        )
+                    except Exception as retry_e:
+                        logger.error(f"Gemini API retry failed: {retry_e}. Switching to Rule-based AI Fallback engine.")
+                else:
+                    logger.error(f"Gemini API call failed: {e}. Switching to Rule-based AI Fallback engine.")
 
         # Option C: Intelligent Rule-Based Fallback Engine
         return self._rule_based_fallback(raw_id, title, content, source, source_tier, is_unverified)
