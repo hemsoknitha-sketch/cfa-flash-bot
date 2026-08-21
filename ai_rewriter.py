@@ -169,8 +169,8 @@ class SuperBrainAIRewriter:
             except Exception as e:
                 err_str = str(e)
                 if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
-                    logger.warning("⚠️ [RATE LIMIT PROTECTION] Gemini 429 hit. Retrying in 7s...")
-                    time.sleep(7)
+                    logger.warning("⚠️ [RATE LIMIT PROTECTION] Gemini 429 hit. Waiting 10s for full quota recovery...")
+                    time.sleep(10)
                     try:
                         response = self.client.models.generate_content(
                             model=model_name,
