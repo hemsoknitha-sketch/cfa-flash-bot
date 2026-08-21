@@ -87,4 +87,24 @@
 ----------------------------------------------------------------------------------------------------
 - Deduplication Persistent Disk Caching ៖ រក្សាទុក News Content Hashes ក្នុង `seen_hashes.json` ការពារព័ត៌មានស្ទួនពេល Server Restart.
 - Telegram Interactive Bot Thread ៖ ឆ្លើយតបពាក្យបញ្ជា `/status`, `/start` ក្នុងរយៈពេល <10ms!
+
+----------------------------------------------------------------------------------------------------
+១០. 🛡️ ស្ថាបត្យកម្មប្រព័ន្ធសុវត្ថិភាព ៥ ជាន់ (5-LAYER ENTERPRISE SECURITY SUITE) (`security_sentinel.py`)
+----------------------------------------------------------------------------------------------------
+ប្រព័ន្ធ CFA Flash Feed ត្រូវបានបំពាក់នូវប្រព័ន្ធសុវត្ថិភាពស្តង់ដារយោធា ៥ ជាន់ (5-Layer Anti-Hacker & Anti-Spam Security Suite) ៖
+
+```mermaid
+flowchart TD
+    A["🌐 External Inputs (RSS / Telegram Messages / Webhooks)"] --> B["1. Strict Admin Authentication & Anti-Spam Rate Limiter"]
+    B --> C["2. Input Sanitization Engine (Anti-XSS & SQL Injection)"]
+    C --> D["3. Dynamic Content Hash Deduplication (SHA-256 Vault)"]
+    D --> E["4. Meta Graph API 15-Min Rate Governor (0% Spam Ban)"]
+    E --> F["5. Systemd Process Isolation & API Key Vault Masking"]
+```
+
+- Layer 1 (Strict Admin Authentication & Anti-Spam Rate Limiter) ៖ ផ្ទៀងផ្ទាត់សិទ្ធិស្វ័យប្រវត្តិតាមរយៈ `verify_admin_access()` ដោយអនុញ្ញាតតែ `TELEGRAM_ADMIN_CHAT_ID` (`859271875`) ប៉ុណ្ណោះក្នុងការរត់ពាក្យបញ្ជា។ រាល់ការព្យាយាមពី Hacker ឬ User ផ្សេងទៀតនឹងត្រូវ Block និង Log ភ្លាមៗ!
+- Layer 2 (Input Sanitization Engine) ៖ ស្កេន និងសម្អាតកូដ XSS/Script Injections (`<script>`, `<iframe>`) និង SQL Injection Payloads មុនពេលបាញ់ចូល AI ឬ Database។
+- Layer 3 (Dynamic Content Hash Deduplication) ៖ ចងចាំ Content Hash តាមរយៈ SHA-256 Vault ការពារការបាញ់ DoS/Replay Attack។
+- Layer 4 (Meta Graph API 15-Min Rate Governor) ៖ គ្រប់គ្រងចន្លោះពេលបោះពុម្ពផ្សាយយ៉ាងតិច ១៥ នាទីម្តង ធានាការគោរព Meta Anti-Spam Policy 100% គ្មានថ្ងៃត្រូវបិទ Page។
+- Layer 5 (Systemd Isolation & API Key Vault Masking) ៖ ការពារ API Key មិនឱ្យជ្រុះចូល Log (`8153...****`) និងកំណត់ `Systemd Auto-Recovery` រស់ឡើងវិញស្វ័យប្រវត្តិក្នង ៥ វិនាទី!
 ====================================================================================================

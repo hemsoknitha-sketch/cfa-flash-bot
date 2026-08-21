@@ -92,6 +92,7 @@ class SuperSmartTelegramBot:
 
     async def handle_update(self, update: dict):
         """Route incoming messages and callback queries."""
+        from security_sentinel import security_sentinel
         start_time = time.time()
         
         # 1. Message Handling
@@ -99,6 +100,11 @@ class SuperSmartTelegramBot:
             msg = update["message"]
             chat_id = msg["chat"]["id"]
             text = msg.get("text", "").strip()
+
+            # Layer 1 Security Gate: Admin Verification
+            if not security_sentinel.verify_admin_access(chat_id):
+                logger.warning(f"🚨 [SECURITY BLOCK] Blocked unauthorized bot interaction attempt from Chat ID: {chat_id}")
+                return
 
             if text.startswith("/start"):
                 welcome_text = (
