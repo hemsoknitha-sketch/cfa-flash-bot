@@ -477,8 +477,8 @@ class SuperBrainAIRewriter:
 
         leak_banner = "\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
 
-        headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip())
-        body_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(body))
+        headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()).replace("*", "").replace("_", "").strip()
+        body_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(body)).replace("*", "").replace("_", "").strip()
         
         footer_signature = (
             f"\n\n🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
