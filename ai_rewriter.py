@@ -202,6 +202,7 @@ class SuperBrainAIRewriter:
         Article 51 of the Cambodian Constitution and liberal multiparty democratic principles.
         """
         status_label = f"🏛️ [{'មតិប្រឆាំងស្ថាបនា' if getattr(political_metrics, 'is_opposition_statement', False) else 'POLITICAL PHILOSOPHY'} - គោរពគ្រឹះប្រជាធិបតេយ្យសេរីពហុបក្ស មាត្រា ៥១]"
+        tenets_str = "\n".join([f"- {t}" for t in political_metrics.philosophical_tenets])
         
         prompt = (
             f"=== OFFICIAL POLITICAL STATEMENT / LEADER MESSAGE INPUT ===\n"
