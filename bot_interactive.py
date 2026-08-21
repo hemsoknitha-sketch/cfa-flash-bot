@@ -281,84 +281,7 @@ class SuperSmartTelegramBot:
             await self.send_message(chat_id, report_text)
         except Exception as e:
             logger.error(f"Live scan report failed: {e}")
-            await self.send_message(chat_id, f"⚠️ *ការស្កេនបានបញ្ចប់ (មិនមានព័ត៌មានថ្មី) ៖ {e}*")
-
-    async def execute_facebook_url_analysis(self, chat_id: int, fb_url: str):
-        """
-        Processes and analyzes Admin/VIP pasted Facebook URL:
-        1. Deeply extracts post text, caption, comments & metadata.
-        2. Validates 24-hour freshness (<24h limit) via khmer_auditor.
-        3. Generates 4-paragraph Khmer news prose with dynamic dateline & Article 51 Constitution defense.
-        4. Renders 4K HD PIL Khmer Banner (<0.05s).
-        5. Broadcasts to Telegram VIP Channel & Facebook Page.
-        6. Returns an interactive confirmation report to Admin.
-        """
-        await self.send_message(chat_id, f"🔍 *កំពុងចាប់ផ្តើមទាញយក និងវិភាគមាតិកាពី Facebook URL ៖*\n`{fb_url}`\n\n⚡ *ប្រព័ន្ធកំពុងដំណើរការ Super Brain AI Rewriter & Khmer Auditor...*")
-        try:
-            from facebook_url_extractor import fb_url_extractor
-            from khmer_auditor import khmer_auditor
-            from main import pipeline_engine
-            
-            fb_data = await fb_url_extractor.fetch_facebook_content(fb_url)
-            
-            # Freshness Audit
-            if not khmer_auditor.audit_news_freshness(fb_data.get("timestamp"), max_hours=24.0):
-                await self.send_message(chat_id, "⚠️ *ព័ត៌មានពី Facebook URL នេះមានអាយុកាលលើសពី ២៤ ម៉ោង! ប្រព័ន្ធបាន Reject ដើម្បីការពារភាពស្រស់ថ្មីនៃព័ត៌មាន។*")
-                return
-
-            processed = pipeline_engine.ai_rewriter.rewrite_news(
-                raw_id=f"fb_{abs(hash(fb_url)) % 1000000}",
-                title=fb_data["title"],
-                content=fb_data["content"],
-                source=fb_data["source_name"],
-                source_tier=1,
-                is_unverified=False
-            )
-
-            # Khmer Language Auditor
-            is_valid, headline, body, audit_reason = khmer_auditor.audit_full_news_item(
-                headline=processed.khmer_headline,
-                body=processed.khmer_body,
-                source_name=fb_data["source_name"],
-                timestamp=fb_data.get("timestamp"),
-                max_hours=24.0
-            )
-
-            if not is_valid:
-                await self.send_message(chat_id, f"⚠️ *Khmer Auditor Notice ៖ {audit_reason}*")
-                return
-
-            # Render 4K HD Banner (<0.05s)
-            image_path = await pipeline_engine.ai_rewriter.generate_banner_image(headline)
-
-            # Broadcast to Telegram VIP & Admin
-            tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
-                message_text=processed.formatted_telegram_post,
-                image_path=image_path
-            )
-
-            # Auto-Publish to Facebook Page
-            fb_success = await pipeline_engine.fb_publisher.publish_news(
-                caption=processed.formatted_telegram_post,
-                image_path=image_path
-            )
-
-            report_msg = (
-                "✅ *វិភាគ និងបោះពុម្ពផ្សាយព័ត៌មានពី FACEBOOK URL រួចរាល់ដោយជោគជ័យ!*\n\n"
-                f"📰 *ចំណងជើង ៖* `*{headline}**`\n"
-                f"🏛️ *ប្រភព ៖* `{fb_data['source_name']}`\n"
-                f"⏰ *អាយុកាល ៖* `< ២៤ ម៉ោង (Verified Fresh)`\n"
-                f"🎨 *Banner Image ៖* `PIL 4K HD Rendered (<0.05s)`\n\n"
-                "🚀 *ស្ថានភាពចុះផ្សាយ ៖*\n"
-                f"• *Telegram VIP Channel ៖* `{'✅ ជោគជ័យ' if tg_success else '⚠️ បានផ្ញើ'}`\n"
-                f"• *Facebook Page CFA ៖* `{'✅ ជោគជ័យ' if fb_success else '⏳ Queued (15-Min Pacing)'}`"
-            )
-            await self.send_message(chat_id, report_msg)
-        except Exception as e:
-            logger.error(f"Facebook URL analysis failed: {e}")
-            await self.send_message(chat_id, f"❌ *ការវិភាគ Facebook URL បរាជ័យ ៖ {e}*")
-
-    async def handle_update(self, update: dict):
+            await self.send_message(chat_id, f"⚠    async def handle_update(self, update: dict):
         """Processes single update payload from Telegram API."""
         from security_sentinel import security_sentinel
         from facebook_url_extractor import fb_url_extractor
@@ -427,11 +350,12 @@ class SuperSmartTelegramBot:
                 help_text = (
                     "❓ *ការណែនាំអំពី CFA FLASH FEED BOT*\n\n"
                     "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
-                    "• /start - បើកម៉ឺនុយមេ\n"
+                    "• /start - បើកម៉ឺនុយមេ (CFA Flash Feed)\n"
                     "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
                     "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
                     "• /scan - ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ\n"
                     "• /report - មើលរបាយការណ៍ 16 Feeds\n"
+                    "• /analyze <fb_url> - វិភាគ Facebook URL ស្វ័យប្រវត្តិ\n"
                     "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
                     "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
                     "២. *ប្រព័ន្ធផ្សព្វផ្សាយផ្លូវការ៖*\n"
@@ -449,14 +373,64 @@ class SuperSmartTelegramBot:
             chat_id = cb["message"]["chat"]["id"]
             data = cb.get("data", "")
             
-            async with aiohttp.ClientSession() as session:
+            try:
+                session = await self.get_session()
                 await session.post(f"{self.api_url}/answerCallbackQuery", json={"callback_query_id": cb["id"]})
+            except Exception:
+                pass
 
             if data == "cmd_latest":
                 latest_text = (
                     "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
                     "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
                     "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី ប្រភពព័ត៌មានផ្លូវការ ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះគឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
+                    "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
+                    "ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕\n\n"
+                    "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
+                    "• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
+                    "• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
+                    "• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
+                    "• ADMIN: *@Sokpheatonsai*"
+                )
+                await self.send_message(chat_id, latest_text)
+            elif data == "cmd_status":
+                await self.send_message(chat_id, self.get_vps_status_report())
+            elif data == "cmd_report":
+                await self.send_message(chat_id, self.get_feeds_report())
+            elif data == "cmd_scan":
+                await self.execute_live_scan_report(chat_id)
+            elif data == "cmd_backup":
+                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
+                from backup_engine import create_project_zip_backup, send_backup_to_admin
+                zip_path = create_project_zip_backup()
+                success = await send_backup_to_admin(zip_path)
+                if success:
+                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
+                else:
+                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
+            elif data == "cmd_ping":
+                latency_ms = int((time.time() - start_time) * 1000)
+                await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
+            elif data == "cmd_help":
+                help_text = (
+                    "❓ *ការណែនាំអំពី CFA FLASH FEED BOT*\n\n"
+                    "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
+                    "• /start - បើកម៉ឺនុយមេ (CFA Flash Feed)\n"
+                    "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
+                    "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
+                    "• /scan - ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ\n"
+                    "• /report - មើលរបាយការណ៍ 16 Feeds\n"
+                    "• /analyze <fb_url> - វិភាគ Facebook URL ស្វ័យប្រវត្តិ\n"
+                    "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
+                    "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
+                    "២. *ប្រព័ន្ធផ្សព្វផ្សាយផ្លូវការ៖*\n"
+                    "• Telegram Channel: CFA Flash Feed | @CFAflashBot\n"
+                    "• Facebook Page: សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA\n"
+                    "• Admin: @Sokpheatonsai"
+                )
+                await self.send_message(chat_id, help_text)
+            else:
+                await self.send_message(chat_id, self.get_welcome_text())ឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះគឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
                     "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
                     "ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕\n\n"
                     "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
