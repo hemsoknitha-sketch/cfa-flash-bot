@@ -433,13 +433,13 @@ class SuperBrainAIRewriter:
         status_label = "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ" if not is_leak else "⚠️ UNVERIFIED MARKET LEAK - ព័ត៌មានបែកធ្លាយមិនទាន់ផ្លូវការ"
 
         dateline = self.extract_geographic_location(title, content)
-        headline = fallback_translate_to_khmer(title) if any(c.isalpha() and ord(c) < 128 for c in title) else title
-        headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
-        if not headline.startswith("ព័ត៌មាន") and not headline.startswith("សារ"):
-            headline = f"ព័ត៌មានទាន់ហេតុការណ៍ ៖ {headline}"
+        clean_title = title.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "").strip()
+        headline = fallback_translate_to_khmer(clean_title) if any(c.isalpha() and ord(c) < 128 for c in clean_title) else clean_title
 
-        source_name = fallback_translate_to_khmer(source) if source and "Super Brain" not in source else "ប្រភពព័ត៌មានផ្លូវការ"
-        clean_desc = content.strip() if content else title
+        is_clean_source_name = source and len(source) < 25 and not any(k in source for k in ["កម្ពុជា", "រដ្ឋ", "ប្រព័ន្ធ", "ព័ត៌មាន"])
+        source_name = fallback_translate_to_khmer(source) if is_clean_source_name else "ប្រភពព័ត៌មានផ្លូវការ"
+
+        clean_desc = content.strip() if content else clean_title
         if any(c.isalpha() and ord(c) < 128 for c in clean_desc[:100]):
             clean_desc = fallback_translate_to_khmer(clean_desc)
         
@@ -447,15 +447,15 @@ class SuperBrainAIRewriter:
         if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!"):
             clean_desc += "។"
 
-        if len(clean_desc) > 250:
-            clean_desc = clean_desc[:250] + "..."
+        if len(clean_desc) > 200:
+            clean_desc = clean_desc[:200] + "..."
 
-        body = (
-            f"{dateline} {clean_desc}\n\n"
-            f"យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ព្រឹត្តិការណ៍ និងសកម្មភាពនេះ គឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
-            f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
-            f"ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕"
-        )
+        p1 = f"{dateline} {clean_desc}"
+        p2 = f"យោងតាមការបញ្ជាក់ពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ ព្រឹត្តិការណ៍នេះគឺជាជំហានដ៏សំខាន់ក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់ភាពអសកម្ម។"
+        p3 = f"ផ្អែកលើស្មារតី មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញកម្ពុជា ការការពាររបបដឹកនាំ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការរក្សាសន្តិភាព ស្ថិរភាព និងនីតិរដ្ឋ។"
+        p4 = f"ជាសន្និដ្ឋាន ការគោរពច្បាប់ និងប្រជាធិបតេយ្យសេរីពហុបក្ស នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពជូនជាតិ និងប្រជាជនទាំងមូល៕"
+
+        body = f"{p1}\n\n{p2}\n\n{p3}\n\n{p4}"
         impact = "លើកកម្ពស់សិទ្ធិមនុស្ស មាត្រា ៥១ និងនីតិរដ្ឋនៅកម្ពុជា"
 
         formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, is_leak)

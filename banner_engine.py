@@ -54,7 +54,7 @@ class BannerEngine:
         """
         logger.info(f"🎨 [BANNER ENGINE] Generating Banner for: '{headline[:60]}...'")
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
-        clean_headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
+        clean_headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "").strip()
 
         # Method 1: High-Definition Playwright OpenType Khmer Engine (Primary Default)
         if use_playwright and async_playwright is not None:
