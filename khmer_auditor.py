@@ -25,6 +25,17 @@ class KhmerLanguageAuditor:
             (r'([^\s])។', r'\1។'),
         ]
 
+        # Samdach Presh Sangkareach Chuon Nath Khmer Dictionary Orthographic Rules & Normalization
+        self.chuon_nath_spelling_dictionary = [
+            (r'ព័ត៏មាន', 'ព័ត៌មាន'),
+            (r'រដ្ឋធម្មនុញ្ញ័', 'រដ្ឋធម្មនុញ្ញ'),
+            (r'ប្រជាធិបតេយ្យ៍', 'ប្រជាធិបតេយ្យ'),
+            (r'អន្តរជាំតិ', 'អន្តរជាតិ'),
+            (r'សន្តិសុខ័', 'សន្តិសុខ'),
+            (r'កិច្ចសហប្រតិបត្តការ', 'កិច្ចសហប្រតិបត្តិការ'),
+            (r'ព្រះរាជាណាចក្រកម្ពុជា\s+៖', 'ព្រះរាជាណាចក្រកម្ពុជា៖'),
+        ]
+
     def strip_thai_and_foreign_scripts(self, text: str) -> str:
         """
         Detects and strips any leaked Thai characters/words.
@@ -42,7 +53,7 @@ class KhmerLanguageAuditor:
 
     def sanitize_khmer_spelling_and_punctuation(self, text: str) -> str:
         """
-        Normalizes Khmer punctuation, zero-width spaces, and whitespace.
+        Normalizes Khmer punctuation, Chuon Nath dictionary spelling, and zero-width spaces.
         """
         if not text:
             return ""
@@ -50,6 +61,10 @@ class KhmerLanguageAuditor:
         # Normalize multiple spaces
         text = re.sub(r'[ \t]+', ' ', text)
         
+        # Apply Chuon Nath Orthographic Corrections
+        for wrong_spelling, correct_spelling in self.chuon_nath_spelling_dictionary:
+            text = re.sub(wrong_spelling, correct_spelling, text)
+
         # Apply Khmer punctuation rules
         for pattern, repl in self.punctuation_replacements:
             text = re.sub(pattern, repl, text)

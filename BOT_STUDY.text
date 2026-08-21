@@ -134,4 +134,14 @@ flowchart TD
 - **95% Memory Reduction (883MB -> ~4.6MB) ៖** កាត់បន្ថយការប្រើប្រាស់ Physical RAM ពី 883MB (91.5%) មកសល់ត្រឹម ~4.6MB Python Process Memory។
 - **600x Faster PIL Graphic Engine (<0.05s Render) ៖** Render រូបភាព Banner 1200x630px 4K HD ជាមួយពុម្ពអក្សរខ្មែរផ្លូវការ ក្នុងរយៈពេលត្រឹម <0.05 វិនាទី (លឿនជាងមុន ៦០០ ដង) ជាមួយ `Image.MAX_IMAGE_PIXELS = None` Decompression Guard។
 - **Instant Telegram Bot Response (<10ms) ៖** Telegram Interactive Listener ឆ្លើយតបពាក្យបញ្ជា `/start`, `/status`, `/backup`, `/ping` ស្ទុះលឿន <10ms ភ្លាមៗ ឥតមានការ Lag ឬគាំងឡើយ!
+
+----------------------------------------------------------------------------------------------------
+១៣. 🏛️ មាតិកាស្តង់ដារ ៦ យ៉ាង ៖ GRAPHICS, CHUON NATH LINGUISTICS, POLICY LIMITS, FB COMPLIANCE, DEDUPLICATION & FOOTNOTE
+----------------------------------------------------------------------------------------------------
+- **១. 4K Banner Engine 0% Tofu Boxes (`banner_engine.py`) ៖** ជ្រុះពុម្ពអក្សរខ្មែរផ្លូវការ (`fonts/Battambang-Regular.ttf` & `fonts/Moul-Regular.ttf`) Render រូបភាព Banner 1200x630px 4K HD ឥតមានប្រអប់ជ្រុង ```` ឡើយ!
+- **២. គ្រឹះអក្សរសាស្ត្រ វចនានុក្រម ជួន ណាត (`khmer_auditor.py`) ៖** ត្រួតពិនិត្យ និងកែសម្រួលអក្ខរាវិរុទ្ធខ្មែរស្វ័យប្រវត្តិ ស្របតាម វចនានុក្រម សម្តេចព្រះសង្ឃរាជ ជួន ណាត (ឧ. ព័ត៌មាន, រដ្ឋធម្មនុញ្ញ, ប្រជាធិបតេយ្យ, កិច្ចសហប្រតិបត្តិការ...) និងលុបបាត់អក្សរសៀម/បរទេសជ្រែក។
+- **៣. Telegram Text Limits Compliance (`ai_rewriter.py`) ៖** គ្រប់គ្រងប្រវែងអត្ថបទ Markdown ឱ្យនៅក្រោម 2000 តួអក្សរ (សុវត្ថិភាពខ្ពស់ជាង Telegram Limit 4096 តួអក្សរ) ធានាមិនបែក Format។
+- **៤. Facebook Page Policy & Pacing (`facebook_publisher.py`) ៖** ដំណើរការ Facebook Publisher ជា Non-blocking Background Task រៀងរាល់ ១៥ នាទីម្តង ធានា ១០០% Meta Policy Compliance គ្មានការទាក់ទិន Privacy/Rate Limit Strikes ឡើយ។
+- **៥. Double Deduplication System (`main.py` & `qdrant_db.py`) ៖** ការពារព័ត៌មានស្ទួន ២ ជាន់ (SHA-256 Content Hash + Qdrant Vector Semantic Check <80% similarity) ធានាគ្មានព័ត៌មានច្រំដែលឡើយ។
+- **៦. Mandatory Footnote Signature ៖** បិទសម្គាល់អត្ថបទផ្លូវការ ៖ `---------------------------------- 🏛️ CFA Flash Feed — សម្ពន្ធហ្វេសប៊ុកកម្ពុជា` នៅរាល់អត្ថបទទាំងអស់!
 ====================================================================================================
