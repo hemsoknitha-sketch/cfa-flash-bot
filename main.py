@@ -226,7 +226,7 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
 async def process_batch_news():
     """Fetch and process incoming news items from RSS feeds in batch."""
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
-    news_items = pipeline_engine.ingestion.fetch_from_rss()
+    news_items = await pipeline_engine.ingestion.fetch_from_rss_async()
     if not news_items:
         logger.info("No new live RSS news items found in this 60s cycle. Waiting for next scan...")
         return

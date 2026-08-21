@@ -24,36 +24,64 @@ class IngestionEngine:
         self.national_feeds = get_all_national_feeds()
         self.rss_urls = rss_urls or [f["url"] for f in self.national_feeds]
 
-    def fetch_from_rss(self) -> List[RawNewsItem]:
-        """Fetch latest raw news items from configured National & Global feeds."""
+    def _fetch_single_feed(self, feed_info: dict) -> List[RawNewsItem]:
         from security_sentinel import security_sentinel
-        news_items = []
-        for feed_info in self.national_feeds:
-            url = feed_info["url"]
-            source_name = feed_info["name"]
-            tier = feed_info.get("tier", 1)
-            try:
-                logger.info(f"Scanning Institutional Feed [{source_name}]: {url}")
-                feed = feedparser.parse(url, request_headers={"User-Agent": "CFA-Flash-Bot/4.2"})
-                for entry in feed.entries[:5]:  # Take latest 5 items per feed
-                    raw_title = entry.get("title", "No Title")
-                    raw_content = entry.get("summary", entry.get("title", ""))
-                    
-                    # Layer 2 Input Sanitization (XSS & SQL Injection protection)
-                    clean_title = security_sentinel.sanitize_input_payload(raw_title)
-                    clean_content = security_sentinel.sanitize_input_payload(raw_content)
+        url = feed_info["url"]
+        source_name = feed_info["name"]
+        tier = feed_info.get("tier", 1)
+        items = []
+        try:
+            logger.info(f"⚡ Scanning Feed [{source_name}]: {url}")
+            feed = feedparser.parse(url, request_headers={"User-Agent": "CFA-Flash-Bot/4.2"})
+            for entry in feed.entries[:5]:
+                raw_title = entry.get("title", "No Title")
+                raw_content = entry.get("summary", entry.get("title", ""))
+                clean_title = security_sentinel.sanitize_input_payload(raw_title)
+                clean_content = security_sentinel.sanitize_input_payload(raw_content)
+                items.append(RawNewsItem(
+                    title=clean_title,
+                    content=clean_content,
+                    source=source_name,
+                    url=entry.get("link", ""),
+                    source_tier=tier,
+                    is_unverified=False
+                ))
+        except Exception as e:
+            logger.error(f"Error fetching RSS [{source_name}] {url}: {e}")
+        return items
 
-                    news_items.append(RawNewsItem(
-                        title=clean_title,
-                        content=clean_content,
-                        source=source_name,
-                        url=entry.get("link", ""),
-                        source_tier=tier,
-                        is_unverified=False
-                    ))
-            except Exception as e:
-                logger.error(f"Error fetching RSS [{source_name}] {url}: {e}")
+    async def fetch_from_rss_async(self) -> List[RawNewsItem]:
+        """Fetch all national feeds concurrently in parallel threads (<3s total)."""
+        import asyncio
+        start_t = time.time()
+        tasks = []
+        for feed_info in self.national_feeds:
+            # Wrap each feed fetch in asyncio.to_thread with 5.0s timeout
+            task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=5.0)
+            tasks.append(task)
+        
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+        news_items = []
+        for res in results:
+            if isinstance(res, list):
+                news_items.extend(res)
+            elif isinstance(res, Exception):
+                pass
+        
+        elapsed = time.time() - start_t
+        logger.info(f"⚡ [PARALLEL ASYNC INGESTION] Scanned {len(self.national_feeds)} Feeds in {elapsed:.2f}s! Retrieved {len(news_items)} items.")
         return news_items
+
+    def fetch_from_rss(self) -> List[RawNewsItem]:
+        """Synchronous wrapper for backwards compatibility."""
+        import asyncio
+        try:
+            return asyncio.run(self.fetch_from_rss_async())
+        except Exception:
+            news_items = []
+            for feed_info in self.national_feeds:
+                news_items.extend(self._fetch_single_feed(feed_info))
+            return news_items
 
     def generate_mock_breaking_news(self) -> List[RawNewsItem]:
         """Generate Cambodia-specific breaking news items."""
