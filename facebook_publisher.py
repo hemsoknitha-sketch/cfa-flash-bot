@@ -24,20 +24,28 @@ class FacebookPublisher:
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
         Non-blocking Facebook Page Publisher.
-        Spawns background task so Telegram posts immediately while Facebook is paced by 15-min Governor.
+        Reads image bytes upfront before main.py deletes the file, then paces post via 15-min Governor.
         """
-        asyncio.create_task(self._publish_with_pacing(caption, image_path))
+        import os
+        image_bytes = None
+        if image_path and os.path.exists(image_path):
+            try:
+                with open(image_path, "rb") as f:
+                    image_bytes = f.read()
+            except Exception as e:
+                logger.warning(f"Could not read image file bytes for Facebook: {e}")
+
+        asyncio.create_task(self._publish_with_pacing(caption, image_bytes))
         return True
 
-    async def _publish_with_pacing(self, caption: str, image_path: Optional[str] = None):
-        import os
+    async def _publish_with_pacing(self, caption: str, image_bytes: Optional[bytes] = None):
         import time
         logger.info(f"[FACEBOOK PUBLISHER] Preparing to publish Flash News to Page ID: {self.page_id}...")
 
         if self.access_token in ("MOCK_FB_PAGE_ACCESS_TOKEN", "your_long_lived_facebook_page_access_token", ""):
             logger.info("[FACEBOOK SIMULATION] Post successfully published to Facebook Page!")
-            if image_path:
-                logger.info(f"[FACEBOOK SIMULATION] Attached Banner Image: {image_path}")
+            if image_bytes:
+                logger.info(f"[FACEBOOK SIMULATION] Attached Banner Image ({len(image_bytes)} bytes)")
             logger.info(f"\n--- FACEBOOK POST PREVIEW ---\n{caption}\n-----------------------------")
             return
 
@@ -50,12 +58,12 @@ class FacebookPublisher:
 
         try:
             async with aiohttp.ClientSession() as session:
-                if image_path and os.path.exists(image_path):
+                if image_bytes:
                     url = f"{self.graph_url}/photos"
                     data = aiohttp.FormData()
                     data.add_field('caption', caption)
                     data.add_field('access_token', self.access_token)
-                    data.add_field('source', open(image_path, 'rb'), filename='banner.jpg')
+                    data.add_field('source', image_bytes, filename='banner.jpg', content_type='image/jpeg')
                     async with session.post(url, data=data) as resp:
                         res_json = await resp.json()
                 else:
@@ -75,7 +83,10 @@ class FacebookPublisher:
                     error_msg = f"Graph API Error (HTTP {resp.status}): {error_obj.get('message', res_json)}"
                     logger.error(error_msg)
                     is_rate_limit = "We limit how often" in str(error_msg) or error_obj.get("code") in (368, 17, 4)
-                    if not is_rate_limit:
+                    if is_rate_limit:
+                        self.last_post_time = time.time()  # Reset governor timestamp to force 15-min wait
+                        logger.warning("🛡️ [FACEBOOK GOVERNOR] Meta rate limit detected. Pacing next Facebook attempt in 15 mins...")
+                    else:
                         await self.send_telegram_admin_alert(error_msg, caption)
         except Exception as e:
             error_msg = f"Facebook Graph API Exception: {str(e)}"

@@ -67,14 +67,14 @@ async def process_news(news_text: str, news_id: str):
     image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
     
     try:
-        # ផ្ញើទៅ Telegram VIP Channel ជាមួយរូបភាព Banner
+        # ផ្ញើទៅ Telegram VIP Channel ជាមួយរូបភាព Banner (១ លើកគត់)
         tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
             message_text=processed_article.formatted_telegram_post,
             image_path=image_path
         )
 
-        # ផ្ញើទៅ Telegram Admin Chat ID ជាមួយរូបភាព Banner
-        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789"):
+        # ផ្ញើទៅ Telegram Admin Chat ID តែក្នុងករណី Admin Chat ID ផ្សេងពី VIP Channel ID ប៉ុណ្ណោះ (ការពារស្ទួន)
+        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789") and str(config.TELEGRAM_ADMIN_CHAT_ID) != str(config.TELEGRAM_VIP_CHANNEL_ID):
             await pipeline_engine.broadcaster.broadcast_to_vip_channel(
                 message_text=processed_article.formatted_telegram_post,
                 image_path=image_path,
@@ -194,12 +194,12 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
     image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
 
     try:
-        # 4. Broadcast to Telegram VIP & Admin
+        # 4. Broadcast to Telegram VIP & Admin (១ លើកគត់)
         tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
             message_text=processed_article.formatted_telegram_post,
             image_path=image_path
         )
-        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789"):
+        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789") and str(config.TELEGRAM_ADMIN_CHAT_ID) != str(config.TELEGRAM_VIP_CHANNEL_ID):
             await pipeline_engine.broadcaster.broadcast_to_vip_channel(
                 message_text=processed_article.formatted_telegram_post,
                 image_path=image_path,
