@@ -133,12 +133,12 @@ async def process_public_opinion_news(news_text: str, comments: list, news_id: s
     image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
 
     try:
-        # 4. Broadcast to Telegram VIP & Admin
+        # 4. Broadcast to Telegram VIP & Admin (១ លើកគត់)
         tg_success = await pipeline_engine.broadcaster.broadcast_to_vip_channel(
             message_text=processed_article.formatted_telegram_post,
             image_path=image_path
         )
-        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789"):
+        if config.TELEGRAM_ADMIN_CHAT_ID and config.TELEGRAM_ADMIN_CHAT_ID not in ("your_admin_chat_id", "123456789") and str(config.TELEGRAM_ADMIN_CHAT_ID) != str(config.TELEGRAM_VIP_CHANNEL_ID):
             await pipeline_engine.broadcaster.broadcast_to_vip_channel(
                 message_text=processed_article.formatted_telegram_post,
                 image_path=image_path,

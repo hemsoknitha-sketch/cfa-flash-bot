@@ -1,3 +1,5 @@
+import os
+import sys
 import asyncio
 import logging
 import threading
@@ -9,6 +11,23 @@ logging.basicConfig(
     format="%(asctime)s [%(levelname)s] %(name)s: %(message)s"
 )
 logger = logging.getLogger("24/7_Daemon")
+
+def acquire_single_instance_lock():
+    """Enforces strict single-instance execution across the entire VPS server."""
+    try:
+        import fcntl
+        lock_file_path = "/tmp/cfa_flash_bot_daemon.lock"
+        fp = open(lock_file_path, "w")
+        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+        fp.write(str(os.getpid()))
+        fp.flush()
+        logger.info(f"🔒 [SINGLE INSTANCE LOCK ACQUIRED] PID: {os.getpid()}")
+        return fp
+    except (ImportError, IOError, OSError):
+        # On Windows or if lock is already held by another process
+        if os.name != 'nt':
+            logger.error("🚨 [SINGLE INSTANCE LOCK ERROR] Another instance of CFA Flash Feed is already running on this server! Terminating duplicate instance to prevent double-posting.")
+            sys.exit(0)
 
 def start_interactive_bot_thread():
     """Runs the Interactive Telegram Bot Menu Listener in its own dedicated thread with auto-restart."""
@@ -37,6 +56,7 @@ async def run_news_ingestion_loop(interval_seconds: int = 60):
 from backup_engine import run_daily_2am_backup_loop
 
 async def main():
+    acquire_single_instance_lock()
     logger.info("🚀 [SUPER BRAIN 24/7 DAEMON STARTED] Real-Time Market Feed & Interactive Bot Active!")
     
     # Start Interactive Telegram Bot Menu in dedicated thread so AI models NEVER block commands
