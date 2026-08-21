@@ -57,7 +57,16 @@ class TelegramBroadcaster:
                             logger.info(f"Successfully delivered Photo Banner & Full News Caption to Telegram Chat {dest_chat_id}.")
                             return True
                         else:
-                            logger.warning(f"sendPhoto failed ({res_json.get('description')}). Falling back to sendMessage text post...")
+                            logger.warning(f"sendPhoto Markdown failed ({res_json.get('description')}). Retrying sendPhoto plain text...")
+                            photo_data_plain = aiohttp.FormData()
+                            photo_data_plain.add_field("chat_id", str(dest_chat_id))
+                            photo_data_plain.add_field("caption", caption_text.replace("*", "").replace("_", "").replace("`", ""))
+                            photo_data_plain.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
+                            async with session.post(photo_url, data=photo_data_plain) as plain_resp:
+                                plain_json = await plain_resp.json()
+                                if plain_resp.status == 200 and plain_json.get("ok"):
+                                    logger.info(f"Successfully delivered Photo Banner & Plain Caption to Telegram Chat {dest_chat_id}.")
+                                    return True
 
                 # Standard Text Post via sendMessage API
                 url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
