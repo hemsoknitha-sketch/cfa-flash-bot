@@ -147,14 +147,17 @@ class SuperBrainAIRewriter:
             except Exception as e:
                 logger.error(f"Local Ollama API call failed: {e}. Switching to Cloud/Rule fallback.")
 
-        # Option B: Cloud Google Gemini API
-        if self.client:
+        # Option B: Cloud Google Gemini API with Multi-Key Pool Rotation
+        from gemini_key_pool import gemini_key_pool
+        client_tuple = gemini_key_pool.get_client()
+        if client_tuple:
+            client, active_key = client_tuple
             prompt = f"Source: {source} (Tier {source_tier})\nIs Unverified Flag: {is_unverified}\nTitle: {title}\nContent: {content}"
-            models_to_try = ["gemini-2.5-flash", "gemini-flash-latest", "gemini-flash-lite-latest", "gemini-2.5-flash-lite"]
+            models_to_try = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
             
             for m_name in models_to_try:
                 try:
-                    response = self.client.models.generate_content(
+                    response = client.models.generate_content(
                         model=m_name,
                         contents=SYSTEM_PROMPT + "\n\nRaw News Input:\n" + prompt,
                     )
@@ -181,7 +184,11 @@ class SuperBrainAIRewriter:
                 except Exception as e:
                     err_str = str(e)
                     if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
-                        logger.info(f"ℹ️ Gemini model [{m_name}] 429 quota reached. Trying next model...")
+                        gemini_key_pool.mark_key_exhausted(active_key)
+                        logger.info(f"ℹ️ Gemini key [{active_key[:6]}...] / model [{m_name}] 429 quota reached. Rotating to next pool key...")
+                        new_client_tuple = gemini_key_pool.get_client()
+                        if new_client_tuple:
+                            client, active_key = new_client_tuple
                         continue
                     else:
                         logger.warning(f"Gemini API model [{m_name}] error: {e}")

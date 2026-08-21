@@ -19,7 +19,17 @@ class Config:
 
     # Gemini AI settings
     GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEY", "")
+    GEMINI_API_KEYS_RAW: str = os.getenv("GEMINI_API_KEYS", "")
     GEMINI_MODEL: str = os.getenv("GEMINI_MODEL", "gemini-3.6-flash")
+
+    def get_gemini_api_keys(self) -> list:
+        """Returns list of Gemini API keys for Multi-Key Pool Round-Robin rotation."""
+        keys = []
+        if self.GEMINI_API_KEYS_RAW:
+            keys.extend([k.strip() for k in self.GEMINI_API_KEYS_RAW.replace("\n", ",").split(",") if k.strip()])
+        if self.GEMINI_API_KEY and self.GEMINI_API_KEY not in keys:
+            keys.append(self.GEMINI_API_KEY.strip())
+        return keys
 
     # Local Ollama LLM settings (Qwen 2.5 3B)
     OLLAMA_HOST: str = os.getenv("OLLAMA_HOST", "http://localhost:11434")

@@ -173,4 +173,11 @@ class KhmerLanguageAuditor:
         logger.info(f"✅ [KHMER AUDITOR PASSED] News item audited successfully with 100% Chuon Nath purity & '៕' termination.")
         return True, purified_headline, purified_body, "AUDIT_PASSED_100%"
 
+    def audit_khmer_text(self, text: str) -> str:
+        """Backwards compatible single-string audit entrypoint."""
+        if not text:
+            return ""
+        text = self.strip_thai_and_foreign_scripts(text)
+        return self.sanitize_khmer_spelling_and_punctuation(text)
+
 khmer_auditor = KhmerLanguageAuditor()
