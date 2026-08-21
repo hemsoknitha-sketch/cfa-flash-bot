@@ -126,6 +126,17 @@ class SuperBrainAIRewriter:
     def process_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
         return self.rewrite_news(raw_id, title, content, source, source_tier, is_unverified)
 
+    def _clean_and_parse_json(self, raw_text: str) -> dict:
+        text = raw_text.strip()
+        if text.startswith("```"):
+            lines = text.splitlines()
+            if lines[0].startswith("```"):
+                lines = lines[1:]
+            if lines and lines[-1].startswith("```"):
+                lines = lines[:-1]
+            text = "\n".join(lines).strip()
+        return json.loads(text)
+
     def rewrite_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
         """Processes raw breaking news, evaluates credibility score, and rewrites into professional Khmer post."""
         
@@ -147,7 +158,7 @@ class SuperBrainAIRewriter:
                     model=model_name,
                     contents=SYSTEM_PROMPT + "\n\nRaw News Input:\n" + prompt,
                 )
-                data = json.loads(response.text)
+                data = self._clean_and_parse_json(response.text)
                 cred_score = float(data.get("credibility_score", 95.0))
                 is_leak = data.get("is_unverified_leak", is_unverified)
                 status_label = data.get("status_label", "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ")
@@ -177,7 +188,7 @@ class SuperBrainAIRewriter:
                             model=model_name,
                             contents=SYSTEM_PROMPT + "\n\nRaw News Input:\n" + prompt,
                         )
-                        data = json.loads(response.text)
+                        data = self._clean_and_parse_json(response.text)
                         cred_score = float(data.get("credibility_score", 95.0))
                         is_leak = data.get("is_unverified_leak", is_unverified)
                         status_label = data.get("status_label", "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ")

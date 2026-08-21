@@ -377,6 +377,9 @@ class SuperSmartTelegramBot:
                                         if len(processed_update_ids) > 1000:
                                             processed_update_ids.clear()
                                         await self.handle_update(update)
+                    elif resp.status == 409:
+                        logger.warning("⚠️ Telegram 409 Conflict: Waiting 5s for old session connection to close...")
+                        await asyncio.sleep(5)
                     else:
                         logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
                         await asyncio.sleep(2)
