@@ -153,4 +153,11 @@ flowchart TD
 - **៤. Facebook Page Policy & Pacing (`facebook_publisher.py`) ៖** ដំណើរការ Facebook Publisher ជា Non-blocking Background Task រៀងរាល់ ១៥ នាទីម្តង ធានា ១០០% Meta Policy Compliance គ្មានការទាក់ទិន Privacy/Rate Limit Strikes ឡើយ។
 - **៥. Double Deduplication System (`main.py` & `qdrant_db.py`) ៖** ការពារព័ត៌មានស្ទួន ២ ជាន់ (SHA-256 Content Hash + Qdrant Vector Semantic Check <80% similarity) ធានាគ្មានព័ត៌មានច្រំដែលឡើយ។
 - **៦. Mandatory Footnote Signature ៖** បិទសម្គាល់អត្ថបទផ្លូវការ ៖ `---------------------------------- 🏛️ CFA Flash Feed — សម្ពន្ធហ្វេសប៊ុកកម្ពុជា` នៅរាល់អត្ថបទទាំងអស់!
+
+----------------------------------------------------------------------------------------------------
+១៤. 📘 DUAL RSS + META GRAPH API FACEBOOK PAGE LIVE INGESTION ENGINE (`scraper.py`)
+----------------------------------------------------------------------------------------------------
+- **Meta Graph API Page Ingestion (`fetch_from_facebook_pages_async`) ៖** ចូលទៅទាញយក Post ថ្មីៗផ្លូវការចេញពី Facebook Page របស់ក្រសួង/ស្ថាប័ន ឬ CFA Page ដោយផ្ទាល់តាមរយៈ Meta Graph API (`v19.0/{page_id}/posts`)។
+- **Parallel Multi-Source Fusion ៖** ស្កេន ១៦ Feeds ថ្នាក់ជាតិ/អន្តរជាតិ + Facebook Pages ក្នុងពេលដំណាលគ្នា ក្នុងរយៈពេលត្រឹម <5.3 វិនាទី!
+- **Super Brain AI Transformation ៖** រាល់ Post ផ្លូវការដែលទាញចេញពី Facebook Page ត្រូវបញ្ជូនចូល **Super Brain AI Rewriter** បង្កើតជាអត្ថបទព័ត៌មានផ្លូវការ ៤ កថាខណ្ឌ (មាត្រា ៥១) ជាមួយ Banner 4K HD និងបោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅ Telegram Channel & Facebook Page!
 ====================================================================================================

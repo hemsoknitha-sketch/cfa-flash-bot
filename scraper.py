@@ -4,6 +4,7 @@ import logging
 from typing import List, Optional
 from pydantic import BaseModel, Field
 import feedparser
+from config import config
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
