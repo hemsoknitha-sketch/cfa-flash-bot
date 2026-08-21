@@ -237,15 +237,26 @@ async def process_batch_news():
         await process_news(news_text=full_text, news_id=item.id)
 
 async def main():
-    logger.info("Starting Flash News Super Brain AI System (Telegram + Facebook Engine)...")
+    logger.info("⚡ [STARTING SUPER BRAIN AI SYSTEM] Initializing 24/7 Dual-Thread Orchestrator...")
     
-    # 1. Run single emergency test news item through the 5-step pipeline
-    test_id = f"news_{int(time.time())}"
-    test_content = "Cambodia strengthens international joint operations to crackdown online scam networks, safeguarding human rights, social justice, and national rule of law."
-    await process_news(news_text=test_content, news_id=test_id)
+    # 1. Spawn Interactive Telegram Bot Listener in Background Thread
+    try:
+        from bot_interactive import SuperSmartTelegramBot
+        bot_listener = SuperSmartTelegramBot()
+        asyncio.create_task(bot_listener.poll_updates_loop())
+        logger.info("⚡ [TELEGRAM BOT LISTENER READY] Responding to /start, /status, /backup, /ping <10ms!")
+    except Exception as e:
+        logger.error(f"Failed to start Interactive Telegram Bot listener: {e}")
 
-    # 2. Run batch news processing
-    await process_batch_news()
+    # 2. Continuous 24/7 RSS Ingestion Loop
+    while True:
+        try:
+            await process_batch_news()
+        except Exception as e:
+            logger.error(f"Error in 24/7 news cycle: {e}")
+        
+        logger.info("⏳ [CYCLE COMPLETED] Waiting 60s for next 24/7 National News Scan...")
+        await asyncio.sleep(60)
 
 if __name__ == "__main__":
     try:

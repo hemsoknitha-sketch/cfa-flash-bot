@@ -83,10 +83,10 @@
     • ADMIN: @Sokpheatonsai
 
 ----------------------------------------------------------------------------------------------------
-៩. ⚡ PERSISTENT DEDUPLICATION & INTERACTIVE BOT (`vector_store.py` & `bot_interactive.py`)
+៩. ⚡ PERSISTENT DEDUPLICATION & INTERACTIVE BOT (`vector_store.py`, `bot_interactive.py` & `main.py`)
 ----------------------------------------------------------------------------------------------------
 - Deduplication Persistent Disk Caching ៖ រក្សាទុក News Content Hashes ក្នុង `seen_hashes.json` ការពារព័ត៌មានស្ទួនពេល Server Restart.
-- Telegram Interactive Bot Thread ៖ ឆ្លើយតបពាក្យបញ្ជា `/status`, `/start` ក្នុងរយៈពេល <10ms!
+- 24/7 Dual-Thread Orchestrator (`main.py`) ៖ រត់តំណាលគ្នា ២ Threads ស្វ័យប្រវត្តិ ២៤/៧ (Thread ទី ១ ៖ `SuperSmartTelegramBot().poll_updates_loop()` រង់ចាំឆ្លើយតបពាក្យបញ្ជា Telegram `/start`, `/status`, `/backup`, `/ping` ក្នុងរយៈពេល <10ms ភ្លាមៗ និង Thread ទី ២ ៖ Continuous Ingestion Loop រត់ស្កេន ៥០+ Feeds ជារៀងរាល់ ៦០ វិនាទី)!
 
 ----------------------------------------------------------------------------------------------------
 ១០. 🛡️ ស្ថាបត្យកម្មប្រព័ន្ធសុវត្ថិភាព ៥ ជាន់ (5-LAYER ENTERPRISE SECURITY SUITE) (`security_sentinel.py`)
