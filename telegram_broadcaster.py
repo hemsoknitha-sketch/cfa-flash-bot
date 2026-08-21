@@ -46,7 +46,7 @@ class TelegramBroadcaster:
                     photo_data = aiohttp.FormData()
                     photo_data.add_field("chat_id", str(dest_chat_id))
                     
-                    caption_text = message_text if len(message_text) <= 1000 else message_text[:990] + "..."
+                    caption_text = message_text if len(message_text) <= 1020 else message_text[:1015] + "..."
                     photo_data.add_field("caption", caption_text)
                     photo_data.add_field("parse_mode", "Markdown")
                     photo_data.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
@@ -54,20 +54,7 @@ class TelegramBroadcaster:
                     async with session.post(photo_url, data=photo_data) as photo_resp:
                         res_json = await photo_resp.json()
                         if photo_resp.status == 200 and res_json.get("ok"):
-                            logger.info(f"Successfully delivered Photo Banner to Telegram Chat {dest_chat_id}.")
-                            # If full article was truncated for photo caption, send complete text via sendMessage
-                            if len(message_text) > 1000:
-                                text_url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
-                                text_payload = {
-                                    "chat_id": str(dest_chat_id),
-                                    "text": message_text,
-                                    "parse_mode": "Markdown"
-                                }
-                                async with session.post(text_url, json=text_payload) as text_resp:
-                                    text_res = await text_resp.json()
-                                    if not text_res.get("ok"):
-                                        text_payload.pop("parse_mode", None)
-                                        await session.post(text_url, json=text_payload)
+                            logger.info(f"Successfully delivered Photo Banner & Full News Caption to Telegram Chat {dest_chat_id}.")
                             return True
                         else:
                             logger.warning(f"sendPhoto failed ({res_json.get('description')}). Falling back to sendMessage text post...")

@@ -357,10 +357,10 @@ class SuperBrainAIRewriter:
             f"{body_clean}\n"
             f"{leak_banner}\n"
             f"🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
-            f"• កម្រិតភាពជឿជាក់ (Credibility Score): `{score}%`\n"
-            f"• ប្រភពដើម: `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain`\n"
+            f"• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
             f"• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
-            f"• Telegram: *CFA Flash News | @CFAflashBot*"
+            f"• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
+            f"• ADMIN: *@Sokpheatonsai*"
         )
 
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍") -> str:
