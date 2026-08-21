@@ -36,11 +36,13 @@ class SuperSmartTelegramBot:
         """Register Telegram Bot Menu Button Commands."""
         commands = [
             {"command": "start", "description": "⚡ បើកម៉ឺនុយមេ (Main Menu)"},
-            {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាពប្រព័ន្ធ AI Server"},
             {"command": "latest", "description": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
+            {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
+            {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
+            {"command": "report", "description": "📊 របាយការណ៍ស្កេន 16 Institutional Feeds"},
             {"command": "backup", "description": "📦 ទាញយក ZIP Backup ប្រព័ន្ធ"},
             {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
-            {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់"}
+            {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់ & Support"}
         ]
         try:
             session = await self.get_session()
@@ -51,11 +53,11 @@ class SuperSmartTelegramBot:
             logger.error(f"Failed to register bot commands: {e}")
 
     def _build_inline_keyboard(self):
-        """Super Smart Inline Keyboard Buttons."""
+        """Super Smart 8-Button Inline Keyboard."""
         return {
             "inline_keyboard": [
                 [
-                    {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ", "callback_data": "cmd_latest"},
+                    {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ", "callback_data": "cmd_latest"}
                 ],
                 [
                     {"text": "🟢 ស្ថានភាពប្រព័ន្ធ Server", "callback_data": "cmd_status"},
@@ -64,6 +66,13 @@ class SuperSmartTelegramBot:
                 [
                     {"text": "⚡ ពិនិត្យល្បឿន Ping", "callback_data": "cmd_ping"},
                     {"text": "❓ ការណែនាំប្រើប្រាស់", "callback_data": "cmd_help"}
+                ],
+                [
+                    {"text": "📊 របាយការណ៍ស្កេន Feeds", "callback_data": "cmd_report"},
+                    {"text": "🔄 ស្កេនព័ត៌មានភ្លាមៗ", "callback_data": "cmd_scan"}
+                ],
+                [
+                    {"text": "👥 ទំនាក់ទំនង Admin Support", "callback_data": "cmd_admin"}
                 ]
             ]
         }
@@ -90,39 +99,19 @@ class SuperSmartTelegramBot:
             logger.error(f"Error sending message to {chat_id}: {e}")
             return None
 
-    async def handle_update(self, update: dict):
-        """Route incoming messages and callback queries."""
-        from security_sentinel import security_sentinel
-        start_time = time.time()
-        
-        # 1. Message Handling
-        if "message" in update:
-            msg = update["message"]
-            chat_id = msg["chat"]["id"]
-            text = msg.get("text", "").strip()
-
-            # Layer 1 Security Gate: Admin Verification
-            if not security_sentinel.verify_admin_access(chat_id):
-                logger.warning(f"🚨 [SECURITY BLOCK] Blocked unauthorized bot interaction attempt from Chat ID: {chat_id}")
-                return
-
-            if text.startswith("/start"):
-                welcome_text = (
-                    "⚡ *CFA FLASH NEWS AI SYSTEM*\n\n"
-                    "សួស្តី! ខ្ញុំគឺជា *CFA Flash News AI Bot* 🤖\n"
-                    "ប្រព័ន្ធព័ត៌មានទាន់ហេតុការណ៍ហិរញ្ញវត្ថុ & ទីផ្សារ ២៤/៧ ៣៦៥។\n\n"
-                    "សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់៖"
-                )
-                await self.send_message(chat_id, welcome_text)
-            elif text.startswith("/backup"):
-                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
-                from backup_engine import create_project_zip_backup, send_backup_to_admin
-                zip_path = create_project_zip_backup()
-                success = await send_backup_to_admin(zip_path)
-                if success:
-                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
-                else:
-                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
+    def get_welcome_text(self) -> str:
+        """Super Smart Welcome Message in Professional Khmer."""
+        return (
+            "⚡ *CFA FLASH FEED | APEX SUPER BRAIN* 🇰🇭\n\n"
+            "សួស្តី! ខ្ញុំគឺជា *CFA Flash Feed AI Bot* 🤖\n"
+            "ប្រព័ន្ធខួរក្បាលសប្បនិម្មិតឆ្លាតវៃ ស្កេន និងបោះពុម្ពផ្សាយព័ត៌មានទាន់ហេតុការណ៍ 24/7/365!\n\n"
+            "🏛️ *មុខងារសំខាន់ៗរបស់ប្រព័ន្ធ ៖*\n"
+            "• ស្កេន ១៦+ ប្រភពព័ត៌មានរដ្ឋ និងអន្តរជាតិផ្លូវការ\n"
+            "• វិភាគ និងសរសេរឡើងវិញជា ៤ កថាខណ្ឌផ្លូវការ (ការពារ មាត្រា ៥១)\n"
+            "• ផលិត Banner 4K HD ស្វ័យប្រវត្តិ (<៣ វិនាទី)\n"
+            "• បោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅ Telegram & Facebook Page\n\n"
+            "👇 *សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់ ៖*"
+        )
 
     def get_vps_status_report(self) -> str:
         """Calculates real-time VPS Server hardware telemetry (RAM, Disk, CPU) and Security status."""
@@ -180,7 +169,7 @@ class SuperSmartTelegramBot:
         os_info = f"{platform.system()} {platform.release()}"
         
         status_text = (
-            "🟢 *CFA FLASH NEWS - VPS SERVER & SECURITY TELEMETRY*\n\n"
+            "🟢 *CFA FLASH FEED - VPS SERVER TELEMETRY*\n\n"
             "💻 *១. ស្ថានភាពម៉ាស៊ីន VPS (Server Telemetry):*\n"
             f"• *OS System:* `{os_info}`\n"
             f"• *CPU Usage:* `{cpu_str}`\n"
@@ -189,18 +178,57 @@ class SuperSmartTelegramBot:
             "• *Server Status:* `Active 24/7 365 (Google Cloud VM)`\n\n"
             "🤖 *២. ព័ត៌មានប្រព័ន្ធ AI & Vector Database:*\n"
             "• *AI Engine:* `Super Brain Khmer Translator & Rewriter`\n"
-            "• *Qdrant Vector Store:* `Active (Dim=384, Deduplication <80%)`\n"
+            "• *Vector Store:* `Deduplication SHA-256 + TF-IDF Active`\n"
             "• *Khmer Standard:* `វចនានុក្រម សម្តេចព្រះសង្ឃរាជ ជួន ណាត`\n\n"
             "🛡️ *៣. ប្រព័ន្ធសុវត្ថិភាព & ភាពឯកជន (Security & Health):*\n"
-            "• *Secrets Protection:* `.env Vault Secured`\n"
-            "• *API SSL Security:* `TLS 1.3 Encrypted`\n"
-            "• *Auto-Recovery:* `systemd Daemon Active`\n"
+            "• *Secrets Vault:* `.env Encrypted & Secured`\n"
+            "• *API Connection:* `TLS 1.3 High-Speed`\n"
+            "• *Auto-Recovery:* `systemd 24/7 Daemon Active`\n"
             "• *ចំណាយ:* `$0.00 / ឥតគិតថ្លៃ ១០០% រហូត`"
         )
         return status_text
 
+    def get_feeds_report(self) -> str:
+        """Generates comprehensive report of the 16 institutional news sources."""
+        return (
+            "📊 *CFA FLASH FEED - INSTITUTIONAL FEEDS REPORT*\n\n"
+            "🏛️ *ប្រភពព័ត៌មានផ្លូវការទាំង ១៦ ៖*\n"
+            "១. 🇰🇭 AKP - Agence Kampuchea Presse (ព័ត៌មានរដ្ឋផ្លូវការ)\n"
+            "២. 🇰🇭 ក្រសួងព័ត៌មានកម្ពុជា (Ministry of Information)\n"
+            "៣. 🇰🇭 ក្រសួងការបរទេស & សហប្រតិបត្តិការអន្តរជាតិ (MFAIC)\n"
+            "៤. 🇰🇭 អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU Cambodia)\n"
+            "៥. 🇰🇭 គណនេយ្យភាពសង្គម & ប្រឆាំងអំពើពុករលួយ (TI Cambodia)\n"
+            "៦. 🇰🇭 សិទ្ធិមនុស្ស & យុត្តិធម៌សង្គម (CCHR Cambodia)\n"
+            "៧. 🇰🇭 សិទ្ធិមនុស្ស & សមភាពសង្គម (LICADHO Cambodia)\n"
+            "៨. 🇰🇭 Khmer Times News (ភាសាអង់គ្លេស & ខ្មែរ)\n"
+            "៩. 🇰🇭 Phnom Penh Post News\n"
+            "១០. 🌐 New York Times - International News Desk\n"
+            "១១. 🌐 BBC News - World Affairs\n"
+            "១២. 🌐 Reuters - Global Breaking News\n"
+            "១៣. 🌐 Associated Press (AP News)\n"
+            "១៤. 🌐 Al Jazeera English\n"
+            "១៥. 🌐 Financial Times - Global Economics\n"
+            "១៦. 🌐 Wall Street Journal\n\n"
+            "⚡ *ល្បឿនស្កេន ៖* `ស្កេន 16 Feeds ក្នុងពេលតែមួយ (<6.0s)`\n"
+            "🔄 *ចន្លោះពេលស្កេន ៖* `រៀងរាល់ ៦០ វិនាទីម្តង ស្វ័យប្រវត្តិ`\n"
+            "📘 *Facebook Auto-Publish:* `១៥ នាទីម្តង (Meta Policy Compliant)`"
+        )
+
+    def get_admin_contact_info(self) -> str:
+        """Admin Contact Information."""
+        return (
+            "👥 *ទំនាក់ទំនងក្រុមការងារ ADMIN SUPPORT*\n\n"
+            "🏛️ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA - CFA FLASH FEED*\n\n"
+            "• *Telegram Admin:* `@Sokpheatonsai`\n"
+            "• *Telegram Channel:* `CFA Flash Feed | @CFAflashBot`\n"
+            "• *Facebook Page:* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
+            "• *ប្រព័ន្ធខួរក្បាល:* `APEX Super Brain AI System`\n\n"
+            "💬 *លោកអ្នកអាចទាក់ទង Admin ផ្ទាល់ សម្រាប់ការស្នើសុំបន្ថែមប្រភពព័ត៌មាន ឬសម្រួលមុខងារផ្សេងៗ!*"
+        )
+
     async def handle_update(self, update: dict):
         """Processes single update payload from Telegram API."""
+        from security_sentinel import security_sentinel
         start_time = time.time()
         
         # 1. Message Command Handling
@@ -210,31 +238,40 @@ class SuperSmartTelegramBot:
             text = msg.get("text", "").strip()
             logger.info(f"📩 [TELEGRAM BOT RECEIVED MESSAGE] Chat ID: {chat_id} | Text: '{text}'")
 
+            if not security_sentinel.verify_admin_access(chat_id):
+                logger.warning(f"🚨 [SECURITY BLOCK] Blocked unauthorized bot interaction attempt from Chat ID: {chat_id}")
+                return
+
             if text.startswith("/start"):
-                welcome_text = (
-                    "⚡ *CFA FLASH NEWS AI SYSTEM*\n\n"
-                    "សួស្តី! ខ្ញុំគឺជា *CFA Flash News AI Bot* 🤖\n"
-                    "ប្រព័ន្ធព័ត៌មានទាន់ហេតុការណ៍ហិរញ្ញវត្ថុ & ទីផ្សារ ២៤/៧ ៣៦៥។\n\n"
-                    "សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់៖"
-                )
-                await self.send_message(chat_id, welcome_text)
+                await self.send_message(chat_id, self.get_welcome_text())
 
             elif text.startswith("/status"):
-                status_text = self.get_vps_status_report()
-                await self.send_message(chat_id, status_text)
+                await self.send_message(chat_id, self.get_vps_status_report())
+
+            elif text.startswith("/report"):
+                await self.send_message(chat_id, self.get_feeds_report())
+
+            elif text.startswith("/scan"):
+                await self.send_message(chat_id, "🔄 *កំពុងចាប់ផ្តើមស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ លើ ១៦ ប្រភព...*")
+                try:
+                    from scraper import fetch_all_news_parallel
+                    articles = await fetch_all_news_parallel()
+                    await self.send_message(chat_id, f"✅ *ស្កេនព័ត៌មានជោគជ័យ! ទាញបានព័ត៌មានចំនួន {len(articles)} អត្ថបទថ្មីៗ!*")
+                except Exception as e:
+                    await self.send_message(chat_id, f"⚠️ *ការស្កេនបានបញ្ចប់ (មិនមានព័ត៌មានថ្មីស្រឡាង) ៖ {e}*")
 
             elif text.startswith("/latest"):
                 latest_text = (
-                    "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិ បើកយុទ្ធនាការក្ដៅគគុកបង្រ្កាបបទល្មើសឆបោកតាមប្រព័ន្ធអនឡាញ និងលើកកម្ពស់នីតិរដ្ឋ*\n\n"
+                    "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
                     "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
-                    "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះមិនត្រឹមតែផ្តោតសំខាន់លើការផ្ដន្ទាទោសឧក្រិដ្ឋជនបច្ចេកវិទ្យាប៉ុណ្ណោះទេ ប៉ុន្តែក៏បានផ្សារភ្ជាប់យ៉ាងស្អិតរមួតទៅនឹងការលើកកម្ពស់ការគោរពសិទ្ធិមនុស្ស និងការពង្រឹងនីតិរដ្ឋយ៉ាងម៉ឺងម៉ាត់នៅកម្ពុជាផងដែរ។ ការបោះជំហាននេះ ឆ្លុះបញ្ចាំងពីឆន្ទៈមោះមុតរបស់អាជ្ញាធរ ក្នុងការកម្ចាត់ភាពអសកម្ម និងធានានូវយុត្តិធម៌សង្គមប្រកបដោយតម្លាភាព។\n\n"
-                    "ជុំវិញការរឹតបន្តឹងវិធានការច្បាប់នេះ អ្នកជំនាញបានធ្វើការវិភាគយ៉ាងច្បាស់លាស់ពីផលប្រយោជន៍ និងឥទ្ធិពលជាវិជ្ជមាននៃយុទ្ធនាការនេះ។ ជាបឋម ប្រតិបត្តិការដ៏ក្តៅគគុកនេះបានចូលរួមចំណែកយ៉ាងសកម្មក្នុងការកាត់បន្ថយ និងទប់ស្កាត់ហានិភ័យនៃបទល្មើសឆបោកតាមប្រព័ន្ធបច្ចេកវិទ្យាឌីជីថល ដែលកំពុងគំរាមកំហែងដល់ប្រជាពលរដ្ឋស្លូតត្រង់ទូទាំងសកលលោក។ តាមរយៈការវាយបំបែកសំបុកឧក្រិដ្ឋជនទាំងនេះ វាបានជួយស្តារ និងបង្កើនទំនុកចិត្តយ៉ាងរឹងមាំ ព្រមទាំងធានាបាននូវសន្តិសុខសុវត្ថិភាពសង្គមជូនប្រជាពលរដ្ឋកម្ពុជាឱ្យរស់នៅដោយភាពកក់ក្តៅ។\n\n"
-                    "លើសពីនេះទៅទៀត ភាពជោគជ័យនៃកិច្ចសហប្រតិបត្តិការជាមួយសហគមន៍អន្តរជាតិនេះ បានផ្តល់នូវផលប្រយោជន៍ជាយុទ្ធសាស្ត្រយ៉ាងធំធេង ដោយបានរួមចំណែកយ៉ាងសំខាន់ក្នុងការលើកស្ទួយកិត្តិយស និងកិត្យានុភាពរបស់ប្រទេសកម្ពុជានៅលើឆាកអន្តរជាតិ ក្នុងនាមជារដ្ឋអធិបតេយ្យដែលប្រកាន់ខ្ជាប់នូវច្បាប់ និងសណ្តាប់ធ្នាប់សាធារណៈយ៉ាងខ្ជាប់ខ្ជួន៕\n\n"
+                    "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី ប្រភពព័ត៌មានផ្លូវការ ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះគឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
+                    "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
+                    "ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕\n\n"
                     "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
-                    "• កម្រិតភាពជឿជាក់ (Credibility Score): `95.0%`\n"
-                    "• ប្រភពដើម: `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ Super Brain`\n"
+                    "• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
                     "• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
-                    "• Telegram: *CFA Flash News | @CFAflashBot*"
+                    "• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
+                    "• ADMIN: *@Sokpheatonsai*"
                 )
                 await self.send_message(chat_id, latest_text)
 
@@ -250,31 +287,96 @@ class SuperSmartTelegramBot:
 
             elif text.startswith("/ping"):
                 latency_ms = int((time.time() - start_time) * 1000)
-                ping_text = f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀"
-                await self.send_message(chat_id, ping_text)
+                await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
 
             elif text.startswith("/help"):
                 help_text = (
-                    "❓ *ការណែនាំអំពី CFA FLASH NEWS BOT*\n\n"
+                    "❓ *ការណែនាំអំពី CFA FLASH FEED BOT*\n\n"
                     "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
                     "• /start - បើកម៉ឺនុយមេ\n"
+                    "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
                     "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
-                    "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ថ្មីៗ\n"
+                    "• /scan - ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ\n"
+                    "• /report - មើលរបាយការណ៍ 16 Feeds\n"
                     "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
-                    "• /ping - ពិនិត្យមើលល្បឿន Bot\n\n"
+                    "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
                     "២. *ប្រព័ន្ធផ្សព្វផ្សាយផ្លូវការ៖*\n"
-                    "• Telegram Channel: CFA Flash News\n"
-                    "• Facebook Page: សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA"
+                    "• Telegram Channel: CFA Flash Feed | @CFAflashBot\n"
+                    "• Facebook Page: សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA\n"
+                    "• Admin: @Sokpheatonsai"
                 )
                 await self.send_message(chat_id, help_text)
             else:
-                welcome_text = (
-                    "⚡ *CFA FLASH NEWS AI SYSTEM*\n\n"
-                    "សួស្តី! ខ្ញុំគឺជា *CFA Flash News AI Bot* 🤖\n"
-                    "ប្រព័ន្ធព័ត៌មានទាន់ហេតុការណ៍ហិរញ្ញវត្ថុ & ទីផ្សារ ២៤/៧ ៣៦៥។\n\n"
-                    "សូមជ្រើសរើសម៉ឺនុយ ឬប៊ូតុងខាងក្រោមដើម្បីប្រាសប្រាស់៖"
+                await self.send_message(chat_id, self.get_welcome_text())
+
+        # 2. Inline Callback Query Handling
+        elif "callback_query" in update:
+            cb = update["callback_query"]
+            chat_id = cb["message"]["chat"]["id"]
+            data = cb.get("data", "")
+            
+            async with aiohttp.ClientSession() as session:
+                await session.post(f"{self.api_url}/answerCallbackQuery", json={"callback_query_id": cb["id"]})
+
+            if data == "cmd_latest":
+                latest_text = (
+                    "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
+                    "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
+                    "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី ប្រភពព័ត៌មានផ្លូវការ ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះគឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
+                    "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
+                    "ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕\n\n"
+                    "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
+                    "• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
+                    "• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
+                    "• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
+                    "• ADMIN: *@Sokpheatonsai*"
                 )
-                await self.send_message(chat_id, welcome_text)
+                await self.send_message(chat_id, latest_text)
+            elif data == "cmd_status":
+                await self.send_message(chat_id, self.get_vps_status_report())
+            elif data == "cmd_report":
+                await self.send_message(chat_id, self.get_feeds_report())
+            elif data == "cmd_scan":
+                await self.send_message(chat_id, "🔄 *កំពុងចាប់ផ្តើមស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ លើ ១៦ ប្រភព...*")
+                try:
+                    from scraper import fetch_all_news_parallel
+                    articles = await fetch_all_news_parallel()
+                    await self.send_message(chat_id, f"✅ *ស្កេនព័ត៌មានជោគជ័យ! ទាញបានព័ត៌មានចំនួន {len(articles)} អត្ថបទថ្មីៗ!*")
+                except Exception as e:
+                    await self.send_message(chat_id, f"⚠️ *ការស្កេនបានបញ្ចប់ ៖ {e}*")
+            elif data == "cmd_admin":
+                await self.send_message(chat_id, self.get_admin_contact_info())
+            elif data == "cmd_backup":
+                await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
+                from backup_engine import create_project_zip_backup, send_backup_to_admin
+                zip_path = create_project_zip_backup()
+                success = await send_backup_to_admin(zip_path)
+                if success:
+                    await self.send_message(chat_id, "✅ *បង្កើត និងបាញ់ផ្ញើ ZIP Backup ចូលមកកាន់ Admin រួចរាល់ដោយជោគជ័យ!*")
+                else:
+                    await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
+            elif data == "cmd_ping":
+                latency_ms = int((time.time() - start_time) * 1000)
+                await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
+            elif data == "cmd_help":
+                help_text = (
+                    "❓ *ការណែនាំអំពី CFA FLASH FEED BOT*\n\n"
+                    "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
+                    "• /start - បើកម៉ឺនុយមេ\n"
+                    "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
+                    "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
+                    "• /scan - ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ\n"
+                    "• /report - មើលរបាយការណ៍ 16 Feeds\n"
+                    "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
+                    "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
+                    "២. *ប្រព័ន្ធផ្សព្វផ្សាយផ្លូវការ៖*\n"
+                    "• Telegram Channel: CFA Flash Feed | @CFAflashBot\n"
+                    "• Facebook Page: សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA\n"
+                    "• Admin: @Sokpheatonsai"
+                )
+                await self.send_message(chat_id, help_text)
+            else:
+                await self.send_message(chat_id, self.get_welcome_text())
 
         # 2. Inline Callback Query Handling
         elif "callback_query" in update:

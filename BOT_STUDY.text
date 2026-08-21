@@ -86,7 +86,16 @@
 ៩. ⚡ PERSISTENT DEDUPLICATION & INTERACTIVE BOT (`vector_store.py`, `bot_interactive.py` & `main.py`)
 ----------------------------------------------------------------------------------------------------
 - Deduplication Persistent Disk Caching ៖ រក្សាទុក News Content Hashes ក្នុង `seen_hashes.json` ការពារព័ត៌មានស្ទួនពេល Server Restart.
-- 24/7 Dual-Thread Orchestrator (`main.py`) ៖ រត់តំណាលគ្នា ២ Threads ស្វ័យប្រវត្តិ ២៤/៧ (Thread ទី ១ ៖ `SuperSmartTelegramBot().poll_updates_loop()` រង់ចាំឆ្លើយតបពាក្យបញ្ជា Telegram `/start`, `/status`, `/backup`, `/ping` ក្នុងរយៈពេល <10ms ភ្លាមៗ និង Thread ទី ២ ៖ Continuous Ingestion Loop រត់ស្កេន ៥០+ Feeds ជារៀងរាល់ ៦០ វិនាទី)!
+- 24/7 Dual-Thread Orchestrator (`main.py`) ៖ រត់តំណាលគ្នា ២ Threads ស្វ័យប្រវត្តិ ២៤/៧ (Thread ទី ១ ៖ `SuperSmartTelegramBot().poll_updates_loop()` រង់ចាំឆ្លើយតបពាក្យបញ្ជា Telegram `/start`, `/latest`, `/status`, `/scan`, `/report`, `/backup`, `/ping`, `/help` ក្នុងរយៈពេល <10ms ភ្លាមៗ និង Thread ទី ២ ៖ Continuous Ingestion Loop រត់ស្កេន 16+ Feeds ជារៀងរាល់ ៦០ វិនាទី)!
+- 8-Button Interactive Menu Suite (`bot_interactive.py`) ៖
+    • ប៊ូតុងទី ១ ៖ 📰 `ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ` (Latest Flash News)
+    • ប៊ូតុងទី ២ ៖ 🟢 `ស្ថានភាពប្រព័ន្ធ Server` (Real-Time VPS Telemetry)
+    • ប៊ូតុងទី ៣ ៖ 📦 `ZIP Backup ប្រព័ន្ធ` (Instant System Backup)
+    • ប៊ូតុងទី ៤ ៖ ⚡ `ពិនិត្យល្បឿន Ping` (Network Response Time <10ms)
+    • ប៊ូតុងទី ៥ ៖ ❓ `ការណែនាំប្រើប្រាស់` (User Guide & Docs)
+    • ប៊ូតុងទី ៦ ៖ 📊 `របាយការណ៍ស្កេន Feeds` (16 Institutional Feeds Report)
+    • ប៊ូតុងទី ៧ ៖ 🔄 `ស្កេនព័ត៌មានភ្លាមៗ` (Manual Instant Ingestion Scan)
+    • ប៊ូតុងទី ៨ ៖ 👥 `ទំនាក់ទំនង Admin Support` (Admin Contact & Channel Links)
 
 ----------------------------------------------------------------------------------------------------
 ១០. 🛡️ ស្ថាបត្យកម្មប្រព័ន្ធសុវត្ថិភាព ៥ ជាន់ (5-LAYER ENTERPRISE SECURITY SUITE) (`security_sentinel.py`)
