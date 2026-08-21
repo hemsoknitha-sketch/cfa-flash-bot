@@ -5,17 +5,22 @@ logger = logging.getLogger(__name__)
 
 class ZeroShotNewsClassifier:
     """
-    Multilingual Zero-Shot News Classifier Engine using 'joeddav/xlm-roberta-large-xnli'.
-    Classifies incoming news text into 'Breaking News' vs 'General News' across 100+ languages
-    without fine-tuning.
+    Ultra-Lightweight News Classifier Engine.
+    Uses high-speed Cambodia/Khmer Domain Signals & Gemini API Cloud Architecture.
+    Avoids loading heavy PyTorch local models (~2.2GB RAM) on 1GB VPS.
     """
-    def __init__(self, model_name: str = "joeddav/xlm-roberta-large-xnli"):
+    def __init__(self, model_name: str = "joeddav/xlm-roberta-large-xnli", enable_local_torch: bool = False):
         self.model_name = model_name
+        self.enable_local_torch = enable_local_torch
         self.classifier = None
         self.is_loaded = False
 
     def load_model(self):
-        """Lazy load Zero-Shot classification pipeline."""
+        """Lazy load Zero-Shot model only if explicitly enabled (disabled by default for VPS <200MB RAM optimization)."""
+        if not self.enable_local_torch:
+            logger.info("⚡ [LIGHTWEIGHT MODE] Using Fast Domain Signals & Gemini API Classifier (0MB RAM footprint).")
+            return
+
         if not self.is_loaded:
             try:
                 logger.info(f"Loading Zero-Shot Classifier Model ('{self.model_name}')...")

@@ -13,17 +13,18 @@ class VectorDeduplicator:
     Uses Qdrant Vector Database + BAAI/bge-m3 Flagship 1024-dim Multilingual Embeddings
     with TF-IDF Cosine Fallback.
     """
-    def __init__(self, similarity_threshold: float = config.SIMILARITY_THRESHOLD, window_seconds: int = 3600):
+    def __init__(self, similarity_threshold: float = config.SIMILARITY_THRESHOLD, window_seconds: int = 3600, enable_local_embeddings: bool = False):
         self.similarity_threshold = similarity_threshold
         self.window_seconds = window_seconds
+        self.enable_local_embeddings = enable_local_embeddings
         
         self.qdrant_enabled = False
         self.qdrant_client = None
         self.encoder = None
         self.collection_name = "news_vectors"
-        self.vector_size = config.QDRANT_VECTOR_SIZE  # 1024 for BAAI/bge-m3
+        self.vector_size = config.QDRANT_VECTOR_SIZE
 
-        # Fallback memory store & content hash cache
+        # Fast memory store & persistent SHA-256 content hash cache
         import os
         import json
         self.history: List[Dict] = []
@@ -31,7 +32,10 @@ class VectorDeduplicator:
         self.cache_file = os.path.join(base_dir, "seen_hashes.json")
         self.seen_hashes: set = self._load_seen_hashes()
 
-        self._init_qdrant()
+        if self.enable_local_embeddings:
+            self._init_qdrant()
+        else:
+            logger.info("⚡ [LIGHTWEIGHT MODE] Vector Deduplication running on SHA-256 + TF-IDF Engine (<5MB RAM).")
 
     def _load_seen_hashes(self) -> set:
         import os
@@ -55,7 +59,7 @@ class VectorDeduplicator:
             logger.error(f"Error saving seen_hashes.json: {e}")
 
     def _init_qdrant(self):
-        """Initialize Qdrant Vector DB & BAAI/bge-m3 SentenceTransformer model."""
+        """Initialize Qdrant Vector DB & SentenceTransformer model if explicitly enabled."""
         try:
             from qdrant_client import QdrantClient
             from qdrant_client.models import VectorParams, Distance
@@ -73,9 +77,9 @@ class VectorDeduplicator:
                 logger.info("Local Qdrant Server not detected. Using In-Memory Qdrant Vector Engine.")
                 self.qdrant_client = QdrantClient(":memory:")
 
-            # Step 2: Load BAAI/bge-m3 model (or fallback to all-MiniLM-L6-v2)
+            # Step 2: Load model
             try:
-                logger.info(f"Loading Flagship Multilingual Embedding Model ('{config.QDRANT_MODEL}')...")
+                logger.info(f"Loading Multilingual Embedding Model ('{config.QDRANT_MODEL}')...")
                 self.encoder = SentenceTransformer(config.QDRANT_MODEL)
                 self.vector_size = self.encoder.get_sentence_embedding_dimension()
             except Exception as model_err:

@@ -97,17 +97,23 @@ def fallback_translate_to_khmer(text: str) -> str:
 
 class NLLBKhmerTranslator:
     """
-    Meta NLLB-200 Neural Khmer Machine Translation Engine.
-    Uses 'facebook/nllb-200-distilled-600M' model for high-precision English to Khmer translation.
+    Ultra-Lightweight Khmer Machine Translation & Orthography Engine.
+    Uses Samdech Sanghareach Chuon Nath Dictionary Rules & Gemini Cloud API-First Architecture.
+    Avoids loading heavy PyTorch local models (~2.5GB RAM) on 1GB VPS.
     """
-    def __init__(self, model_name: str = "facebook/nllb-200-distilled-600M"):
+    def __init__(self, model_name: str = "facebook/nllb-200-distilled-600M", enable_local_torch: bool = False):
         self.model_name = model_name
+        self.enable_local_torch = enable_local_torch
         self.tokenizer = None
         self.model = None
         self.is_loaded = False
 
     def load_model(self):
-        """Lazy load NLLB model and tokenizer."""
+        """Lazy load NLLB model only if explicitly enabled (disabled by default for VPS <200MB RAM optimization)."""
+        if not self.enable_local_torch:
+            logger.info("⚡ [LIGHTWEIGHT MODE] Using Gemini Cloud API & Chuon Nath Orthography Engine (0MB RAM footprint).")
+            return
+            
         if not self.is_loaded:
             try:
                 logger.info(f"Loading Meta NLLB-200 Model ('{self.model_name}')...")
@@ -122,11 +128,10 @@ class NLLBKhmerTranslator:
 
     def translate_to_khmer(self, text: str, src_lang: str = "eng_Latn") -> str:
         """Translate input text (default English) into fluent Khmer (khm_Khmr)."""
-        if not self.is_loaded:
+        if self.enable_local_torch and not self.is_loaded:
             self.load_model()
 
         if not self.is_loaded or not self.model or not self.tokenizer:
-            logger.warning("NLLB model unavailable. Using fallback Khmer translator.")
             return fallback_translate_to_khmer(text)
 
         try:
