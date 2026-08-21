@@ -176,4 +176,10 @@ flowchart TD
     • បញ្ជូនចូល **Super Brain AI Rewriter** បង្កើតជាអត្ថបទ ៤ កថាខណ្ឌយ៉ាងអស្ចារ្យ (មាត្រា ៥១)
     • Render រូបភាព **Banner 4K HD** (<0.05s)
     • បោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅកាន់ **Telegram VIP Channel & Facebook Page CFA** ភ្លាមៗ!
+----------------------------------------------------------------------------------------------------
+១៧. 🧹 SAFE NEWS CACHE PURGE & USER DATA PROTECTION (`vector_store.py` & `bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **Safe News Deduplication Purge (`clear_news_cache`) ៖** លុបទិន្នន័យ Hash ព័ត៌មានចាស់ៗ (`seen_hashes.json`) ចោល ១០០% តាមរយៈពាក្យបញ្ជា `/purge` ឬ `/clearcache` ក្នុង Telegram ៖
+    • មិនប៉ះពាល់ មិនលុប ឬប៉ះពាល់ដល់ Telegram Bot Token, Admin Chat ID, FB Access Tokens ឬ `.env` ឡើយ (១០០% User & Admin Config Protected)!
+    • អនុញ្ញាតឱ្យប្រព័ន្ធធ្វើការ Ingestion & Scan ព័ត៌មានថ្មីៗឡើងវិញដោយឥតទាក់ឡើយ!
 ====================================================================================================

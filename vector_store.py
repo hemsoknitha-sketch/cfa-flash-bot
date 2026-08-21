@@ -58,6 +58,15 @@ class VectorDeduplicator:
         except Exception as e:
             logger.error(f"Error saving seen_hashes.json: {e}")
 
+    def clear_news_cache(self) -> int:
+        """Clears all old cached news hashes and history while keeping user/admin settings 100% intact."""
+        count = len(self.seen_hashes)
+        self.seen_hashes.clear()
+        self.history.clear()
+        self._save_seen_hashes()
+        logger.info(f"🧹 [NEWS DEDUPLICATION CACHE PURGED] Cleared {count} old news hashes.")
+        return count
+
     def _init_qdrant(self):
         """Initialize Qdrant Vector DB & SentenceTransformer model if explicitly enabled."""
         try:

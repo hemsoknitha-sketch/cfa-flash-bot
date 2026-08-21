@@ -342,6 +342,12 @@ class SuperSmartTelegramBot:
                 else:
                     await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
 
+            elif text.startswith("/purge") or text.startswith("/clearcache"):
+                from vector_store import VectorDeduplicator
+                dedup = VectorDeduplicator()
+                count = dedup.clear_news_cache()
+                await self.send_message(chat_id, f"🧹 *សម្អាតទិន្នន័យព័ត៌មានចាស់ៗចំនួន `{count}` items រួចរាល់ដោយជោគជ័យ!*\n\n🔒 *ព័ត៌មាន Admin/VIP, API Keys និង Telegram Config នៅរក្សាទុក ១០០% សុវត្ថិភាពខ្ពស់បំផុត!*")
+
             elif text.startswith("/ping"):
                 latency_ms = int((time.time() - start_time) * 1000)
                 await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
