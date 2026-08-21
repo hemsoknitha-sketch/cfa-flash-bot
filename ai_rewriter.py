@@ -23,7 +23,7 @@ Your mission is to evaluate incoming news from all global social networks and ne
 
 STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
-2. PARAGRAPH 1 (DATELINE & LEAD): Start with "រាជធានីភ្នំពេញ៖ " followed by the lead news story.
+2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD): Scan the text to extract the exact geographical location/city/province where the event occurred. Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'ខេត្តបាត់ដំបង៖ ', 'ទីក្រុងវ៉ាស៊ីនតោន៖ ', 'ទីក្រុងហ្សឺណែវ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the lead news story.
 3. PARAGRAPH 2 (SUPER BRAIN DYNAMIC SOURCE): MUST start with: "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា..." followed by details connecting to human rights, anti-corruption, or rule of law.
 4. PARAGRAPH 3 & 4 (IMPACT & CONCLUSION): Write fluid, elegant Khmer prose paragraphs analyzing the positive social impact, benefits to citizens, and national prestige. End the final paragraph with the official Khmer full stop "៕".
 5. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
@@ -49,7 +49,78 @@ class SuperBrainAIRewriter:
                 self.client = genai.Client(api_key=self.api_key)
                 logger.info("⚡ [SUPER BRAIN AI READY] Gemini 2.5 Flash News Rewriter Active!")
             except Exception as e:
-                logger.error(f"Failed to initialize Gemini API client: {e}")
+                logger.error(f"Failed to initialize Gemini Client: {e}")
+
+    def extract_geographic_location(self, title: str, content: str) -> str:
+        """
+        Smart Geographic Location Extractor.
+        Scans title and content for Cambodian 25 provinces/cities & major world capitals.
+        """
+        text = f"{title} {content}".lower()
+        
+        # 1. Cambodian 25 Provinces & Cities
+        cam_locations = [
+            ("សៀមរាប", "siem reap", "ខេត្តសៀមរាប៖"),
+            ("ព្រះសីហនុ", "sihanouk", "ខេត្តព្រះសីហនុ៖"),
+            ("បាត់ដំបង", "battambang", "ខេត្តបាត់ដំបង៖"),
+            ("កំពត", "kampot", "ខេត្តកំពត៖"),
+            ("កែប", "kep", "ខេត្តកែប៖"),
+            ("កោះកុង", "koh kong", "ខេត្តកោះកុង៖"),
+            ("កំពង់ចាម", "kampong cham", "ខេត្តកំពង់ចាម៖"),
+            ("ស្វាយរៀង", "svay rieng", "ខេត្តស្វាយរៀង៖"),
+            ("តាកែវ", "takeo", "ខេត្តតាកែវ៖"),
+            ("ក្រចេះ", "kratie", "ខេត្តក្រចេះ៖"),
+            ("ស្ទឹងត្រែង", "stung treng", "ខេត្តស្ទឹងត្រែង៖"),
+            ("រតនគិរី", "ratanakiri", "ខេត្តរតនគិរី៖"),
+            ("មណ្ឌលគិរី", "mondulkiri", "ខេត្តមណ្ឌលគិរី៖"),
+            ("ព្រះវិហារ", "preah vihear", "ខេត្តព្រះវិហារ៖"),
+            ("បន្ទាយមានជ័យ", "banteay meanchey", "ខេត្តបន្ទាយមានជ័យ៖"),
+            ("ឧត្តរមានជ័យ", "oddar meanchey", "ខេត្តឧត្តរមានជ័យ៖"),
+            ("ពោធិ៍សាត់", "pursat", "ខេត្តពោធិ៍សាត់៖"),
+            ("កំពង់ឆ្នាំង", "kampong chhnang", "ខេត្តកំពង់ឆ្នាំង៖"),
+            ("កំពង់ស្ពឺ", "kampong speu", "ខេត្តកំពង់ស្ពឺ៖"),
+            ("កំពង់ធំ", "kampong thom", "ខេត្តកំពង់ធំ៖"),
+            ("ព្រៃវែង", "prey veng", "ខេត្តព្រៃវែង៖"),
+            ("ប៉ោយប៉ែត", "poipet", "ក្រុងប៉ោយប៉ែត៖"),
+            ("បាវិត", "bavet", "ក្រុងបាវិត៖"),
+            ("ភ្នំពេញ", "phnom penh", "រាជធានីភ្នំពេញ៖"),
+        ]
+        for name_kh, name_en, dateline in cam_locations:
+            if name_kh in text or name_en in text:
+                return dateline
+
+        # 2. International Capitals & Cities
+        intl_locations = [
+            ("វ៉ាស៊ីនតោន", "washington", "ទីក្រុងវ៉ាស៊ីនតោន៖"),
+            ("ហ្សឺណែវ", "geneva", "ទីក្រុងហ្សឺណែវ៖"),
+            ("បេកាំង", "beijing", "ទីក្រុងបេកាំង៖"),
+            ("បាងកក", "bangkok", "ទីក្រុងបាងកក៖"),
+            ("ហាណូយ", "hanoi", "ទីក្រុងហាណូយ៖"),
+            ("ឡុងដ៍", "london", "ទីក្រុងឡុងដ៍៖"),
+            ("ប៉ារីស", "paris", "ទីក្រុងប៉ារីស៖"),
+            ("តូក្យូ", "tokyo", "ទីក្រុងតូក្យូ៖"),
+            ("សេអ៊ូល", "seoul", "ទីក្រុងសេអ៊ូល៖"),
+            ("ម៉ានីល", "manila", "ទីក្រុងម៉ានីល៖"),
+            ("ហ្សាការតា", "jakarta", "ទីក្រុងហ្សាការតា៖"),
+            ("កូឡាឡាំពួ", "kuala lumpur", "ទីក្រុងកូឡាឡាំពួ៖"),
+            ("ស៊ីងហ្គាពូរី", "singapore", "ប្រទេសសឹង្ហបូរី៖"),
+            ("ញូវយ៉ក", "new york", "ទីក្រុងញូវយ៉ក៖"),
+            ("ម៉ូស្កូ", "moscow", "ទីក្រុងម៉ូស្កូ៖"),
+            ("កង់បេរ៉ា", "canberra", "ទីក្រុងកង់បេរ៉ា៖"),
+            ("អូស្ត្រាលី", "australia", "ប្រទេសអូស្ត្រាលី៖"),
+            ("អាមេរិក", "usa", "សហរដ្ឋអាមេរិក៖"),
+            ("ចិន", "china", "ប្រទេសចិន៖"),
+            ("ជប៉ុន", "japan", "ប្រទេសជប៉ុន៖"),
+            ("បារាំង", "france", "ប្រទេសបារាំង៖"),
+            ("វៀតណាម", "vietnam", "ប្រទេសវៀតណាម៖"),
+            ("ថៃ", "thailand", "ប្រទេសថៃ៖"),
+            ("ឡាវ", "laos", "ប្រទេសឡាវ៖"),
+        ]
+        for name_kh, name_en, dateline in intl_locations:
+            if name_kh in text or name_en in text:
+                return dateline
+
+        return "រាជធានីភ្នំពេញ៖"
 
     def process_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
         return self.rewrite_news(raw_id, title, content, source, source_tier, is_unverified)
@@ -113,6 +184,7 @@ class SuperBrainAIRewriter:
         Public Opinion Journalism Rewriter:
         Rewrites viral hot posts into Khmer Public Opinion Journalism articles incorporating public sentiment % and citizen quotes.
         """
+        dateline = self.extract_geographic_location(title, content)
         quotes_str = "\n".join([f"- {q}" for q in sentiment_metrics.representative_quotes]) if sentiment_metrics.representative_quotes else "- មហាជនសម្តែងការគាំទ្រយ៉ាងពេញទំហឹង"
         
         prompt = (
@@ -128,7 +200,7 @@ class SuperBrainAIRewriter:
             f"=== REPRESENTATIVE CITIZEN QUOTES ===\n"
             f"{quotes_str}\n\n"
             f"INSTRUCTION: Write an official Khmer Public Opinion Journalistic Article (អត្ថបទសារព័ត៌មានមតិសាធារណៈផ្លូវការ) with:\n"
-            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' and lead viral event.\n"
+            f"Paragraph 1: Dateline starting with exact location '{dateline} ' and lead viral event.\n"
             f"Paragraph 2: Public sentiment breakdown (% Support, % Concern) connecting to rule of law and human rights.\n"
             f"Paragraph 3: Representative citizen quotes and public reactions.\n"
             f"Paragraph 4: Balanced journalistic conclusion ending with '៕'."
@@ -169,7 +241,7 @@ class SuperBrainAIRewriter:
         # Fallback
         headline = f"មហាជនសម្តែងការចាប់អារម្មណ៍យ៉ាងខ្លាំងលើ ៖ {title}"
         body = (
-            f"រាជធានីភ្នំពេញ៖ ព្រឹត្តិការណ៍ក្តៅគគុកអំពី «{title}» កំពុងផ្ទុះការចាប់អារម្មណ៍ និងពិភាក្សាយ៉ាងផុសផុលពីសំណាក់មហាជនលើបណ្តាញសង្គម។\n\n"
+            f"{dateline} ព្រឹត្តិការណ៍ក្តៅគគុកអំពី «{title}» កំពុងផ្ទុះការចាប់អារម្មណ៍ និងពិភាក្សាយ៉ាងផុសផុលពីសំណាក់មហាជនលើបណ្តាញសង្គម។\n\n"
             f"យោងតាមការបញ្ជាក់ពីប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ដែលបានធ្វើការស្កេនមតិមហាជន បានបង្ហាញឱ្យដឹងថា មហាជនរហូតដល់ {sentiment_metrics.support_pct}% បានសម្តែងការគាំទ្រ និងស្វាគមន៍យ៉ាងពេញទំហឹង  ខណៈ {sentiment_metrics.concern_pct}% សម្តែងការបារម្ភ និងស្នើសុំឱ្យមានការយកចិត្តទុកដាក់បន្ថែម។\n\n"
             f"ចំពោះមតិតំណាងរបស់ប្រជាពលរដ្ឋបានបញ្ជាក់ថា៖ «{sentiment_metrics.representative_quotes[0] if sentiment_metrics.representative_quotes else 'ការរួមចំណែករបស់មហាជន គឺជាកម្លាំងចលករយ៉ាងសំខាន់ក្នុងការលើកកម្ពស់សង្គម'}»។\n\n"
             f"ជាការសន្និដ្ឋាន ការបញ្ចេញមតិយ៉ាងសកម្មរបស់សាធារណជន ឆ្លុះបញ្ចាំងពីការយល់ដឹង និងការចូលរួមយ៉ាងសកម្មក្នុងការលើកកម្ពស់តម្លាភាព និងនីតិរដ្ឋនៅកម្ពុជា៕"
@@ -201,6 +273,7 @@ class SuperBrainAIRewriter:
         Rewrites political party statements into formal Khmer political science articles that promote
         Article 51 of the Cambodian Constitution and liberal multiparty democratic principles.
         """
+        dateline = self.extract_geographic_location(title, content)
         status_label = f"🏛️ [{'មតិប្រឆាំងស្ថាបនា' if getattr(political_metrics, 'is_opposition_statement', False) else 'POLITICAL PHILOSOPHY'} - គោរពគ្រឹះប្រជាធិបតេយ្យសេរីពហុបក្ស មាត្រា ៥១]"
         tenets_str = "\n".join([f"- {t}" for t in political_metrics.philosophical_tenets])
         
@@ -216,7 +289,7 @@ class SuperBrainAIRewriter:
             f"Constitutional Law: {political_metrics.constitutional_reference}\n"
             f"Core Tenets:\n{tenets_str}\n\n"
             f"INSTRUCTION: Write an official Khmer Political Science & Democratic Pluralism Article (អត្ថបទសារលិខិតឥស្សរជននយោបាយ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស) with:\n"
-            f"Paragraph 1: Dateline starting with 'រាជធានីភ្នំពេញ៖ ' summarizing the official message/statement of {political_metrics.figure_name} ({political_metrics.party_name}).\n"
+            f"Paragraph 1: Dateline starting with exact location '{dateline} ' summarizing the official message/statement of {political_metrics.figure_name} ({political_metrics.party_name}).\n"
             f"Paragraph 2: Political philosophy analysis connecting the message to Tocqueville, J.S. Mill constructive opposition, Montesquieu, and John Locke principles.\n"
             f"Paragraph 3: Defense of Article 51 of the Cambodian Constitution, emphasizing the absolute necessity of maintaining peace, stability, national unity, and liberal multiparty democracy.\n"
             f"Paragraph 4: Balanced journalistic conclusion upholding constitutional rule of law ending with '៕'."
@@ -256,7 +329,7 @@ class SuperBrainAIRewriter:
         headline = f"សារលិខិតផ្លូវការ ៖ {title}"
         opp_comment = "ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋបាលដឹកនាំរដ្ឋ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិប្រឆាំងស្ថាបនា (Constructive Opposition) គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។" if getattr(political_metrics, 'is_opposition_statement', False) else "ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋបាលដឹកនាំរដ្ឋ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិចម្រុះ គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។"
         body = (
-            f"រាជធានីភ្នំពេញ៖ {political_metrics.figure_name} នៃ {political_metrics.party_name} បានចេញផ្សាយសារលិខិតផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
+            f"{dateline} {political_metrics.figure_name} នៃ {political_metrics.party_name} បានចេញផ្សាយសារលិខិតផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
             f"{opp_comment}\n\n"
             f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
             f"ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕"
