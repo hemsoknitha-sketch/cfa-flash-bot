@@ -10,21 +10,21 @@ class FacebookPublisher:
     """
     Facebook Graph API Publisher.
     Features:
-    1. Automatic posting to Facebook Page Feed / Photos API.
-    2. Automatic Failover Emergency Sentinel: Sends alert to Telegram Admin if Graph API fails.
+    1. Automatic posting to Facebook Page Feed / Photos API with In-Memory Photo Buffer.
+    2. Strict 30-min Meta Pacing Governor for 100% Meta Code 368 Anti-Spam Compliance.
+    3. Zero Telegram Duplicate Messages (Silent Logging on FB Errors).
     """
     def __init__(self, page_id: str = config.FB_PAGE_ID, access_token: str = config.FB_PAGE_ACCESS_TOKEN):
         self.page_id = page_id
         self.access_token = access_token
         self.graph_url = f"https://graph.facebook.com/v19.0/{self.page_id}"
-        self.last_alert_time = 0  # Cooldown timestamp for sentinel alerts
-        self.last_post_time = 0   # Rate Governor timestamp (Min 15 mins = 900s between posts)
-        self.min_post_interval = 900  # 15 mins safety interval between FB posts for 100% Meta Policy Compliance
+        self.last_post_time = 0   # Rate Governor timestamp (Min 30 mins = 1800s between posts)
+        self.min_post_interval = 1800  # 30 mins safety interval for 100% Meta Policy Compliance
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
         Non-blocking Facebook Page Publisher.
-        Reads image bytes upfront before main.py deletes the file, then paces post via 15-min Governor.
+        Reads image bytes upfront before main.py deletes the file, then paces post via 30-min Governor.
         """
         import os
         image_bytes = None
@@ -53,7 +53,7 @@ class FacebookPublisher:
         time_since_last = now - self.last_post_time
         if self.last_post_time > 0 and time_since_last < self.min_post_interval:
             wait_needed = int(self.min_post_interval - time_since_last)
-            logger.info(f"🛡️ [FACEBOOK RATE GOVERNOR] Pacing Facebook post ({wait_needed}s remaining in 15-min safety window) for 100% Meta Policy Compliance.")
+            logger.info(f"🛡️ [FACEBOOK RATE GOVERNOR] Pacing Facebook post ({wait_needed}s remaining in 30-min safety window) for 100% Meta Policy Compliance.")
             await asyncio.sleep(wait_needed)
 
         try:
@@ -81,53 +81,8 @@ class FacebookPublisher:
                 else:
                     error_obj = res_json.get("error", {})
                     error_msg = f"Graph API Error (HTTP {resp.status}): {error_obj.get('message', res_json)}"
-                    logger.error(error_msg)
-                    is_rate_limit = "We limit how often" in str(error_msg) or error_obj.get("code") in (368, 17, 4)
-                    if is_rate_limit:
-                        self.last_post_time = time.time()  # Reset governor timestamp to force 15-min wait
-                        logger.warning("🛡️ [FACEBOOK GOVERNOR] Meta rate limit detected. Pacing next Facebook attempt in 15 mins...")
-                    else:
-                        await self.send_telegram_admin_alert(error_msg, caption)
+                    logger.error(f"⚠️ [FACEBOOK PUBLISH NOTICE] {error_msg}")
+                    # Update governor timestamp on rate limit so we don't spam Meta
+                    self.last_post_time = time.time()
         except Exception as e:
-            error_msg = f"Facebook Graph API Exception: {str(e)}"
-            logger.error(error_msg)
-            await self.send_telegram_admin_alert(error_msg, caption)
-
-    async def send_telegram_admin_alert(self, error_details: str, failed_payload: str):
-        """
-        EMERGENCY SENTINEL: Automatically sends alarm message to Telegram Admin
-        with 10-minute cooldown to prevent alert spamming.
-        """
-        import time
-        now = time.time()
-        if (now - self.last_alert_time) < 600:  # 10 minutes cooldown
-            logger.info("Sentinel alert suppressed by 10-minute cooldown.")
-            return
-
-        self.last_alert_time = now
-        logger.warning(f"🚨 [EMERGENCY SENTINEL TRIGGERED] Sending Telegram Alert to Admin ({config.TELEGRAM_ADMIN_CHAT_ID})...")
-
-        alert_message = (
-            f"🚨 *[EMERGENCY SENTINEL ALERT: FACEBOOK API FAILURE]*\n\n"
-            f"❌ *Error Details:*\n`{error_details}`\n\n"
-            f"📌 *Failed News Post Payload:*\n{failed_payload[:300]}...\n\n"
-            f"⚠️ *Action Required:* Please inspect Facebook Page Access Token or Graph API version."
-        )
-
-        if config.TELEGRAM_BOT_TOKEN == "MOCK_TELEGRAM_BOT_TOKEN":
-            logger.info(f"[TELEGRAM ADMIN SENTINEL SIMULATION] Alert delivered to Admin:\n{alert_message}")
-            return
-
-        try:
-            url = f"https://api.telegram.org/bot{config.TELEGRAM_BOT_TOKEN}/sendMessage"
-            payload = {
-                "chat_id": config.TELEGRAM_ADMIN_CHAT_ID,
-                "text": alert_message,
-                "parse_mode": "Markdown"
-            }
-            async with aiohttp.ClientSession() as session:
-                async with session.post(url, json=payload) as resp:
-                    if resp.status == 200:
-                        logger.info("Emergency alert delivered to Telegram Admin successfully.")
-        except Exception as e:
-            logger.error(f"Failed to deliver Emergency Telegram Admin Alert: {e}")
+            logger.error(f"⚠️ [FACEBOOK EXCEPTION] {e}")
