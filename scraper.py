@@ -50,8 +50,51 @@ class IngestionEngine:
             logger.error(f"Error fetching RSS [{source_name}] {url}: {e}")
         return items
 
+    async def fetch_from_facebook_pages_async(self) -> List[RawNewsItem]:
+        """
+        Meta Graph API Facebook Page Ingestion Engine.
+        Scans official configured Facebook Pages via Meta Graph API v19.0.
+        """
+        import aiohttp
+        from security_sentinel import security_sentinel
+        page_id = config.FB_PAGE_ID
+        token = config.FB_PAGE_ACCESS_TOKEN
+        items = []
+
+        if not token or token == "MOCK_FB_PAGE_ACCESS_TOKEN" or page_id == "MOCK_FB_PAGE_ID":
+            return items
+
+        url = f"https://graph.facebook.com/v19.0/{page_id}/posts?fields=id,message,created_time,permalink_url,full_picture&limit=5&access_token={token}"
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=5.0)) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
+                        for post in data.get("data", []):
+                            msg = post.get("message", "").strip()
+                            if not msg:
+                                continue
+                            clean_msg = security_sentinel.sanitize_input_payload(msg)
+                            first_line = clean_msg.split("\n")[0].strip()
+                            title = first_line[:100] if len(first_line) > 10 else clean_msg[:80]
+                            items.append(RawNewsItem(
+                                title=title,
+                                content=clean_msg,
+                                source="Facebook Page ផ្លូវការ",
+                                url=post.get("permalink_url", f"https://facebook.com/{post.get('id')}"),
+                                source_tier=1,
+                                is_unverified=False
+                            ))
+                        logger.info(f"📘 [FB PAGE INGESTION] Ingested {len(items)} live posts from Facebook Page ID: {page_id}")
+                    else:
+                        err_json = await resp.json()
+                        logger.warning(f"FB Page Graph API Notice: {err_json.get('error', {}).get('message')}")
+        except Exception as e:
+            logger.error(f"FB Page Ingestion Error: {e}")
+        return items
+
     async def fetch_from_rss_async(self) -> List[RawNewsItem]:
-        """Fetch all national feeds concurrently in parallel threads (<3s total)."""
+        """Fetch all national feeds & Facebook Pages concurrently in parallel (<3s total)."""
         import asyncio
         start_t = time.time()
         tasks = []
@@ -60,7 +103,11 @@ class IngestionEngine:
             task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=5.0)
             tasks.append(task)
         
+        fb_task = asyncio.create_task(self.fetch_from_facebook_pages_async())
+        
         results = await asyncio.gather(*tasks, return_exceptions=True)
+        fb_items = await fb_task
+
         news_items = []
         for res in results:
             if isinstance(res, list):
@@ -68,8 +115,11 @@ class IngestionEngine:
             elif isinstance(res, Exception):
                 pass
         
+        if fb_items:
+            news_items.extend(fb_items)
+        
         elapsed = time.time() - start_t
-        logger.info(f"⚡ [PARALLEL ASYNC INGESTION] Scanned {len(self.national_feeds)} Feeds in {elapsed:.2f}s! Retrieved {len(news_items)} items.")
+        logger.info(f"⚡ [PARALLEL ASYNC INGESTION] Scanned {len(self.national_feeds)} Feeds + FB Pages in {elapsed:.2f}s! Retrieved {len(news_items)} items.")
         return news_items
 
     def fetch_from_rss(self) -> List[RawNewsItem]:
