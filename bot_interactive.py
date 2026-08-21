@@ -353,36 +353,37 @@ class SuperSmartTelegramBot:
             logger.error(f"Error flushing old updates: {e}")
 
     async def poll_updates_loop(self):
-        """Long-polling loop for receiving user updates asynchronously."""
+        """Long-polling loop for receiving user updates asynchronously with persistent connection."""
         await self.flush_old_updates()
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
         processed_update_ids = set()
+        session = await self.get_session()
+        
         while True:
             try:
-                timeout_config = aiohttp.ClientTimeout(total=35)
-                async with aiohttp.ClientSession(timeout=timeout_config) as session:
-                    url = f"{self.api_url}/getUpdates?offset={self.offset}&timeout=25"
-                    async with session.get(url) as resp:
-                        if resp.status == 200:
-                            res = await resp.json()
-                            if res.get("ok"):
-                                for update in res.get("result", []):
-                                    up_id = update.get("update_id")
-                                    if up_id:
-                                        self.offset = up_id + 1
-                                        if up_id not in processed_update_ids:
-                                            processed_update_ids.add(up_id)
-                                            # Keep processed set small
-                                            if len(processed_update_ids) > 1000:
-                                                processed_update_ids.clear()
-                                            await self.handle_update(update)
-                        else:
-                            logger.warning(f"Telegram API getUpdates returned status: {resp.status} | URL: '{url}'")
-                            await asyncio.sleep(2)
+                url = f"{self.api_url}/getUpdates?offset={self.offset}&timeout=25"
+                async with session.get(url, timeout=aiohttp.ClientTimeout(total=35)) as resp:
+                    if resp.status == 200:
+                        res = await resp.json()
+                        if res.get("ok"):
+                            for update in res.get("result", []):
+                                up_id = update.get("update_id")
+                                if up_id:
+                                    self.offset = up_id + 1
+                                    if up_id not in processed_update_ids:
+                                        processed_update_ids.add(up_id)
+                                        if len(processed_update_ids) > 1000:
+                                            processed_update_ids.clear()
+                                        await self.handle_update(update)
+                    else:
+                        logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
+                        await asyncio.sleep(2)
+            except asyncio.TimeoutError:
+                await asyncio.sleep(1)
             except Exception as e:
-                logger.error(f"Error in polling loop: {e}")
+                logger.warning(f"Telegram polling retry: {e}")
                 await asyncio.sleep(2)
 
 if __name__ == "__main__":
