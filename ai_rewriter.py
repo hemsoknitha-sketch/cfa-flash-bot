@@ -443,8 +443,12 @@ class SuperBrainAIRewriter:
         if any(c.isalpha() and ord(c) < 128 for c in clean_desc[:100]):
             clean_desc = fallback_translate_to_khmer(clean_desc)
         
-        if len(clean_desc) > 350:
-            clean_desc = clean_desc[:350] + "..."
+        clean_desc = clean_desc.strip()
+        if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!"):
+            clean_desc += "។"
+
+        if len(clean_desc) > 250:
+            clean_desc = clean_desc[:250] + "..."
 
         body = (
             f"{dateline} {clean_desc}\n\n"
@@ -475,20 +479,21 @@ class SuperBrainAIRewriter:
 
         headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip())
         body_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(body))
-        impact_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(impact or ""))
-        impact_lines = [line.strip() for line in impact_clean.split("\n") if line.strip()]
-        formatted_impact = "\n".join([f"• {line}" if not line.startswith("•") else line for line in impact_lines])
-
-        return (
-            f"*{headline_clean}*\n\n"
-            f"{body_clean}\n"
-            f"{leak_banner}\n"
-            f"🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
+        
+        footer_signature = (
+            f"\n\n🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
             f"• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
             f"• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
             f"• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
             f"• ADMIN: *@Sokpheatonsai*"
         )
+
+        # Telegram Photo Caption Limit Safety Guard (1024 chars max)
+        max_body_len = 980 - len(headline_clean) - len(leak_banner) - len(footer_signature)
+        if len(body_clean) > max_body_len and max_body_len > 100:
+            body_clean = body_clean[:max_body_len].rsplit(" ", 1)[0] + "..."
+
+        return f"*{headline_clean}*\n\n{body_clean}{leak_banner}{footer_signature}"
 
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍") -> str:
         """
