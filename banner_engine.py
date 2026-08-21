@@ -37,27 +37,59 @@ class BannerEngine:
                 logger.error(f"Failed to read LOGO.png: {e}")
         return ""
 
+    def _get_font_b64(self, font_name: str) -> str:
+        font_path = os.path.join(self.base_dir, "fonts", font_name)
+        if os.path.exists(font_path):
+            try:
+                with open(font_path, "rb") as f:
+                    return base64.b64encode(f.read()).decode("utf-8")
+            except Exception as e:
+                logger.error(f"Failed to read font {font_name}: {e}")
+        return ""
+
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", use_playwright: bool = True) -> str:
         """
         Generates 4K HD Banner Image (1200x630 JPEG).
-        Uses Playwright OpenType Khmer HarfBuzz Engine as Primary, with PIL TTF Fallback.
+        Uses Playwright OpenType Khmer HarfBuzz Engine with Embedded Base64 TTF Fonts.
         """
         logger.info(f"🎨 [BANNER ENGINE] Generating Banner for: '{headline[:60]}...'")
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
         clean_headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
 
-        # Method 1: Playwright HTML5 Engine (Primary for OpenType Khmer Shaping)
+        # Method 1: Playwright HTML5 Engine with Embedded Base64 TTF Fonts
         if use_playwright and async_playwright is not None:
             try:
                 logo_b64 = self._get_logo_b64()
+                battambang_b64 = self._get_font_b64("Battambang-Regular.ttf")
+                moul_b64 = self._get_font_b64("Moul-Regular.ttf")
+
                 logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 36px; width: auto; vertical-align: middle; border-radius: 6px;" />' if logo_b64 else '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
+
+                font_faces = ""
+                if battambang_b64:
+                    font_faces += f"""
+@font-face {{
+    font-family: 'Battambang';
+    src: url('data:font/ttf;charset=utf-8;base64,{battambang_b64}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}}"""
+                if moul_b64:
+                    font_faces += f"""
+@font-face {{
+    font-family: 'Moul';
+    src: url('data:font/ttf;charset=utf-8;base64,{moul_b64}') format('truetype');
+    font-weight: normal;
+    font-style: normal;
+}}"""
 
                 html_content = f"""<!DOCTYPE html>
 <html>
 <head>
 <meta charset='UTF-8'>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Battambang:wght@400;700&family=Moul&family=Outfit:wght@600;800&display=swap');
+{font_faces}
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&display=swap');
 body {{
     margin: 0;
     padding: 0;
