@@ -343,12 +343,13 @@ class SuperBrainAIRewriter:
 
     def _build_telegram_markdown(self, status: str, headline: str, body: str, impact: str, score: float, source: str, is_leak: bool) -> str:
         from translator import clean_khmer_spaces
+        from khmer_auditor import khmer_auditor
 
         leak_banner = "\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
 
-        headline_clean = clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()
-        body_clean = clean_khmer_spaces(body)
-        impact_clean = clean_khmer_spaces(impact or "")
+        headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip())
+        body_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(body))
+        impact_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(impact or ""))
         impact_lines = [line.strip() for line in impact_clean.split("\n") if line.strip()]
         formatted_impact = "\n".join([f"• {line}" if not line.startswith("•") else line for line in impact_lines])
 
