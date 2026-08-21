@@ -23,21 +23,24 @@ class FacebookPublisher:
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
-        Publish post to Facebook Page.
-        Paced by Super Smart Rate Governor (15-min interval) for 100% Meta Policy Compliance.
+        Non-blocking Facebook Page Publisher.
+        Spawns background task so Telegram posts immediately while Facebook is paced by 15-min Governor.
         """
+        asyncio.create_task(self._publish_with_pacing(caption, image_path))
+        return True
+
+    async def _publish_with_pacing(self, caption: str, image_path: Optional[str] = None):
+        import os
+        import time
         logger.info(f"[FACEBOOK PUBLISHER] Preparing to publish Flash News to Page ID: {self.page_id}...")
 
         if self.access_token in ("MOCK_FB_PAGE_ACCESS_TOKEN", "your_long_lived_facebook_page_access_token", ""):
-            # Test / Simulation Mode
             logger.info("[FACEBOOK SIMULATION] Post successfully published to Facebook Page!")
             if image_path:
                 logger.info(f"[FACEBOOK SIMULATION] Attached Banner Image: {image_path}")
             logger.info(f"\n--- FACEBOOK POST PREVIEW ---\n{caption}\n-----------------------------")
-            return True
+            return
 
-        # 🛡️ Super Smart Rate Governor: Ensure min 15 mins between Facebook posts for 100% Meta Policy Compliance
-        import time
         now = time.time()
         time_since_last = now - self.last_post_time
         if self.last_post_time > 0 and time_since_last < self.min_post_interval:
@@ -47,8 +50,7 @@ class FacebookPublisher:
 
         try:
             async with aiohttp.ClientSession() as session:
-                if image_path:
-                    # Photo Post API
+                if image_path and os.path.exists(image_path):
                     url = f"{self.graph_url}/photos"
                     data = aiohttp.FormData()
                     data.add_field('caption', caption)
@@ -57,7 +59,6 @@ class FacebookPublisher:
                     async with session.post(url, data=data) as resp:
                         res_json = await resp.json()
                 else:
-                    # Standard Feed Post API
                     url = f"{self.graph_url}/feed"
                     payload = {
                         "message": caption,
@@ -68,26 +69,18 @@ class FacebookPublisher:
 
                 if resp.status == 200 and "id" in res_json:
                     self.last_post_time = time.time()
-                    logger.info(f"Successfully published to Facebook Page! Post ID: {res_json.get('id')}")
-                    return True
+                    logger.info(f"✨ [FACEBOOK SUCCESS] Post published to Facebook Page! Post ID: {res_json.get('id')}")
                 else:
                     error_obj = res_json.get("error", {})
                     error_msg = f"Graph API Error (HTTP {resp.status}): {error_obj.get('message', res_json)}"
                     logger.error(error_msg)
-                    
-                    # Suppress alert spam for temporary Facebook posting rate limit
                     is_rate_limit = "We limit how often" in str(error_msg) or error_obj.get("code") in (368, 17, 4)
                     if not is_rate_limit:
                         await self.send_telegram_admin_alert(error_msg, caption)
-                    else:
-                        logger.warning("Facebook temporary posting rate limit active. Will retry on next news cycle.")
-                    return False
-
         except Exception as e:
-            error_msg = f"Facebook Graph API Connection Exception: {str(e)}"
+            error_msg = f"Facebook Graph API Exception: {str(e)}"
             logger.error(error_msg)
             await self.send_telegram_admin_alert(error_msg, caption)
-            return False
 
     async def send_telegram_admin_alert(self, error_details: str, failed_payload: str):
         """
