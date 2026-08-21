@@ -1,0 +1,89 @@
+====================================================================================================
+               🏛️ APEX SUPER BRAIN AI SYSTEM — CFA FLASH FEED MASTER MANUAL 🏛️
+====================================================================================================
+កាលបរិច្ឆេទអាប់ដេតចុងក្រោយ ៖ ថ្ងៃទី ២១ ខែ សីហា ឆ្នាំ ២០២៦
+កំណែប្រែ ៖ APEX SUPER BRAIN AI ENGINE V4.0 (FULL PRODUCTION RELEASE)
+
+----------------------------------------------------------------------------------------------------
+១. 🏛️ ស្ថាបត្យកម្មប្រព័ន្ធសរុប (SUPER SMART SYSTEM ARCHITECTURE)
+----------------------------------------------------------------------------------------------------
+ប្រព័ន្ធ CFA Flash Feed គឺជាស្ថាបត្យកម្ម AI ព័ត៌មានទាន់ហេតុការណ៍ និងវិភាគមតិមហាជនដំបូងគេនៅកម្ពុជា (Super Smart Social Listening, Public Sentiment & Multiparty Democratic AI Engine) ដែលដំណើរការស្វ័យប្រវត្ត ២៤ ម៉ោង / ៧ ថ្ងៃ / ៣៦៥ ថ្ងៃ លើ Google Cloud VM Debian Environment.
+
+ស្ថាបត្យកម្មប្រព័ន្ធត្រូវបានបែងចែកជា ៤ ដំណាក់កាលចម្បង (4-Stage Autonomous Pipeline) ៖
+  [ 📡 ដំណាក់កាលទី ១ ] ៖ Real-Time Data Ingestion & Zero-Shot Classification Engine
+  [ 🧠 ដំណាក់កាលទី ២ ] ៖ Super Brain AI Rewriting, Public Sentiment & Political Philosophy Engine
+  [ 🎨 ដំណាក់កាលទី ៣ ] ៖ Dedicated 4K HD Graphic Banner Engine & Master Khmer Text Audition
+  [ 🚀 ដំណាក់កាលទី ៤ ] ៖ Dual Auto-Publishing (Facebook 15-Min Rate Governor & Telegram VIP Channel)
+
+----------------------------------------------------------------------------------------------------
+២. 📡 DATA SOURCES & REAL-TIME INGESTION ENGINE (`scraper.py` & `news_filter.py`)
+----------------------------------------------------------------------------------------------------
+- Scanning Multi-Threads ៖ ស្កេនប្រភពព័ត៌មានផ្លូវការ RSS Feed, Facebook Pages, X, និង Telegram Channels ជារៀងរាល់ ៦០ វិនាទី។
+- Zero-Shot Classifier ៖ រែកចម្រាញ់ព័ត៌មានក្លែងក្លាយ (Fake News Filter) និងកំណត់កម្រិតភាពជឿជាក់ (Credibility Score) ស្វ័យប្រវត្តិ។
+- Tier Standard ៖
+    • Tier 1 ៖ ព័ត៌មានច្បាស់ការណ៍ផ្លូវការ (Verified Flash News)
+    • Tier 2 ៖ ព័ត៌មានពីសារព័ត៌មានធំៗ (Mainstream Media)
+    • Tier 3 ៖ ព័ត៌មានមិនទាន់បដិសេធ/ leak (Unverified Leak with Warning Banner)
+
+----------------------------------------------------------------------------------------------------
+៣. 🧠 SUPER BRAIN AI ENGINE & LENGTH OPTIMIZATION (`ai_rewriter.py`)
+----------------------------------------------------------------------------------------------------
+- Gemini 3.6 Flash LLM Backend ៖ បង្កើត និងសរសេរព័ត៌មានឡើងវិញជាភាសាខ្មែរផ្លូវការ ៤ កថាខណ្ឌ ៖
+    • កថាខណ្ឌទី ១ ៖ រាយការណ៍ហេតុការណ៍ទាន់ហេតុការណ៍ (Dateline ៖ រាជធានីភ្នំពេញ)
+    • កថាខណ្ឌទី ២ ៖ ការវិភាគទស្សនៈវិទ្យាសាស្ត្រនយោបាយ / មតិមហាជន / ទស្សនៈវិជ្ជាដឹកនាំរដ្ឋ
+    • កថាខណ្ឌទី ៣ ៖ ការការពាររដ្ឋធម្មនុញ្ញ មាត្រា ៥១ (លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស, នីតិរដ្ឋ, សន្តិភាព)
+    • កថាខណ្ឌទី ៤ ៖ សេចក្តីសន្និដ្ឋានបែបសារព័ត៌មានអាជីព បញ្ចប់ដោយសញ្ញា «៕»
+- Single-Message Telegram Caption Optimization ៖ កំណត់ប្រវែងអត្ថបទត្រឹមក្រោម ៩៥០ តួអក្សរ (១២០-១៥០ ពាក្យ) ធានាថាបាញ់ផ្ញើភ្ជាប់ជាមួយ Banner ក្នុង ១ សារ Telegram តែមួយគត់ (`sendPhoto` Caption Limit Compliance)!
+
+----------------------------------------------------------------------------------------------------
+៤. 🎨 DEDICATED 4K HD GRAPHIC BANNER ENGINE (`banner_engine.py`)
+----------------------------------------------------------------------------------------------------
+- Playwright Chromium OpenType Khmer Engine ៖ បង្កើតរូបភាព Banner 1200x630 JPEG ជាមួយពុម្ពអក្សរខ្មែរ Google Fonts (Battambang, Moul) តាមរៀប OpenType HarfBuzz Shaping.
+- Synchronized PIL/Pillow Fallback Engine ៖ ប្រសិនបើ Playwright Timeout លើ Linux Server ប្រព័ន្ធស្វ័យប្រវត្តិនឹងប្តូរទៅ PIL Fallback ដែលមាន Branding ដូចគ្នា ១០០% ៖
+    🔴 Badge Header ៖ LOGO.png + សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA
+    💻 Footer Left ៖ APEX SUPER BRAIN AI SYSTEM
+    ⚡ Watermark Right ៖ @CFAflashBot | REAL-TIME FLASH FEED (អក្សរពណ៌ខៀវ Neon #38bdf8)
+
+----------------------------------------------------------------------------------------------------
+៥. 🏛️ POLITICAL PHILOSOPHY & MULTIPARTY DEMOCRATIC ENGINE (`political_analyzer.py`)
+----------------------------------------------------------------------------------------------------
+- Political Figures Recognition ៖ ស្កេន និងសម្គាល់ឥស្សរជននយោបាយ និងអ្នកដឹកនាំរដ្ឋ (សម្តេចធិបតី ហ៊ុន ម៉ាណែត, សម្តេចតេជោ ហ៊ុន សែន, សម្តេច ឃួន សុដារី, ឧបនាយករដ្ឋមន្ត្រី, រដ្ឋមន្ត្រី) និងថ្នាក់ដឹកនាំគណបក្សនយោបាយផ្លូវការទាំងអស់នៅកម្ពុជា (CPP, FUNCINPEC, Khmer Will, National Power, GDP, Beehive)។
+- Constructive Opposition & Democratic Pluralism ៖ បញ្ចូលទ្រឹស្តីវិទ្យាសាស្ត្រនយោបាយរបស់ Alexis de Tocqueville, John Stuart Mill, Cicero, Marcus Aurelius, Montesquieu, និង John Locke។
+- Constitutional Defense ៖ លើកកម្ពស់ **មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា** («ព្រះរាជាណាចក្រកម្ពុជា អនុវត្តគោលការណ៍លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស...»)។
+
+----------------------------------------------------------------------------------------------------
+៦. 💬 SOCIAL LISTENING & PUBLIC SENTIMENT AI ENGINE (`sentiment_analyzer.py`)
+----------------------------------------------------------------------------------------------------
+- Engagement Radar Velocity Score ៖
+    Score = (0.5 * ΔComments) + (0.3 * ΔShares) + (0.2 * ΔReactions) / ΔTime (mins)
+    ( Trending Score >= 5.0 ចាត់ថ្នាក់ជា Breaking Viral Hot Post )
+- Public Opinion Clustering ៖ បែងចែកភាគរយមតិមហាជន ៖
+    • ភាគរយគាំទ្រ (Support %)
+    • ភាគរយបារម្ភ (Concern %)
+    • ភាគរយសំណើស្ថាបនា (Proposal %)
+    • ស្រង់យកមតិតំណាងប្រជាពលរដ្ឋដោយរក្សាការសម្ងាត់ (Privacy-Sanitized Citizen Quotes)
+
+----------------------------------------------------------------------------------------------------
+៧. 🛡️ MASTER KHMER TEXTS DEEPLY AUDITION ENGINE (`khmer_auditor.py`)
+----------------------------------------------------------------------------------------------------
+- Thai Script Purifier ៖ ប្រើប្រាស់ Regex Engine `re.compile(r'[\u0e00-\u0e7f]+')` ស្កេន និងសម្អាត/លុបចោលរាល់តួអក្សរថៃដែលជ្រុះមកពីប្រភពដើមចោលស្វ័យប្រវត្តិ ១០០% មុនពេលបាញ់ចេញ!
+- Khmer Grammar & Punctuation Sanitizer ៖ កែសម្រួលសញ្ញាខណ្ឌខ្មែរផ្លូវការ `៖`, `។`, `៕` និងលុបចោលចន្លោះឃ្លាស្ទួន (Zero-Width Space & Redundant Whitespace)។
+
+----------------------------------------------------------------------------------------------------
+៨. 🚀 DUAL AUTO-PUBLISHING ENGINE & FOOTNOTE SIGNATURE
+----------------------------------------------------------------------------------------------------
+- Facebook Rate Governor (`facebook_publisher.py`) ៖ កំណត់ចន្លោះពេលបោះពុម្ពផ្សាយយ៉ាងតិច ១៥ នាទីម្តង (`min_post_interval = 900` វិនាទី) ការពារ Spam Block ពី Meta 100%!
+- Telegram Broadcaster Engine (`telegram_broadcaster.py`) ៖ ផ្ញើសារ `sendPhoto` ត្រឹម ១ សារប៉ុណ្ណោះ ជាមួយស្វ័យការពារ `Plain Text Retry Fallback` (ធានាថារូបភាព Banner ត្រូវតែផ្ញើចេញភ្ជាប់ជាមួយអត្ថបទព័ត៌មាន ១០០% ជានិច្ច)។
+- Standard Footnote Signature ៖
+    🔍 ព័ត៌មាននេះនាំមកជូនដោយ៖
+    • បច្ចេកទេស: ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain
+    • ផលិតដោយ៖ សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA
+    • Telegram: CFA Flash Feed | @CFAflashBot
+    • ADMIN: @Sokpheatonsai
+
+----------------------------------------------------------------------------------------------------
+៩. ⚡ PERSISTENT DEDUPLICATION & INTERACTIVE BOT (`vector_store.py` & `bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- Deduplication Persistent Disk Caching ៖ រក្សាទុក News Content Hashes ក្នុង `seen_hashes.json` ការពារព័ត៌មានស្ទួនពេល Server Restart.
+- Telegram Interactive Bot Thread ៖ ឆ្លើយតបពាក្យបញ្ជា `/status`, `/start` ក្នុងរយៈពេល <10ms!
+====================================================================================================
