@@ -281,7 +281,9 @@ class SuperSmartTelegramBot:
             await self.send_message(chat_id, report_text)
         except Exception as e:
             logger.error(f"Live scan report failed: {e}")
-            await self.send_message(chat_id, f"⚠    async def handle_update(self, update: dict):
+            await self.send_message(chat_id, f"⚠️ *ការស្កេនបានបញ្ចប់ ៖ {e}*")
+
+    async def handle_update(self, update: dict):
         """Processes single update payload from Telegram API."""
         from security_sentinel import security_sentinel
         from facebook_url_extractor import fb_url_extractor
@@ -435,17 +437,6 @@ class SuperSmartTelegramBot:
                     "• Admin: @Sokpheatonsai"
                 )
                 await self.send_message(chat_id, help_text)
-            else:
-                await self.send_message(chat_id, self.get_welcome_text())ឃើញ បានបញ្ជាក់ឱ្យដឹងថា ប្រតិបត្តិការចម្រុះនេះគឺជាជំហានដ៏សំខាន់មួយក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្មនានា។\n\n"
-                    "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
-                    "ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕\n\n"
-                    "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
-                    "• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
-                    "• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
-                    "• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
-                    "• ADMIN: *@Sokpheatonsai*"
-                )
-                await self.send_message(chat_id, latest_text)
             elif data == "cmd_status":
                 await self.send_message(chat_id, self.get_vps_status_report())
             elif data == "cmd_report":
