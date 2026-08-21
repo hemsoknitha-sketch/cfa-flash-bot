@@ -89,7 +89,6 @@ class BannerEngine:
 <meta charset='UTF-8'>
 <style>
 {font_faces}
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@600;800&display=swap');
 body {{
     margin: 0;
     padding: 0;
@@ -115,7 +114,7 @@ body {{
 .badge {{
     background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
     color: white;
-    font-family: 'Battambang', 'Outfit', sans-serif;
+    font-family: 'Battambang', sans-serif;
     font-size: 24px;
     font-weight: 700;
     padding: 10px 24px;
@@ -166,7 +165,7 @@ body {{
 }}
 
 .brand-left {{
-    font-family: 'Outfit', sans-serif;
+    font-family: sans-serif;
     font-size: 20px;
     font-weight: 800;
     letter-spacing: 2px;
@@ -175,7 +174,7 @@ body {{
 }}
 
 .watermark-right {{
-    font-family: 'Outfit', sans-serif;
+    font-family: sans-serif;
     font-size: 20px;
     font-weight: 700;
     color: #38bdf8;
@@ -208,7 +207,7 @@ body {{
                 async with async_playwright() as p:
                     browser = await p.chromium.launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'])
                     page = await browser.new_page(viewport={"width": 1200, "height": 630})
-                    await page.set_content(html_content, wait_until="networkidle")
+                    await page.set_content(html_content, wait_until="domcontentloaded")
                     await page.screenshot(path=image_filename, type="jpeg", quality=95)
                     await browser.close()
                 logger.info(f"✨ [PLAYWRIGHT BANNER READY] Asset prepared: {image_filename}")
