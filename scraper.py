@@ -20,31 +20,39 @@ class RawNewsItem(BaseModel):
 
 class IngestionEngine:
     def __init__(self, rss_urls: Optional[List[str]] = None):
-        self.rss_urls = rss_urls or [
-            "https://www.khmertimeskh.com/feed/",
-            "https://www.phnompenhpost.com/rss.xml",
-            "https://feeds.a.dj.com/rss/RSSWorldNews.xml",
-            "https://rss.nytimes.com/services/xml/rss/nyt/World.xml"
-        ]
+        from national_ingestion_registry import get_all_national_feeds
+        self.national_feeds = get_all_national_feeds()
+        self.rss_urls = rss_urls or [f["url"] for f in self.national_feeds]
 
     def fetch_from_rss(self) -> List[RawNewsItem]:
-        """Fetch latest raw news items from configured RSS feeds."""
+        """Fetch latest raw news items from configured National & Global feeds."""
+        from security_sentinel import security_sentinel
         news_items = []
-        for url in self.rss_urls:
+        for feed_info in self.national_feeds:
+            url = feed_info["url"]
+            source_name = feed_info["name"]
+            tier = feed_info.get("tier", 1)
             try:
-                logger.info(f"Scanning RSS Feed: {url}")
-                feed = feedparser.parse(url)
+                logger.info(f"Scanning Institutional Feed [{source_name}]: {url}")
+                feed = feedparser.parse(url, request_headers={"User-Agent": "CFA-Flash-Bot/4.2"})
                 for entry in feed.entries[:5]:  # Take latest 5 items per feed
+                    raw_title = entry.get("title", "No Title")
+                    raw_content = entry.get("summary", entry.get("title", ""))
+                    
+                    # Layer 2 Input Sanitization (XSS & SQL Injection protection)
+                    clean_title = security_sentinel.sanitize_input_payload(raw_title)
+                    clean_content = security_sentinel.sanitize_input_payload(raw_content)
+
                     news_items.append(RawNewsItem(
-                        title=entry.get("title", "No Title"),
-                        content=entry.get("summary", entry.get("title", "")),
-                        source=feed.feed.get("title", "RSS Source"),
+                        title=clean_title,
+                        content=clean_content,
+                        source=source_name,
                         url=entry.get("link", ""),
-                        source_tier=1,
+                        source_tier=tier,
                         is_unverified=False
                     ))
             except Exception as e:
-                logger.error(f"Error fetching RSS {url}: {e}")
+                logger.error(f"Error fetching RSS [{source_name}] {url}: {e}")
         return news_items
 
     def generate_mock_breaking_news(self) -> List[RawNewsItem]:

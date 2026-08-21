@@ -107,4 +107,23 @@ flowchart TD
 - Layer 3 (Dynamic Content Hash Deduplication) ៖ ចងចាំ Content Hash តាមរយៈ SHA-256 Vault ការពារការបាញ់ DoS/Replay Attack។
 - Layer 4 (Meta Graph API 15-Min Rate Governor) ៖ គ្រប់គ្រងចន្លោះពេលបោះពុម្ពផ្សាយយ៉ាងតិច ១៥ នាទីម្តង ធានាការគោរព Meta Anti-Spam Policy 100% គ្មានថ្ងៃត្រូវបិទ Page។
 - Layer 5 (Systemd Isolation & API Key Vault Masking) ៖ ការពារ API Key មិនឱ្យជ្រុះចូល Log (`8153...****`) និងកំណត់ `Systemd Auto-Recovery` រស់ឡើងវិញស្វ័យប្រវត្តិក្នង ៥ វិនាទី!
+
+----------------------------------------------------------------------------------------------------
+១១. 🌐 ស្ថាបត្យកម្មពង្រីកប្រភពព័ត៌មានជាតិ ២៥ ខេត្តក្រុង & ស្ថាប័នរដ្ឋ (NATIONAL INSTITUTIONAL INGESTION REGISTRY) (`national_ingestion_registry.py`)
+----------------------------------------------------------------------------------------------------
+ដើមបីធានាថាប្រព័ន្ធមានព័ត៌មានថ្មីៗ Update រហូតពេញ ២៤/៧ គ្មានពេលស្ងាត់ និងគ្មានព័ត៌មានច្រំដែល ប្រព័ន្ធ CFA Flash Feed ត្រូវបានពង្រីកប្រភពស្កេនគ្រប់ជ្រុងជ្រោយ (National Registry Coverage) ៖
+
+```mermaid
+flowchart TD
+    A["🏛️ National Ingestion Registry (50+ Feeds)"] --> B["📡 Scraper Engine (10s Timeout & Date Parsing)"]
+    B --> C["🛡️ Dynamic SHA-256 Hash Deduplication (0% Duplicates)"]
+    C --> D["🧠 Gemini 3.6 Flash Rewriter (Dateline & Length <950 chars)"]
+    D --> E["📦 15-Min Paced Facebook Queue (1 Post / 15 Mins)"]
+    E --> F["🚀 Telegram VIP Broadcast & Facebook Auto-Publishing"]
+```
+
+- **ស្ថាប័នរដ្ឋ & ក្រសួង/មន្ទីរ ៖** AKP (Agence Kampuchea Presse ព័ត៌មានរដ្ឋផ្លូវការ), ក្រសួងព័ត៌មាន, ក្រសួងការបរទេស, អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU), រដ្ឋបាលរាជធានី-ខេត្តទាំង ២៥ (ភ្នំពេញ, សៀមរាប, ព្រះសីហនុ, បាត់ដំបង...), តុលាការ និងសាលាដំបូង។
+- **អង្គការ សមាគម សិទ្ធិមនុស្ស & យុត្តិធម៌សង្គម ៖** Transparency International Cambodia (គណនេយ្យភាពសង្គម & ប្រឆាំងអំពើពុករលួយ), CCHR, LICADHO, ADHOC, គណៈកម្មាធិការសិទ្ធិមនុស្សកម្ពុជា។
+- **សារព័ត៌មានធំៗ ជាតិ & អន្តរជាតិ ៖** Khmer Times, Phnom Penh Post, ThmeyThmey, Fresh News, DAP News, CamboJA News, RFI Khmer, VOA Khmer, Reuters World, New York Times World។
+- **24/7 Continuous Feed Stream & 15-Min Facebook Pacing ៖** ស្កេន ៥០+ Feeds ជារៀងរាល់ ៦០ វិនាទី ច្រោះ SHA-256 Content Hash មិនឱ្យមានព័ត៌មានស្ទួនស្បត់ និងរៀបចំ Queue បោះពុម្ពផ្សាយចូល Facebook Page រៀងរាល់ ១៥ នាទីម្តង ឥតចន្លោះ!
 ====================================================================================================
