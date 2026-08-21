@@ -40,6 +40,7 @@ class SuperSmartTelegramBot:
             {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
             {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
             {"command": "report", "description": "📊 របាយការណ៍ស្កេន 16 Institutional Feeds"},
+            {"command": "clearcache", "description": "🧹 សម្អាតទិន្នន័យព័ត៌មានចាស់ៗទាំងអស់"},
             {"command": "backup", "description": "📦 ទាញយក ZIP Backup ប្រព័ន្ធ"},
             {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
             {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់ & Support"}
@@ -344,11 +345,26 @@ class SuperSmartTelegramBot:
                 else:
                     await self.send_message(chat_id, "❌ *បរាជ័យក្នុងការផ្ញើ Backup! សូមពិនិត្យមើល Log។*")
 
-            elif text.startswith("/purge") or text.startswith("/clearcache"):
-                from vector_store import VectorDeduplicator
-                dedup = VectorDeduplicator()
-                count = dedup.clear_news_cache()
-                await self.send_message(chat_id, f"🧹 *សម្អាតទិន្នន័យព័ត៌មានចាស់ៗចំនួន `{count}` items រួចរាល់ដោយជោគជ័យ!*\n\n🔒 *ព័ត៌មាន Admin/VIP, API Keys និង Telegram Config នៅរក្សាទុក ១០០% សុវត្ថិភាពខ្ពស់បំផុត!*")
+            elif text.startswith("/clearcache"):
+                from main import pipeline_engine
+                count = pipeline_engine.dedup_store.clear_news_cache()
+                
+                # Clean up any leftover temporary banner images
+                import os, glob
+                base_dir = os.path.dirname(os.path.abspath(__file__))
+                temp_banners = glob.glob(os.path.join(base_dir, "banner_*.jpg"))
+                for b in temp_banners:
+                    try:
+                        os.remove(b)
+                    except Exception:
+                        pass
+
+                await self.send_message(
+                    chat_id,
+                    f"🧹 *សម្អាតទិន្នន័យព័ត៌មានចាស់ៗចំនួន `{count}` items និង Cache ទាំងអស់ចោលរួចរាល់ ១០០%!*\n\n"
+                    "⚡ *ប្រព័ន្ធស្កេននឹងមិនផ្ញើព័ត៌មានច្រំដែលៗ ឬស្ទួន ពេលរត់ស្កេន ឬពេល Restart / New Update ឡើយ!*\n"
+                    "🔒 *ព័ត៌មាន Admin/VIP, API Keys និង Telegram Config នៅរក្សាទុក ១០០% សុវត្ថិភាពខ្ពស់បំផុត!*"
+                )
 
             elif text.startswith("/ping"):
                 latency_ms = int((time.time() - start_time) * 1000)
