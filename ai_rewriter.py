@@ -92,6 +92,7 @@ class SuperBrainAIRewriter:
 
         # 2. International Capitals & Cities
         intl_locations = [
+            ("ហុងកុង", "hong kong", "ហុងកុង៖"),
             ("វ៉ាស៊ីនតោន", "washington", "ទីក្រុងវ៉ាស៊ីនតោន៖"),
             ("ហ្សឺណែវ", "geneva", "ទីក្រុងហ្សឺណែវ៖"),
             ("បេកាំង", "beijing", "ទីក្រុងបេកាំង៖"),

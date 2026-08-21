@@ -101,6 +101,10 @@ class KhmerLanguageAuditor:
         clean_body = self.strip_thai_and_foreign_scripts(body)
         clean_body = self.sanitize_khmer_spelling_and_punctuation(clean_body)
 
+        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖', 'ហុងកុង៖ ហុងកុង៖' -> 'ហុងកុង៖')
+        clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖\s*((?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖)', r'\1', clean_body)
+        clean_body = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', clean_body)
+
         # Split into paragraphs
         paragraphs = [p.strip() for p in clean_body.split('\n') if p.strip()]
         
@@ -109,11 +113,16 @@ class KhmerLanguageAuditor:
 
         formatted_paragraphs = []
         for i, p in enumerate(paragraphs):
+            # Clean duplicate location prefix on paragraph 1
+            if i == 0:
+                p = re.sub(r'^(?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖\s*((?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖)', r'\1', p)
+                p = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', p)
+
             # Ensure paragraph ends with proper Khmer punctuation
             if not p.endswith('។') and not p.endswith('៕'):
                 p += '។'
             
-            # If it's the last paragraph, change final '។' to '៕' (Khmer final closing symbol)
+            # If it's the last paragraph, change final '។' to '<ctrl42>' (Khmer final closing symbol)
             if i == len(paragraphs) - 1:
                 if p.endswith('។'):
                     p = p[:-1] + '៕'
