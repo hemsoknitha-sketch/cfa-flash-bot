@@ -155,9 +155,9 @@ flowchart TD
 - **៦. Mandatory Footnote Signature ៖** បិទសម្គាល់អត្ថបទផ្លូវការ ៖ `---------------------------------- 🏛️ CFA Flash Feed — សម្ពន្ធហ្វេសប៊ុកកម្ពុជា` នៅរាល់អត្ថបទទាំងអស់!
 
 ----------------------------------------------------------------------------------------------------
-១៤. 📘 DUAL RSS + META GRAPH API FACEBOOK PAGE LIVE INGESTION ENGINE (`scraper.py`)
+១៤. 📘 EXCLUSIVE FACEBOOK PAGE AUTO-PUBLISHING DESTINATION & INSTITUTIONAL INGESTION POLICY (`facebook_publisher.py` & `scraper.py`)
 ----------------------------------------------------------------------------------------------------
-- **Meta Graph API Page Ingestion (`fetch_from_facebook_pages_async`) ៖** ចូលទៅទាញយក Post ថ្មីៗផ្លូវការចេញពី Facebook Page របស់ក្រសួង/ស្ថាប័ន ឬ CFA Page ដោយផ្ទាល់តាមរយៈ Meta Graph API (`v19.0/{page_id}/posts`)។
-- **Parallel Multi-Source Fusion ៖** ស្កេន ១៦ Feeds ថ្នាក់ជាតិ/អន្តរជាតិ + Facebook Pages ក្នុងពេលដំណាលគ្នា ក្នុងរយៈពេលត្រឹម <5.3 វិនាទី!
-- **Super Brain AI Transformation ៖** រាល់ Post ផ្លូវការដែលទាញចេញពី Facebook Page ត្រូវបញ្ជូនចូល **Super Brain AI Rewriter** បង្កើតជាអត្ថបទព័ត៌មានផ្លូវការ ៤ កថាខណ្ឌ (មាត្រា ៥១) ជាមួយ Banner 4K HD និងបោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅ Telegram Channel & Facebook Page!
+- **Strict Destination Output Scoping ៖** Facebook Page «សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA» (តាមរយៈ `FB_PAGE_ID` & `FB_PAGE_ACCESS_TOKEN`) ត្រូវបានកំណត់យ៉ាងម៉ឺងម៉ាត់ជា **ប្រព័ន្ធបោះពុម្ពផ្សាយចេញតែមួយមុខគត់ (Output Destination Only)**។
+- **0% Self-Ingestion Rule ៖** ដាច់ខាតមិនទាញយក ឬអានមាតិកាចេញពី Facebook Page មកសរសេរព័ត៌មានឡើងវិញឡើយ ដើម្បីការពារ ១០០% មិនឱ្យមានការសរសេរច្រំដែល ឬទាក់ទិន Loop ព័ត៌មានរបស់ខ្លួនឯង។
+- **Pure Institutional Ingestion ៖** ការទាញយកព័ត៌មានរ៉ូ (Raw News Ingestion) ធ្វើឡើងតែលើ ១៦ Institutional RSS Feeds ផ្លូវការ (AKP, MINFO, MFAIC, ACU, TI, CCHR, LICADHO, Khmer Times, Post...) ប៉ុណ្ណោះ!
 ====================================================================================================
