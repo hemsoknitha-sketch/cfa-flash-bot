@@ -23,11 +23,13 @@ def start_interactive_bot_thread():
             time.sleep(3)
 
 async def run_news_ingestion_loop(interval_seconds: int = 60):
-    """Continuous News Ingestion & Publishing Loop."""
+    """Continuous News Ingestion & Publishing Loop with Active Memory Management."""
+    import gc
     logger.info("📡 [NEWS INGESTION LOOP ACTIVE] Real-Time RSS Market Scanning Every 60s...")
     while True:
         try:
             await process_batch_news()
+            gc.collect()  # Release unused objects back to OS memory
         except Exception as e:
             logger.error(f"❌ Error in news processing cycle: {e}")
         await asyncio.sleep(interval_seconds)
