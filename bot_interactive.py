@@ -116,6 +116,22 @@ class SuperSmartTelegramBot:
         except Exception as e:
             logger.error(f"Error sending message to chat {chat_id}: {e}")
 
+    async def delete_message(self, chat_id: int, message_id: int):
+        """Deletes unauthorized media or external non-Facebook URL message via Telegram deleteMessage API."""
+        try:
+            session = await self.get_session()
+            payload = {"chat_id": chat_id, "message_id": message_id}
+            async with session.post(f"{self.api_url}/deleteMessage", json=payload, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                if resp.status == 200:
+                    logger.info(f"🗑️ [MESSAGE DELETED] Chat ID: {chat_id} | Message ID: {message_id}")
+                    return True
+                else:
+                    err_res = await resp.text()
+                    logger.warning(f"Telegram deleteMessage non-200 ({resp.status}): {err_res}")
+        except Exception as e:
+            logger.error(f"Error deleting message {message_id} in chat {chat_id}: {e}")
+        return False
+
     async def answer_callback_query(self, callback_query_id: str, text: str = ""):
         """Acknowledges callback query instantly to dismiss UI spinner."""
         try:
@@ -246,15 +262,49 @@ class SuperSmartTelegramBot:
         """Processes single update payload from Telegram API cleanly with 100% crash protection."""
         try:
             from security_sentinel import security_sentinel
-            from facebook_url_extractor import fb_url_extractor
             start_time = time.time()
             
             # 1. Handle Text Messages
             if "message" in update:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
+                message_id = msg.get("message_id")
                 raw_text = msg.get("text", "").strip()
-                
+
+                # 1. Security Gatekeeper: Check for unauthorized media attachments (photo, video, document, etc.)
+                MEDIA_KEYS = ["photo", "video", "document", "voice", "audio", "animation", "sticker", "video_note"]
+                has_media = any(key in msg for key in MEDIA_KEYS)
+
+                if has_media:
+                    logger.warning(f"🛡️ [SECURITY PURGE] Media detected from Chat ID: {chat_id}. Deleting message {message_id}...")
+                    if message_id:
+                        await self.delete_message(chat_id, message_id)
+                    await self.send_message(
+                        chat_id,
+                        "🛡️ *[SECURITY GATEKEEPER ៖ សារត្រូវបានលុបចោលដោយស្វ័យប្រវត្តិ]*\n\n"
+                        "ប្រព័ន្ធសុវត្ថិភាពបានលុបសារនេះចោលភ្លាមៗ ដោយសារប្រព័ន្ធអនុញ្ញាតតែអត្ថបទ (Text) និង URL Facebook ផ្លូវការប៉ុណ្ណោះ។\n\n"
+                        "💡 *លោកអ្នកអាចផ្ញើអត្ថបទសំណួរ (Text) ឬ URL Facebook ផ្លូវការ ដើម្បីឱ្យប្រព័ន្ធ AI ជួយវិភាគបាន 24/7!*"
+                    )
+                    return
+
+                # 2. Security Gatekeeper: Check for non-Facebook external URLs
+                import re
+                urls = re.findall(r'https?://[^\s]+', raw_text)
+                if urls:
+                    fb_domain_pattern = re.compile(r'https?://(?:www\.|m\.|web\.|mobile\.)?(?:facebook\.com|fb\.watch|fb\.com|fb\.me)', re.IGNORECASE)
+                    non_fb_urls = [u for u in urls if not fb_domain_pattern.search(u)]
+                    if non_fb_urls:
+                        logger.warning(f"🛡️ [SECURITY PURGE] Unauthorized non-Facebook URL detected ({non_fb_urls}). Deleting message {message_id}...")
+                        if message_id:
+                            await self.delete_message(chat_id, message_id)
+                        await self.send_message(
+                            chat_id,
+                            "🛡️ *[SECURITY GATEKEEPER ៖ សារត្រូវបានលុបចោលដោយស្វ័យប្រវត្តិ]*\n\n"
+                            "ប្រព័ន្ធសុវត្ថិភាពបានលុបសារនេះចោលភ្លាមៗ ដោយសារប្រព័ន្ធអនុញ្ញាតតែតំណភ្ជាប់ (URL) របស់ Facebook ផ្លូវការប៉ុណ្ណោះ។\n\n"
+                            "💡 *សូមផ្ញើតែ URL ផ្លូវការរបស់ Facebook (ឧទាហរណ៍ ៖ facebook.com/...) ប៉ុណ្ណោះ!*"
+                        )
+                        return
+
                 # Sanitize username suffix e.g. /laws@CFAflashBot -> /laws
                 if raw_text.startswith("/") and "@" in raw_text:
                     parts = raw_text.split(" ", 1)
@@ -272,7 +322,7 @@ class SuperSmartTelegramBot:
                     "/status", "/report", "/scan", "/clearcache", "/backup"
                 ]
 
-                is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES)
+                is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES) or not text.startswith("/")
 
                 if not is_public_cmd and not security_sentinel.verify_admin_access(chat_id):
                     await self.send_message(
@@ -397,29 +447,19 @@ class SuperSmartTelegramBot:
                             await self.send_message(chat_id, f"⚠️ *រកមិនឃើញកំណត់ត្រាទី {query} ឡើយ! សូមជ្រើសរើសពី [1] ដល់ [{len(records)}]*")
                     elif query:
                         await self.send_message(chat_id, f"🔍 *ប្រព័ន្ធ AI Super Brain កំពុងវិភាគ និងទាញយកកំណត់ត្រាយោធា/ការទូតសម្រាប់ ៖*\n`{query}`...")
-                        answer = await defense_engine.answer_defense_question(query)
-                        await self.send_message(chat_id, answer)
+                        ans = await defense_engine.answer_defense_question(query)
+                        clean_t, clean_b = khmer_auditor.audit_prose_structure(query, ans)
+                        await self.send_message(chat_id, clean_b)
                     else:
                         records = defense_engine.get_border_archives(limit=5)
-                        title_hdr = (
-                            "🛡️ *ប្រព័ន្ធស្រាវជ្រាវ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា និងព្រំដែនកម្ពុជា ៖*\n\n"
-                            "📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
-                        )
-                        body_items = []
+                        msg = "🛡️ *ប្រព័ន្ធស្រាវជ្រាវ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា និងព្រំដែនកម្ពុជា ៖*\n\n📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
                         inline_btns = []
-                        for idx, item in enumerate(records, 1):
-                            clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
-                            body_items.append(
-                                f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n"
-                                f"{clean_t}"
-                            )
-                            inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"arc_{idx-1}"}])
-                        
-                        await self.send_message(
-                            chat_id,
-                            title_hdr + "\n\n".join(body_items),
-                            reply_markup={"inline_keyboard": inline_btns}
-                        )
+                        for idx, r in enumerate(records, 1):
+                            clean_headline = khmer_auditor.audit_headline_purity(r.get('title', ''))
+                            clean_date = khmer_auditor.sanitize_khmer_spelling_and_punctuation(r.get('date', ''))
+                            msg += f"📌 *[{idx}] {clean_date} | {r.get('source_name')}*\n{clean_headline}\n\n"
+                            inline_btns.append([{"text": f"📌 [{idx}] {clean_headline}", "callback_data": f"arc_{idx-1}"}])
+                        await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
 
                 elif text.startswith("/factcheck"):
                     claim = text.replace("/factcheck", "").strip()
