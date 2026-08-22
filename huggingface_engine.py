@@ -51,7 +51,7 @@ class HuggingFacePolymathAI:
 
         for url in self.urls:
             try:
-                response = requests.post(url, headers=self.headers, json=payload, timeout=25)
+                response = requests.post(url, headers=self.headers, json=payload, timeout=6)
                 if response.status_code == 200:
                     res_json = response.json()
                     if isinstance(res_json, list) and len(res_json) > 0:
