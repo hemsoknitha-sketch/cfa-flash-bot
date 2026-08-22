@@ -319,7 +319,26 @@ class SuperSmartTelegramBot:
                 elif text.startswith("/border_archive") or text.startswith("/ask"):
                     query = text.replace("/border_archive", "").replace("/ask", "").strip()
                     from defense_intelligence_engine import defense_engine
-                    if query:
+                    from khmer_auditor import khmer_auditor
+
+                    if query and query.isdigit():
+                        idx = int(query) - 1
+                        records = defense_engine.get_border_archives(limit=10)
+                        if 0 <= idx < len(records):
+                            rec = records[idx]
+                            clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
+                            clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
+                            full_msg = (
+                                f"📜 *សេចក្តីថ្លែងការណ៍ & កំណត់ត្រាយោធា/ការទូតពេញលេញ (កំណត់ត្រាទី {idx+1}) ៖*\n\n"
+                                f"*{clean_title}*\n\n"
+                                f"{clean_body}\n\n"
+                                f"📅 *កាលបរិច្ឆេទ ៖* `{rec.get('date')}`\n"
+                                f"🏛️ *ប្រភពផ្លូវការ ៖* `{rec.get('source_name')}`"
+                            )
+                            await self.send_message(chat_id, full_msg)
+                        else:
+                            await self.send_message(chat_id, f"⚠️ *រកមិនឃើញកំណត់ត្រាទី {query} ឡើយ! សូមជ្រើសរើសពី [1] ដល់ [{len(records)}]*")
+                    elif query:
                         await self.send_message(chat_id, f"🔍 *ប្រព័ន្ធ AI Super Brain កំពុងវិភាគ និងទាញយកកំណត់ត្រាយោធា/ការទូតសម្រាប់ ៖*\n`{query}`...")
                         answer = await defense_engine.answer_defense_question(query)
                         await self.send_message(chat_id, answer)
@@ -330,14 +349,21 @@ class SuperSmartTelegramBot:
                             "📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
                         )
                         body_items = []
-                        from khmer_auditor import khmer_auditor
+                        inline_btns = []
                         for idx, item in enumerate(records, 1):
                             clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
                             body_items.append(
                                 f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n"
                                 f"{clean_t}"
                             )
-                        await self.send_message(chat_id, title_hdr + "\n\n".join(body_items))
+                            short_btn_title = clean_t[:32] + "..." if len(clean_t) > 32 else clean_t
+                            inline_btns.append([{"text": f"📌 [{idx}] {short_btn_title}", "callback_data": f"arc_{idx-1}"}])
+                        
+                        await self.send_message(
+                            chat_id,
+                            title_hdr + "\n\n".join(body_items),
+                            reply_markup={"inline_keyboard": inline_btns}
+                        )
 
                 elif text.startswith("/factcheck"):
                     claim = text.replace("/factcheck", "").strip()
@@ -464,6 +490,27 @@ class SuperSmartTelegramBot:
                     for idx, r in enumerate(records, 1):
                         msg += f"📌 *[{idx}] {r.get('date')} | {r.get('source_name')}*\n*{r.get('title')}*\n\n"
                     await self.send_message(chat_id, msg)
+
+                elif data.startswith("arc_"):
+                    from defense_intelligence_engine import defense_engine
+                    from khmer_auditor import khmer_auditor
+                    try:
+                        idx = int(data.replace("arc_", ""))
+                        records = defense_engine.get_border_archives(limit=10)
+                        if 0 <= idx < len(records):
+                            rec = records[idx]
+                            clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
+                            clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
+                            full_msg = (
+                                f"📜 *សេចក្តីថ្លែងការណ៍ & កំណត់ត្រាយោធា/ការទូតពេញលេញ (កំណត់ត្រាទី {idx+1}) ៖*\n\n"
+                                f"*{clean_title}*\n\n"
+                                f"{clean_body}\n\n"
+                                f"📅 *កាលបរិច្ឆេទ ៖* `{rec.get('date')}`\n"
+                                f"🏛️ *ប្រភពផ្លូវការ ៖* `{rec.get('source_name')}`"
+                            )
+                            await self.send_message(chat_id, full_msg)
+                    except Exception as e:
+                        logger.error(f"Error handling archive callback: {e}")
 
                 elif data == "cmd_factcheck":
                     await self.send_message(
