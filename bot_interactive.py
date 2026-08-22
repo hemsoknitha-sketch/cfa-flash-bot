@@ -356,8 +356,7 @@ class SuperSmartTelegramBot:
                                 f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n"
                                 f"{clean_t}"
                             )
-                            short_btn_title = clean_t[:32] + "..." if len(clean_t) > 32 else clean_t
-                            inline_btns.append([{"text": f"📌 [{idx}] {short_btn_title}", "callback_data": f"arc_{idx-1}"}])
+                            inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"arc_{idx-1}"}])
                         
                         await self.send_message(
                             chat_id,
