@@ -568,7 +568,8 @@ class SuperSmartTelegramBot:
 
                             fb_data = await extract_facebook_url_content(text)
                             extracted_content = fb_data.get("content", text)
-                            page_name = fb_data.get("source_name", "ប្រភព Facebook ផ្លូវការ")
+                            raw_page = fb_data.get("source_name", "")
+                            page_name = "ប្រភព Facebook ផ្លូវការ" if not raw_page or "Facebook Page / User Source" in raw_page else raw_page
 
                             rewriter = SuperBrainAIRewriter()
                             processed = rewriter.process_news(

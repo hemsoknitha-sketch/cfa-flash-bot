@@ -31,7 +31,7 @@ class KhmerLanguageAuditor:
             (r'\s+៕', '៕'),
             (r'៖([^\s])', r'៖ \1'),
             (r'([^\s])។', r'\1។'),
-            (r'(\.|\!|\?)+', '។'),
+            (r'(?<!\d)[\!\?]+|(?<!\d)\.(?!\d)', '។'),
         ]
 
         # Samdach Presh Sangkareach Chuon Nath Khmer Dictionary Orthographic Rules & Typo Fixes
@@ -51,6 +51,9 @@ class KhmerLanguageAuditor:
             (r'ឧត្តមសេនីយ៍\s+ឯក', 'ឧត្តមសេនីយ៍ឯក'),
             (r'ឧត្តមសេនីយ៍\s+ត្រី', 'ឧត្តមសេនីយ៍ត្រី'),
             (r'ប្រធាន\s+ថ្មី', 'ប្រធានថ្មី'),
+            (r'ប្រធាន\s+បទ', 'ប្រធានបទ'),
+            (r'អភិបាល\s+កិច្ច', 'អភិបាលកិច្ច'),
+            (r'ប្រធាន\s+សក្តិ', 'ប្រធានសក្តិ'),
             (r'(\d{2}):\s*(\d{2}):\s*(\d{2})', r'\1:\2:\3'),
         ]
 
@@ -193,8 +196,8 @@ class KhmerLanguageAuditor:
         return clean_headline, purified_body
 
     def audit_source_attribution(self, body: str, source_name: str) -> str:
-        """Verifies explicit source attribution without internal AI terms."""
-        if not source_name or any(k in source_name for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
+        """Verifies explicit source attribution without internal AI terms or raw fallback strings."""
+        if not source_name or "Facebook Page / User Source" in source_name or any(k in source_name for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
         attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}"
@@ -228,7 +231,7 @@ class KhmerLanguageAuditor:
 
         # 3. Source Attribution Audit
         clean_source = source_name
-        if not clean_source or any(k in clean_source for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
+        if not clean_source or "Facebook Page / User Source" in clean_source or any(k in clean_source for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
             clean_source = "ប្រភពព័ត៌មានផ្លូវការ"
 
         clean_body = self.audit_source_attribution(clean_body, clean_source)

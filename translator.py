@@ -54,14 +54,19 @@ def super_smart_khmer_formatter(text: str) -> str:
         # Step 1: Normalize horizontal spaces only (preserve words, do not collapse all spaces blindly)
         curr = re.sub(r'[ \t]+', ' ', curr)
 
-        # Step 2: Ensure proper Honorific Spacing (ឯកឧត្តម, សម្តេច, លោកជំទាវ, នាយឧត្តមសេនីយ៍, សាស្ត្រាចារ្យ, ឧបនាយករដ្ឋមន្ត្រី, រដ្ឋមន្ត្រី, អភិបាល, ឥស្សរជន)
+        # Step 2: Ensure proper Honorific Spacing (ឯកឧត្តម, សម្តេច, លោកជំទាវ, នាយឧត្តមសេនីយ៍, សាស្ត្រាចារ្យ, ឧបនាយករដ្ឋមន្ត្រី, រដ្ឋមន្ត្រី)
         honorifics = [
             'សម្តេចពិជ័យសេនា', 'សម្តេចតេជោ', 'សម្តេចកិត្តិព្រឹទ្ធបណ្ឌិត', 'សម្តេចធិបតី', 'សម្តេចមហារដ្ឋសភាធិការធិបតី', 'សម្តេច',
-            'ឯកឧត្តម', 'លោកជំទាវ', 'លោកស្រី', 'លោក', 'នាយឧត្តមសេនីយ៍', 'ឧត្តមសេនីយ៍', 'សាស្ត្រាចារ្យ', 'សាស្រ្តាចារ្យ',
-            'ឧបនាយករដ្ឋមន្ត្រី', 'រដ្ឋមន្ត្រី', 'អភិបាលរង', 'អភិបាល', 'មេបញ្ជាការ', 'ប្រធាន', 'អនុប្រធាន'
+            'ឯកឧត្តម', 'លោកជំទាវ', 'លោកស្រី', 'នាយឧត្តមសេនីយ៍', 'ឧត្តមសេនីយ៍', 'សាស្ត្រាចារ្យ', 'សាស្រ្តាចារ្យ',
+            'ឧបនាយករដ្ឋមន្ត្រី', 'រដ្ឋមន្ត្រី', 'អភិបាលរង', 'មេបញ្ជាការ'
         ]
         for h in honorifics:
             curr = re.sub(rf'({h})\s*({khmer_char})', r'\1 \2', curr)
+
+        # Fix compound words that should not have spaces
+        curr = re.sub(r'ប្រធាន\s+បទ', 'ប្រធានបទ', curr)
+        curr = re.sub(r'អភិបាល\s+កិច្ច', 'អភិបាលកិច្ច', curr)
+        curr = re.sub(r'ប្រធាន\s+សក្តិ', 'ប្រធានសក្តិ', curr)
 
         # Step 3: Space after Khmer full stop (។), closing full stop (៕), colon (៖)
         curr = re.sub(r'([។៖!?:])\s*', r'\1 ', curr)
