@@ -36,9 +36,13 @@ class FacebookPublisher:
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
         Non-blocking Facebook Enqueuer.
-        Reads image bytes into memory before temporary banner file is deleted, then queues post.
+        Passes caption through khmer_auditor for 100% linguistic purity before enqueuing.
         """
         self._ensure_worker_started()
+
+        from khmer_auditor import khmer_auditor
+        caption = khmer_auditor.sanitize_khmer_spelling_and_punctuation(caption)
+
         image_bytes = None
         if image_path and os.path.exists(image_path):
             try:

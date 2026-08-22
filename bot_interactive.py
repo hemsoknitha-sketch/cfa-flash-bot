@@ -95,7 +95,10 @@ class SuperSmartTelegramBot:
         }
 
     async def send_message(self, chat_id: int, text: str, reply_markup=None):
-        """Send message via Telegram API with persistent HTTP Keep-Alive socket."""
+        """Send message via Telegram API with 100% Khmer Auditor linguistic audit."""
+        from khmer_auditor import khmer_auditor
+        text = khmer_auditor.sanitize_khmer_spelling_and_punctuation(text)
+
         payload = {
             "chat_id": chat_id,
             "text": text,
