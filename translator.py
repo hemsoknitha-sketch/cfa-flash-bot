@@ -99,14 +99,14 @@ KHMER_FALLBACK_DICTIONARY = {
 
 def fallback_translate_to_khmer(text: str) -> str:
     """Fallback translation helper ensuring zero raw English sentences remain."""
+    if not text:
+        return ""
     res = text
     for eng, khm in KHMER_FALLBACK_DICTIONARY.items():
         res = re.sub(re.escape(eng), khm, res, flags=re.IGNORECASE)
     
-    # Generic English phrase translation fallback if text is still primarily English
-    if re.search(r'[a-zA-Z]{3,}', res):
-        res = "កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក (Online Scam) និងពង្រឹងនីតិរដ្ឋ"
-            
+    # Strip any remaining raw English words gracefully without replacing with dummy sentences
+    res = re.sub(r'\b[A-Za-z]+\b', '', res).strip()
     return super_smart_khmer_formatter(res)
 
 class NLLBKhmerTranslator:

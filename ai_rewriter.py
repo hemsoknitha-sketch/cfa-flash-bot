@@ -444,19 +444,32 @@ class SuperBrainAIRewriter:
         clean_title = title.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "").strip()
         headline = fallback_translate_to_khmer(clean_title) if any(c.isalpha() and ord(c) < 128 for c in clean_title) else clean_title
 
-        is_clean_source_name = source and len(source) < 25 and not any(k in source for k in ["កម្ពុជា", "រដ្ឋ", "ប្រព័ន្ធ", "ព័ត៌មាន"])
-        source_name = fallback_translate_to_khmer(source) if is_clean_source_name else "ប្រភពព័ត៌មានផ្លូវការ"
+        # Clean source name resolution
+        if source and len(source) < 50:
+            if any(c.isalpha() and ord(c) < 128 for c in source):
+                source_name = fallback_translate_to_khmer(source) or "ប្រភពព័ត៌មានផ្លូវការ"
+            else:
+                source_name = source
+        else:
+            source_name = "ប្រភពព័ត៌មានផ្លូវការ"
+
+        if len(source_name) > 35 or "កម្ពុជាពង្រឹង" in source_name:
+            source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
         clean_desc = content.strip() if content else clean_title
+        # Prevent title duplication at the start of paragraph 1
+        if clean_desc.startswith(clean_title):
+            clean_desc = clean_desc[len(clean_title):].strip(" -:៖\t\n")
+
         if any(c.isalpha() and ord(c) < 128 for c in clean_desc[:100]):
             clean_desc = fallback_translate_to_khmer(clean_desc)
         
         clean_desc = clean_desc.strip()
-        if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!"):
-            clean_desc += "។"
+        if not clean_desc or len(clean_desc) < 20:
+            clean_desc = clean_title
 
-        if len(clean_desc) > 200:
-            clean_desc = clean_desc[:200] + "..."
+        if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!") and not clean_desc.endswith("៕"):
+            clean_desc += "។"
 
         p1 = f"{dateline} {clean_desc}"
         p2 = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name} បានបញ្ជាក់ឱ្យដឹងថា ព្រឹត្តិការណ៍នេះគឺជាជំហានដ៏សំខាន់ក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្ម។"
