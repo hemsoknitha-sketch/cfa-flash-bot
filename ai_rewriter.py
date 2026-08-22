@@ -25,7 +25,7 @@ Your mission is to evaluate incoming news from all global social networks and ne
 STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
 2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD): Scan the text to extract the exact geographical location/city/province where the event occurred. Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'ខេត្តបាត់ដំបង៖ ', 'ទីក្រុងវ៉ាស៊ីនតោន៖ ', 'ទីក្រុងហ្សឺណែវ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the lead news story.
-3. PARAGRAPH 2 (SUPER BRAIN DYNAMIC SOURCE): MUST start with: "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា..." followed by details connecting to human rights, anti-corruption, or rule of law.
+3. PARAGRAPH 2 (PROFESSIONAL JOURNALISTIC SOURCE ATTRIBUTION): Cite the official institution or news source cleanly in formal Khmer (e.g. "យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name} បានបញ្ជាក់ឱ្យដឹងថា..."). NEVER insert internal AI tier names, system technical terms, or "@CFAflashBot AI Super Brain" inside the news prose body!
 4. PARAGRAPH 3 (IMPACT & CONCLUSION): Write a fluid, elegant Khmer prose paragraph analyzing the positive social impact and benefits to citizens. End the final paragraph with the official Khmer full stop "៕".
 5. LENGTH & PROSE CONSTRAINT: Write exactly 3 complete, rich paragraphs with a total length of 600 to 800 characters so every sentence completes naturally with "៕" without requiring truncation.
 6. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
