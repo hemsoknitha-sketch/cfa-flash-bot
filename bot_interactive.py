@@ -398,6 +398,47 @@ class SuperSmartTelegramBot:
                 else:
                     await self.send_message(chat_id, "⚠️ *សូមផ្ញើ ឬទម្លាក់ Facebook URL (Post, Video, News) មកជាមួយពាក្យបញ្ជា /analyze ៖*\n`/analyze https://www.facebook.com/...`")
 
+            elif text.startswith("/defense_news"):
+                from defense_intelligence_engine import defense_engine
+                latest_items = defense_engine.get_latest_defense_news(5)
+                if not latest_items:
+                    await self.send_message(
+                        chat_id,
+                        "🛡️ *មិនទាន់មានកំណត់ត្រាសេចក្តីថ្លែងការណ៍យោធា ឬការទូតក្នុង Archive នៅឡើយទេ។*\n"
+                        "⚡ *សូមប្រើពាក្យបញ្ជា /sync_defense_archive ដើម្បីស្កេន និងទាញយកទិន្នន័យ!*"
+                    )
+                else:
+                    msg = "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយ (ក្រសួងការពារជាតិ & ក្រសួងការបរទេស) ៖*\n\n"
+                    for idx, item in enumerate(latest_items, 1):
+                        msg += f"📌 *{idx}. {item.get('title')}*\n"
+                        msg += f"  └ 📅 *កាលបរិច្ឆេទ ៖* `{item.get('date')}` | *ប្រភព ៖* `{item.get('source_name')}`\n\n"
+                    await self.send_message(chat_id, msg)
+
+            elif text.startswith("/border_archive"):
+                query = text.replace("/border_archive", "").strip()
+                from defense_intelligence_engine import defense_engine
+                records = defense_engine.get_border_archives(query=query if query else None, limit=5)
+                if not records:
+                    await self.send_message(chat_id, "📂 *ពុំទាន់រកឃើញកំណត់ត្រាយោធា ឬកំណត់ទូតព្រំដែនដែលត្រូវគ្នានឹងពាក្យស្វែងរកនេះនៅឡើយទេ។*")
+                else:
+                    title_hdr = f"🛡️ *កំណត់ត្រាប្រវត្តិសាស្ត្រយោធា & ព្រំដែនកម្ពុជា ({len(records)} ករណីចុងក្រោយ) ៖*\n\n"
+                    body_lines = []
+                    for idx, item in enumerate(records, 1):
+                        body_lines.append(f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n*ចំណងជើង ៖* {item.get('title')}\n*ខ្លឹមសារ ៖*\n{item.get('content')[:300]}...\n----------------------------------------")
+                    await self.send_message(chat_id, title_hdr + "\n\n".join(body_lines))
+
+            elif text.startswith("/sync_defense_archive"):
+                await self.send_message(chat_id, "📡 *កំពុងស្កេន និងទាញយកកំណត់ត្រាសេចក្តីថ្លែងការណ៍ផ្លូវការពី ក្រសួងការពារជាតិ & MFAIC...*")
+                from defense_intelligence_engine import defense_engine
+                from main import pipeline_engine
+                items = await pipeline_engine.ingestion.fetch_from_rss_async()
+                archived_count = 0
+                for item in items:
+                    if any(k in item.source.lower() or k in item.title.lower() for k in ["defence", "defense", "mfaic", "ការពារជាតិ", "ការបរទេស", "ព្រំដែន"]):
+                        if defense_engine.archive_post(post_id=item.id, title=item.title, content=item.content, source_name=item.source):
+                            archived_count += 1
+                await self.send_message(chat_id, f"✅ *ស្កេន និងបញ្ចូលកំណត់ត្រាយោធា & ការទូតថ្មីចំនួន `{archived_count}` items ចូលក្នុង Archive រួចរាល់!*")
+
             elif text.startswith("/latest"):
                 latest_text = (
                     "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"

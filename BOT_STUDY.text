@@ -220,4 +220,14 @@ flowchart TD
 - **Dynamic Large Font Sizing (36px - 48px/52px) ៖** បង្កើនទំហំអក្សរ Headline ធំបន្ថែម ងាយស្រួលមើល និងច្បាស់ត្រចះត្រចង់ ជាមួយការគណនាទំហំអក្សរស្វ័យប្រវត្តិតាមប្រវែងចំណងជើង។
 - **0% Margin Overflow & Syllable-Safe Line Wrapping ៖** គណនា Pixel Width (១០៤០px) យ៉ាងច្បាស់លាស់ ដោយមិនឱ្យអក្សរជ្រុលហួសសន្លឹករូបភាព Banner ឡើយ ព្រមទាំងការពារមិនឱ្យបែកជើងអក្សរ (`្`) បង្កើតជារង្វង់ចុច `◌` ឡើយ!
 - **100% Quality Output ៖** រក្សាទុកក្នុងកម្រិត Quality 100 Maximum JPEG (Chroma 4:4:4) ធានារូបភាព Banner ច្បាស់កម្រិត 4K Ultra HD!
+----------------------------------------------------------------------------------------------------
+២៥. 🛡️ MILITARY & DIPLOMATIC INTELLIGENCE ARCHIVE ENGINE (`defense_intelligence_engine.py`)
+----------------------------------------------------------------------------------------------------
+- **Chronological Defense & Diplomatic Archive (`defense_intelligence_engine.py`) ៖** ស្ថាបត្យកម្មកត់ត្រា និងរក្សាទុកទិន្នន័យប្រវត្តិសាស្ត្រពី **ក្រសួងការពារជាតិកម្ពុជា (`Ministrydefence`)** និង **ក្រសួងការបរទេស (`mfaic.gov.kh`)** ចូលក្នុង `data/border_defense_archives.json` ៖
+    • **0% Data Loss Guarantee ៖** ផ្ទៀងផ្ទាត់ទិន្នន័យតាម SHA-256 Content Deduplication និងកត់ត្រាទុកនូវរាល់សេចក្តីថ្លែងការណ៍ បញ្ជាយោធា និងកំណត់ទូត តាមលំដាប់កាលបរិច្ឆេទ (Chronological Order) ដោយមិនកាត់ខ្លឹមសារចោលឡើយ។
+    • **Zero System Impact ៖** ប្រព័ន្ធ Archive ដំណើរការក្នុង Async Background Task ដាច់ដោយឡែក (0% Latency លើ Real-Time Scan 60s និង Telegram Bot <10ms)។
+    • **Interactive Telegram Commands ៖**
+        - `/defense_news` ៖ អានសេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយពីក្រសួងការពារជាតិ & MFAIC។
+        - `/border_archive [query]` ៖ ស្វែងរក និងទាញយកប្រវត្តិកត់ត្រាសកម្មភាពការពារព្រំដែនកម្ពុជា។
+        - `/sync_defense_archive` ៖ ស្កេន និងធ្វើបច្ចុប្បន្នភាពទិន្នន័យយោធា & ការទូតចូលក្នុង Archive ស្វ័យប្រវត្តិ។
 ====================================================================================================

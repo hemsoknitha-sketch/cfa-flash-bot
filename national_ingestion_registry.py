@@ -16,6 +16,12 @@ logger = logging.getLogger(__name__)
 # 1. State Ministries & National Institutions
 MINISTRY_INSTITUTION_FEEDS = [
     {
+        "name": "Ministry of National Defence Cambodia (ក្រសួងការពារជាតិ)",
+        "url": "https://www.mod.gov.kh/feed",
+        "category": "National Defence",
+        "tier": 1
+    },
+    {
         "name": "AKP - Agence Kampuchea Presse (ព័ត៌មានរដ្ឋផ្លូវការ)",
         "url": "https://www.akp.gov.kh/feed",
         "category": "State News Agency",

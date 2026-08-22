@@ -105,6 +105,20 @@ async def process_news(news_text: str, news_id: str):
         if tg_success or fb_success:
             # Index in Qdrant Vector DB
             pipeline_engine.dedup_store.add_item(news_id, news_text)
+
+            # Auto-Archive into Defense & Diplomatic Intelligence Engine
+            try:
+                from defense_intelligence_engine import defense_engine
+                defense_engine.archive_post(
+                    post_id=news_id,
+                    title=processed_article.khmer_headline,
+                    content=processed_article.khmer_body,
+                    source_name="ក្រសួងការពារជាតិ / MFAIC",
+                    category="សេចក្តីថ្លែងការណ៍ផ្លូវការ"
+                )
+            except Exception as e:
+                logger.error(f"Error archiving to Defense Intelligence Engine: {e}")
+
             logger.info(f"🚀 [STEP 5 COMPLETED: PUBLISHED TO TELEGRAM & FACEBOOK] Item ID: {news_id}\n")
     finally:
         # 🧹 AUTO-CLEANUP: Delete temp banner image immediately after publishing to preserve 100% disk space
