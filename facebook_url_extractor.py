@@ -85,3 +85,8 @@ class FacebookURLExtractorEngine:
         }
 
 fb_url_extractor = FacebookURLExtractorEngine()
+
+async def extract_facebook_url_content(fb_url: str) -> Dict[str, Any]:
+    """Helper function to extract Facebook URL content."""
+    return await fb_url_extractor.fetch_facebook_content(fb_url)
+

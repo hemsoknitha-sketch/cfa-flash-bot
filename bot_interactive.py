@@ -566,9 +566,9 @@ class SuperSmartTelegramBot:
                             from ai_rewriter import SuperBrainAIRewriter
                             from khmer_auditor import khmer_auditor
 
-                            fb_data = extract_facebook_url_content(text)
+                            fb_data = await extract_facebook_url_content(text)
                             extracted_content = fb_data.get("content", text)
-                            page_name = fb_data.get("page_name", "ប្រភព Facebook ផ្លូវការ")
+                            page_name = fb_data.get("source_name", "ប្រភព Facebook ផ្លូវការ")
 
                             rewriter = SuperBrainAIRewriter()
                             processed = rewriter.process_news(
