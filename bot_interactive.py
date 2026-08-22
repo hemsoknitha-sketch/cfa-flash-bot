@@ -44,6 +44,9 @@ class SuperSmartTelegramBot:
             {"command": "defense_news", "description": "🛡️ សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC"},
             {"command": "border_archive", "description": "📂 ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា"},
             {"command": "sync_defense_archive", "description": "📡 ស្កេន & ធ្វើបច្ចុប្បន្នភាព Archive យោធា"},
+            {"command": "factcheck", "description": "🔍 Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន (0-100%)"},
+            {"command": "national_desks", "description": "🏛️ បញ្ជីស្ថាប័នរដ្ឋ & ២៥ រាជធានី-ខេត្ត (37 Desks)"},
+            {"command": "sovereignty_vault", "description": "📂 ឃ្លាំងប្រវត្តិសាស្ត្រយោធា ការទូត & ព្រំដែន"},
             {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
             {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
             {"command": "report", "description": "📊 របាយការណ៍ស្កេន 16 Institutional Feeds"},
@@ -373,7 +376,8 @@ class SuperSmartTelegramBot:
 
                 PUBLIC_COMMAND_PREFIXES = [
                     "/start", "/help", "/latest", "/defense_news",
-                    "/border_archive", "/sync_defense_archive", "/ask", "/ping"
+                    "/border_archive", "/sync_defense_archive", "/ask", "/ping",
+                    "/factcheck", "/national_desks", "/sovereignty_vault"
                 ]
 
                 is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES)
@@ -492,6 +496,40 @@ class SuperSmartTelegramBot:
                         if defense_engine.archive_post(post_id=item.id, title=item.title, content=item.content, source_name=item.source):
                             archived_count += 1
                     await self.send_message(chat_id, f"✅ *ស្កេន និងបញ្ចូលកំណត់ត្រាយោធា & ការទូតថ្មីចំនួន `{archived_count}` items ចូលក្នុង Archive រួចរាល់!*")
+
+                elif text.startswith("/factcheck"):
+                    claim = text.replace("/factcheck", "").strip()
+                    if claim:
+                        await self.send_message(chat_id, f"🔍 *កំពុងរត់ប្រព័ន្ធ Fact-Check & ផ្ទៀងផ្ទាត់ភាពជឿជាក់សម្រាប់ ៖*\n`{claim}`...")
+                        from news_credibility_engine import credibility_engine
+                        report = credibility_engine.generate_factcheck_report(claim)
+                        await self.send_message(chat_id, report)
+                    else:
+                        await self.send_message(
+                            chat_id,
+                            "🔍 *ប្រព័ន្ធ Fact-Check & ផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន ៖*\n\n"
+                            "💡 *របៀបប្រើប្រាស់ ៖* វាយពាក្យបញ្ជាដកឃ្លាតតាមដោយអត្ថបទ ឬ URL ព័ត៌មាន ៖\n"
+                            "• `/factcheck <អត្ថបទព័ត៌មាន ឬ URL>`\n\n"
+                            "ឧទាហរណ៍ ៖ `/factcheck ក្រសួងការពារជាតិកម្ពុជាបានចេញសេចក្តីថ្លែងការណ៍`"
+                        )
+
+                elif text.startswith("/national_desks"):
+                    from national_ingestion_registry import get_all_national_feeds
+                    feeds = get_all_national_feeds()
+                    msg = f"🏛️ *បញ្ជីប្រភពព័ត៌មានផ្លូវការទាំង {len(feeds)} (37 National & Regional Desks) ៖*\n\n"
+                    for idx, f in enumerate(feeds[:15], 1):
+                        msg += f"• `{idx}. {f.get('name')}` ({f.get('category')})\n"
+                    msg += f"\n... និងប្រភពរដ្ឋបាលខេត្តទាំង ២៥ រួមទាំងស្ថាប័នជាតិផ្សេងទៀតស្កេន 24/7!"
+                    await self.send_message(chat_id, msg)
+
+                elif text.startswith("/sovereignty_vault"):
+                    from defense_intelligence_engine import defense_engine
+                    records = defense_engine.get_border_archives(limit=5)
+                    msg = f"📂 *ឃ្លាំងប្រវត្តិសាស្ត្រយោធា ការទូត និងព្រំដែនកម្ពុជា ({len(records)} Archives Loaded) ៖*\n\n"
+                    for idx, r in enumerate(records, 1):
+                        msg += f"📌 *[{idx}] {r.get('date')} | {r.get('source_name')}*\n*{r.get('title')}*\n\n"
+                    msg += "💡 *លោកអ្នកអាចសួរ AI អំពីព្រំដែនកម្ពុជាបានតាម ៖* `/border_archive <សំណួរ>`"
+                    await self.send_message(chat_id, msg)
 
                 elif text.startswith("/latest"):
                     latest_text = (
