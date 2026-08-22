@@ -1,18 +1,22 @@
 import re
+import html
 import time
 import logging
 from typing import Optional, List, Tuple
+from translator import super_smart_khmer_formatter
 
 logger = logging.getLogger(__name__)
 
 class KhmerLanguageAuditor:
     """
-    Master Khmer Script Purifier, Professional Journalistic Auditor & Freshness Gatekeeper.
+    Master Khmer Script Purifier, Zero-Error Journalistic Auditor & Freshness Gatekeeper V5.0.
     Guarantees 100% formal Khmer linguistic purity & institutional quality:
     1. Freshness Audit: Rejects news older than 24 hours (86,400s).
-    2. Prose & Punctuation Audit: Enforces clean Khmer paragraphs (វគ្គ/ឃ្លា), inline '។', and final closing '៕'.
-    3. Source Attribution Audit: Verifies explicit source name or Facebook Page/Account acknowledgment.
-    4. Orthographic Purifier: Strips leaked Thai/foreign characters and applies Samdach Chuon Nath Dictionary rules.
+    2. Headline Purity Audit: Deduplicates repetitive titles (e.g. 'A - A' -> 'A') & strips raw prefixes.
+    3. HTML & Entity Purifier: Purges 100% of leaked HTML tags (<p>, <div>) & unescapes HTML entities (&nbsp;).
+    4. Prose & Punctuation Audit: Enforces clean 3 Khmer paragraphs (វគ្គ/ឃ្លា), inline '។', and final closing '៕'.
+    5. Source Attribution Audit: Enforces clean official source names without internal AI technical terms.
+    6. Honorific Spacing Audit: Ensures formal spaces between titles (ឯកឧត្តម, សម្តេច, លោកជំទាវ) and names.
     """
     def __init__(self):
         # Regex pattern matching Thai Unicode script (\u0e00-\u0e7f)
@@ -25,10 +29,10 @@ class KhmerLanguageAuditor:
             (r'\s+៕', '៕'),
             (r'៖([^\s])', r'៖ \1'),
             (r'([^\s])។', r'\1។'),
-            (r'(\.|\!|\?)+', '។'),  # Convert western punctuation to Khmer '។'
+            (r'(\.|\!|\?)+', '។'),
         ]
 
-        # Samdach Presh Sangkareach Chuon Nath Khmer Dictionary Orthographic Rules & Normalization
+        # Samdach Presh Sangkareach Chuon Nath Khmer Dictionary Orthographic Rules
         self.chuon_nath_spelling_dictionary = [
             (r'ព័ត៏មាន', 'ព័ត៌មាន'),
             (r'រដ្ឋធម្មនុញ្ញ័', 'រដ្ឋធម្មនុញ្ញ'),
@@ -40,9 +44,7 @@ class KhmerLanguageAuditor:
         ]
 
     def audit_news_freshness(self, timestamp: Optional[float] = None, max_hours: float = 24.0) -> bool:
-        """
-        Validates news freshness. Rejects any news item published more than 24 hours ago.
-        """
+        """Validates news freshness. Rejects any news item published more than 24 hours ago."""
         if timestamp is None or timestamp <= 0:
             return True
         
@@ -56,9 +58,7 @@ class KhmerLanguageAuditor:
         return True
 
     def strip_thai_and_foreign_scripts(self, text: str) -> str:
-        """
-        Detects and strips any leaked Thai characters/words.
-        """
+        """Detects and strips any leaked Thai characters/words."""
         if not text:
             return ""
         
@@ -69,39 +69,58 @@ class KhmerLanguageAuditor:
         return text
 
     def sanitize_khmer_spelling_and_punctuation(self, text: str) -> str:
-        """
-        Normalizes Khmer punctuation, Chuon Nath dictionary spelling, and zero-width spaces.
-        """
+        """Purges HTML tags (<p>, <div>), unescapes entities, and normalizes Khmer punctuation."""
         if not text:
             return ""
 
-        # Normalize multiple spaces & newlines
-        text = re.sub(r'[ \t]+', ' ', text)
-        
-        # Apply Chuon Nath Orthographic Corrections
+        # 1. Strip all HTML tags
+        if "<" in text and ">" in text:
+            text = re.sub(r'<[^>]+>', '', text)
+
+        # 2. Unescape HTML entities
+        text = html.unescape(text)
+
+        # 3. Apply Chuon Nath Orthographic Corrections
         for wrong_spelling, correct_spelling in self.chuon_nath_spelling_dictionary:
             text = re.sub(wrong_spelling, correct_spelling, text)
 
-        # Apply Khmer punctuation rules
+        # 4. Apply Khmer punctuation rules
         for pattern, repl in self.punctuation_replacements:
             text = re.sub(pattern, repl, text)
 
+        # 5. Format Khmer spaces and honorifics cleanly
+        text = super_smart_khmer_formatter(text)
+
         return text.strip()
 
-    def audit_prose_structure(self, headline: str, body: str) -> Tuple[str, str]:
-        """
-        Ensures elegant Khmer literary paragraphs (វគ្គ/ឃ្លា):
-        - Clean headline without duplicate prefixes.
-        - Ensures inline sentence endings use '។'.
-        - Ensures the final sentence of the final paragraph terminates with '៕'.
-        """
+    def audit_headline_purity(self, headline: str) -> str:
+        """Deduplicates repetitive titles (e.g. 'A - A' -> 'A') and purges raw prefixes."""
+        if not headline:
+            return ""
+
+        # Clean HTML & unwanted characters
         clean_headline = re.sub(r'^ព័ត៌មានទាន់ហេតុការណ៍\s*៖?\s*', '', headline).strip()
         clean_headline = self.sanitize_khmer_spelling_and_punctuation(clean_headline)
+
+        # Deduplicate title split by ' - ', ' | ', ' — ', ' – ', ' : ', ' ៖ '
+        separators = [' - ', ' | ', ' — ', ' – ', ' : ', ' ៖ ']
+        for sep in separators:
+            if sep in clean_headline:
+                parts = [p.strip() for p in clean_headline.split(sep) if p.strip()]
+                if len(parts) >= 2 and parts[0] == parts[1]:
+                    clean_headline = parts[0]
+                    break
+
+        return clean_headline
+
+    def audit_prose_structure(self, headline: str, body: str) -> Tuple[str, str]:
+        """Ensures elegant Khmer literary 3 paragraphs with clean dateline and closing ៕."""
+        clean_headline = self.audit_headline_purity(headline)
 
         clean_body = self.strip_thai_and_foreign_scripts(body)
         clean_body = self.sanitize_khmer_spelling_and_punctuation(clean_body)
 
-        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖', 'ហុងកុង៖ ហុងកុង៖' -> 'ហុងកុង៖')
+        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖')
         clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖\s*((?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖)', r'\1', clean_body)
         clean_body = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', clean_body)
 
@@ -122,7 +141,7 @@ class KhmerLanguageAuditor:
             if not p.endswith('។') and not p.endswith('៕'):
                 p += '។'
             
-            # If it's the last paragraph, change final '។' to '<ctrl42>' (Khmer final closing symbol)
+            # If it's the last paragraph, change final '។' to '៕'
             if i == len(paragraphs) - 1:
                 if p.endswith('។'):
                     p = p[:-1] + '៕'
@@ -135,19 +154,15 @@ class KhmerLanguageAuditor:
         return clean_headline, purified_body
 
     def audit_source_attribution(self, body: str, source_name: str) -> str:
-        """
-        Verifies explicit source attribution (including Facebook Page/Account name).
-        If missing, injects high-level formal source credit into Paragraph 2.
-        """
-        if not source_name:
+        """Verifies explicit source attribution without internal AI terms."""
+        if not source_name or any(k in source_name for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
-        attribution_phrase = f"យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name}"
+        attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}"
         if attribution_phrase not in body and source_name not in body:
-            logger.info(f"✍️ [KHMER AUDITOR] Injecting explicit source attribution for: '{source_name}'")
             paragraphs = body.split('\n\n')
             if len(paragraphs) >= 2:
-                paragraphs[1] = f"{attribution_phrase} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា " + paragraphs[1]
+                paragraphs[1] = f"{attribution_phrase} បានបញ្ជាក់ឱ្យដឹងថា " + paragraphs[1]
                 body = '\n\n'.join(paragraphs)
 
         return body
@@ -158,35 +173,31 @@ class KhmerLanguageAuditor:
         body: str,
         source_name: str = "ប្រភពព័ត៌មានផ្លូវការ",
         timestamp: Optional[float] = None,
-        max_hours: float = 24.0
+        max_freshness_hours: float = 24.0
     ) -> Tuple[bool, str, str, str]:
         """
-        Master Executive Audit Entrypoint:
-        1. Checks 24-hour freshness (<24h).
-        2. Purifies Thai & foreign scripts.
-        3. Applies Chuon Nath orthography & punctuation (វគ្គ/ឃ្លា/។/៕).
-        4. Enforces explicit Facebook Page / Account Source Attribution.
-        
-        Returns: (is_valid, purified_headline, purified_body, audit_reason)
+        Master Zero-Error Quality Gatekeeper:
+        Audits freshness, title purity, prose structure, HTML cleanliness, and source attribution.
+        Returns: (is_valid, purified_headline, purified_body, purified_source_name)
         """
         # 1. Freshness Audit
-        if not self.audit_news_freshness(timestamp, max_hours=max_hours):
-            return False, headline, body, f"STALE_NEWS_EXCEEDED_{max_hours}H"
+        if not self.audit_news_freshness(timestamp, max_freshness_hours):
+            return False, headline, body, source_name
 
-        # 2. Prose & Punctuation Audit
-        purified_headline, purified_body = self.audit_prose_structure(headline, body)
+        # 2. Headline Purity & Prose Structure Audit
+        clean_headline, clean_body = self.audit_prose_structure(headline, body)
 
         # 3. Source Attribution Audit
-        purified_body = self.audit_source_attribution(purified_body, source_name)
+        clean_source = source_name
+        if not clean_source or any(k in clean_source for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
+            clean_source = "ប្រភពព័ត៌មានផ្លូវការ"
 
-        logger.info(f"✅ [KHMER AUDITOR PASSED] News item audited successfully with 100% Chuon Nath purity & '៕' termination.")
-        return True, purified_headline, purified_body, "AUDIT_PASSED_100%"
+        clean_body = self.audit_source_attribution(clean_body, clean_source)
+
+        return True, clean_headline, clean_body, clean_source
 
     def audit_khmer_text(self, text: str) -> str:
-        """Backwards compatible single-string audit entrypoint."""
-        if not text:
-            return ""
-        text = self.strip_thai_and_foreign_scripts(text)
+        """Utility for auditing raw Khmer text strings."""
         return self.sanitize_khmer_spelling_and_punctuation(text)
 
 khmer_auditor = KhmerLanguageAuditor()
