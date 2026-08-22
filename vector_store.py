@@ -58,14 +58,55 @@ class VectorDeduplicator:
         except Exception as e:
             logger.error(f"Error saving seen_hashes.json: {e}")
 
+    def purge_temp_banner_files(self) -> int:
+        """Deletes all temporary banner images and temp HTML files from the project directory."""
+        import glob
+        import os
+        base_dir = os.path.dirname(os.path.abspath(__file__))
+        patterns = ["banner_*.jpg", "temp_banner.html", "test_*.jpg", "test_*.png"]
+        removed_count = 0
+        for pattern in patterns:
+            for filepath in glob.glob(os.path.join(base_dir, pattern)):
+                try:
+                    os.remove(filepath)
+                    removed_count += 1
+                except Exception as e:
+                    logger.error(f"Could not remove temp banner file {filepath}: {e}")
+        logger.info(f"🧹 [TEMP BANNERS PURGED] Removed {removed_count} temporary banner files.")
+        return removed_count
+
     def clear_news_cache(self) -> int:
         """Clears all old cached news hashes and history while keeping user/admin settings 100% intact."""
         count = len(self.seen_hashes)
         self.seen_hashes.clear()
         self.history.clear()
         self._save_seen_hashes()
-        logger.info(f"🧹 [NEWS DEDUPLICATION CACHE PURGED] Cleared {count} old news hashes.")
+        self.purge_temp_banner_files()
+        logger.info(f"🧹 [NEWS DEDUPLICATION CACHE PURGED] Cleared {count} old news hashes & temp banner files.")
         return count
+
+    async def seed_baseline_from_rss_async(self, ingestion_engine) -> int:
+        """
+        Seeds existing news from active RSS feeds into seen_hashes as baseline.
+        This prevents old feed items from being processed as 'new news' on initial boot,
+        after a /clearcache command, or after restarting/updating on Google Cloud.
+        """
+        import hashlib
+        try:
+            items = await ingestion_engine.fetch_from_rss_async()
+            count = 0
+            for item in items:
+                full_text = f"{item.title} - {item.content}"
+                content_hash = hashlib.sha256(full_text.strip().encode('utf-8')).hexdigest()
+                if content_hash not in self.seen_hashes:
+                    self.seen_hashes.add(content_hash)
+                    count += 1
+            self._save_seen_hashes()
+            logger.info(f"🛡️ [BASELINE SEEDED] Seeded {count} current RSS feed items into seen_hashes.json as baseline.")
+            return count
+        except Exception as e:
+            logger.error(f"Error seeding baseline hashes from RSS: {e}")
+            return 0
 
     def _init_qdrant(self):
         """Initialize Qdrant Vector DB & SentenceTransformer model if explicitly enabled."""

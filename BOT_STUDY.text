@@ -207,4 +207,17 @@ flowchart TD
 ២២. 🔒 HARDWARE-LEVEL SINGLE INSTANCE SYSTEM LOCK (`main_loop.py`)
 ----------------------------------------------------------------------------------------------------
 - **System-Wide SingleInstanceLock (`fcntl.flock`) ៖** បន្ថែមការចាក់សោប្រព័ន្ធកម្រិត Hardware/OS (`acquire_single_instance_lock()`) លើ file `/tmp/cfa_flash_bot_daemon.lock` ធានាថាទោះបីជាមាន Service ស្ទួនពីររត់លើ Server យ៉ាងណាក៏ដោយ ក៏ប្រព័ន្ធ **អនុញ្ញាតឱ្យ Process តែ ១ គត់រត់នៅលើ Server** ហើយ Process ទី២ នឹងត្រូវប្រព័ន្ធបិទ `sys.exit(0)` ភ្លាមៗ ការពារការផ្ញើសារស្ទួន ២ ដងជារៀងរហូត ១០០%!
+----------------------------------------------------------------------------------------------------
+២៣. 🛡️ CLEAN BOOT BASELINE PROTECTION & AUTOMATIC RSS RE-SEEDING (`vector_store.py` & `main.py`)
+----------------------------------------------------------------------------------------------------
+- **Cold Boot & Restart Protection (`seed_baseline_from_rss_async`) ៖** នៅពេលប្រព័ន្ធ Restart ឬធ្វើការ Update លើ Google Cloud (ដែលនាំឱ្យ `seen_hashes.json` អាចទំនេរ) ឬនៅពេល Admin វាយពាក្យបញ្ជា `/clearcache` ៖
+    • ប្រព័ន្ធនឹងធ្វើការស្កេន RSS Feeds ទាំងអស់ដើម្បីយក SHA-256 Hashes នៃព័ត៌មានបច្ចុប្បន្ន ចុះបញ្ជីចូល `seen_hashes.json` ជា Baseline ភ្លាមៗ (ដោយមិនផ្ញើសារ ឬ Render Banner ឡើយ)!
+    • ធានាដាច់ខាត ១០០% ថា គ្មានព័ត៌មានចាស់ សារចាស់ ឬ Banner ចាស់ ត្រូវផ្ញើរំខានចូល Telegram VIP Channel ឬ Facebook Page ឡើយ នៅពេល Restart/Update លើ Google Cloud — គឺមានតែព័ត៌មានថ្មីៗស្រឡាងដែលទើបចេញបន្តបន្ទាប់ប៉ុណ្ណោះ នឹងត្រូវស្កេន និងផ្ញើចេញ!
+----------------------------------------------------------------------------------------------------
+២៤. 🎨 100% CENTER-ALIGNED HIGH-DEF BANNER & SYLLABLE-SAFE WRAPPING (`banner_engine.py`)
+----------------------------------------------------------------------------------------------------
+- **100% Center Alignment Typography ៖** តម្រឹគែមអក្សរ Center ទាំងអស់ (Badge Header, Category Title, Headline Lines) ធានាភាពទាក់ទាញ តុល្យភាព និងសោភ័ណភាពស្រស់ស្អាត ១០០%!
+- **Dynamic Large Font Sizing (36px - 48px/52px) ៖** បង្កើនទំហំអក្សរ Headline ធំបន្ថែម ងាយស្រួលមើល និងច្បាស់ត្រចះត្រចង់ ជាមួយការគណនាទំហំអក្សរស្វ័យប្រវត្តិតាមប្រវែងចំណងជើង។
+- **0% Margin Overflow & Syllable-Safe Line Wrapping ៖** គណនា Pixel Width (១០៤០px) យ៉ាងច្បាស់លាស់ ដោយមិនឱ្យអក្សរជ្រុលហួសសន្លឹករូបភាព Banner ឡើយ ព្រមទាំងការពារមិនឱ្យបែកជើងអក្សរ (`្`) បង្កើតជារង្វង់ចុច `◌` ឡើយ!
+- **100% Quality Output ៖** រក្សាទុកក្នុងកម្រិត Quality 100 Maximum JPEG (Chroma 4:4:4) ធានារូបភាព Banner ច្បាស់កម្រិត 4K Ultra HD!
 ====================================================================================================

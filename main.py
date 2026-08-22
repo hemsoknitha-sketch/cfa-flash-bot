@@ -21,6 +21,20 @@ class FlashNewsSuperBrainPipeline:
         self.broadcaster = TelegramBroadcaster()
         self.fb_publisher = FacebookPublisher()
 
+    async def clear_all_cache_and_seed_baseline(self):
+        """
+        Executes full cache purge & baseline re-seeding:
+        1. Purges all old seen news hashes.
+        2. Deletes all temporary banner images and files.
+        3. Seeds current RSS feed items as baseline so no old news/banners are ever re-sent.
+        Returns: (cleared_hashes_count, removed_banners_count, seeded_baseline_count)
+        """
+        cleared_count = self.dedup_store.clear_news_cache()
+        removed_banners = self.dedup_store.purge_temp_banner_files()
+        seeded_count = await self.dedup_store.seed_baseline_from_rss_async(self.ingestion)
+        logger.info(f"🧹 [FULL CACHE PURGE & SEED COMPLETE] Cleared: {cleared_count} hashes | Banners removed: {removed_banners} | Baseline seeded: {seeded_count}")
+        return cleared_count, removed_banners, seeded_count
+
 # Global pipeline instance
 pipeline_engine = FlashNewsSuperBrainPipeline()
 
@@ -225,6 +239,11 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
 
 async def process_batch_news():
     """Fetch and process incoming news items from RSS feeds in batch."""
+    # Cold boot / Empty cache protection: Seed baseline first if empty to avoid blasting old news on Google Cloud update/restart
+    if not pipeline_engine.dedup_store.seen_hashes:
+        logger.info("🛡️ [CLEAN BOOT / EMPTY CACHE DETECTED] Initializing baseline RSS news hashes to prevent re-sending old news on update/restart...")
+        await pipeline_engine.dedup_store.seed_baseline_from_rss_async(pipeline_engine.ingestion)
+
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
     news_items = await pipeline_engine.ingestion.fetch_from_rss_async()
     if not news_items:
