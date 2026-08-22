@@ -549,9 +549,70 @@ class SuperSmartTelegramBot:
                         "• /border_archive - ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែន\n"
                         "• /national_desks - បញ្ជី ៣៧ ស្ថាប័នរដ្ឋ & ២៥ រាជធានី-ខេត្ត\n"
                         "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
-                        "• /ping - ពិនិត្យមើលល្បឿន Response Time"
+                        "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
+                        "💡 *ចំណាំ ៖* លោកអ្នកអាចផ្ញើសារសួរសំណួរដោយសេរី ឬផ្ញើ Facebook URL ចូលប្រព័ន្ធដោយផ្ទាល់ ឥតបាច់ប្រើ slash (`/`) ឡើយ!"
                     )
                     await self.send_message(chat_id, help_text)
+
+                else:
+                    # 3. Free-form AI Questions & Facebook URLs Handler
+                    if "facebook.com" in text or "fb.watch" in text or "fb.me" in text:
+                        await self.send_message(
+                            chat_id,
+                            f"🔍 *ប្រព័ន្ធ AI Super Brain កំពុងទាញយកខ្លឹមសារ និងធ្វើ AI Fact-Check សម្រាប់ Facebook URL ៖*\n`{text}`..."
+                        )
+                        try:
+                            from facebook_url_extractor import extract_facebook_url_content
+                            from ai_rewriter import SuperBrainAIRewriter
+                            from khmer_auditor import khmer_auditor
+
+                            fb_data = extract_facebook_url_content(text)
+                            extracted_content = fb_data.get("content", text)
+                            page_name = fb_data.get("page_name", "ប្រភព Facebook ផ្លូវការ")
+
+                            rewriter = SuperBrainAIRewriter()
+                            processed = rewriter.process_news(
+                                raw_id=f"fb_{int(time.time())}",
+                                title=extracted_content[:100],
+                                content=extracted_content,
+                                source=page_name,
+                                source_tier=1
+                            )
+
+                            clean_headline = khmer_auditor.audit_headline_purity(processed.khmer_headline)
+                            clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(processed.khmer_body)
+
+                            reply_text = (
+                                f"🌐 *លទ្ធផលនៃការវិភាគ & ផ្ទៀងផ្ទាត់ (Facebook Content Analysis) ៖*\n\n"
+                                f"*{clean_headline}*\n\n"
+                                f"{clean_body}\n\n"
+                                f"----------------------------------\n"
+                                f"🏛️ *ប្រភព ៖* `{page_name}` | 🔍 *ភាពជឿជាក់ ៖* `{processed.credibility_score}%`\n"
+                                f"⚡ *វិភាគដោយ ៖* `APEX Super Brain AI System`"
+                            )
+                            await self.send_message(chat_id, reply_text)
+                        except Exception as e:
+                            logger.error(f"Error extracting/analyzing Facebook URL: {e}")
+                            await self.send_message(
+                                chat_id,
+                                "⚠️ *ប្រព័ន្ធមិនអាចទាញយកខ្លឹមសារពី Facebook URL នេះបានឡើយ។ សូមពិនិត្យមើលថាតើតំណភ្ជាប់ជាសាធារណៈ (Public Post) ឬអត់!*"
+                            )
+                    else:
+                        # Free-form General AI Assistant Query
+                        await self.send_message(chat_id, f"🧠 *ប្រព័ន្ធ AI Super Brain កំពុងដំណើរការវិភាគ និងឆ្លើយតបសំណួរ ៖*\n`{text}`...")
+                        try:
+                            from ai_rewriter import SuperBrainAIRewriter
+                            from khmer_auditor import khmer_auditor
+
+                            rewriter = SuperBrainAIRewriter()
+                            ans = rewriter._query_llm_chain(
+                                f"សូជួយឆ្លើយតបសំណួរ ឬវិភាគអត្ថបទខាងក្រោមជាភាសាខ្មែរផ្លូវការ ដោយយោងតាមរដ្ឋធម្មនុញ្ញ មាត្រា ៥១/៥២ និងវចនានុក្រម ជួន ណាត ៖\n{text}"
+                            )
+                            clean_ans = khmer_auditor.sanitize_khmer_spelling_and_punctuation(ans)
+                            await self.send_message(chat_id, clean_ans)
+                        except Exception as e:
+                            logger.error(f"Error in free-form AI response: {e}")
+                            await self.send_message(chat_id, "⚠️ *សុំទោស! ប្រព័ន្ធ AI កំពុងមានបម្រែបម្រួលបច្ចេកទេស។ សូមព្យាយាមម្តងទៀត!*")
 
             # 2. Handle Inline Button Callback Queries
             elif "callback_query" in update:
