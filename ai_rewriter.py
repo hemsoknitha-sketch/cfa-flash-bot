@@ -453,11 +453,10 @@ class SuperBrainAIRewriter:
         else:
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
-        if len(source_name) > 35 or "កម្ពុជាពង្រឹង" in source_name:
+        if not source_name or len(source_name) > 25 or any(k in source_name for k in ["កម្ពុជាពង្រឹង", "បទល្មើស"]):
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
         clean_desc = content.strip() if content else clean_title
-        # Prevent title duplication at the start of paragraph 1
         if clean_desc.startswith(clean_title):
             clean_desc = clean_desc[len(clean_title):].strip(" -:៖\t\n")
 
@@ -465,10 +464,31 @@ class SuperBrainAIRewriter:
             clean_desc = fallback_translate_to_khmer(clean_desc)
         
         clean_desc = clean_desc.strip()
-        if not clean_desc or len(clean_desc) < 20:
-            clean_desc = clean_title
 
-        if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!") and not clean_desc.endswith("៕"):
+        # Smart Lead Story Generator for Empty / Duplicate Content
+        if not clean_desc or len(clean_desc) < 25 or clean_desc == clean_title:
+            if any(k in clean_title for k in ["ឆបោក", "អនឡាញ", "បទល្មើស"]):
+                clean_desc = (
+                    "អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ "
+                    "ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។"
+                )
+            elif any(k in clean_title for k in ["ព្រំដែន", "យោធា", "ការពារជាតិ", "កងទ័ព"]):
+                clean_desc = (
+                    "កងយោធពលខេមរភូមិន្ទ និងក្រសួងការពារជាតិកម្ពុជា បានបន្តបំពេញភារកិច្ចការពារអធិបតេយ្យភាព បូរណភាពទឹកដី "
+                    "និងសុខសន្តិភាពសង្គមជាតិយ៉ាងសកម្មបំផុត ដោយប្រកាន់ខ្ជាប់នូវស្មារតីទទួលខុសត្រូវខ្ពស់បំផុត។"
+                )
+            elif any(k in clean_title for k in ["សុខាភិបាល", "មាតា", "ទារក", "មន្ទីរពេទ្យ"]):
+                clean_desc = (
+                    "ក្រសួងសុខាភិបាល និងអាជ្ញាធរពាក់ព័ន្ធ បានរៀបចំនិងដាក់ឱ្យអនុវត្តនូវផែនទីបង្ហាញផ្លូវ និងវិធានការគន្លឹះនានា "
+                    "ដើម្បីលើកកម្ពស់សុខុមាលភាពប្រជាពលរដ្ឋ ជាពិសេសការកាត់បន្ថយអត្រាមរណភាពមាតានិងទារកប្រកបដោយប្រសិទ្ធភាពខ្ពស់។"
+                )
+            else:
+                clean_desc = (
+                    "រាជរដ្ឋាភិបាលកម្ពុជា និងស្ថាប័នពាក់ព័ន្ធ បាននិងកំពុងរៀបចំ និងអនុវត្តនូវវិធានការគន្លឹះជាច្រើន "
+                    "ក្នុងគោលបំណងលើកកម្ពស់ជីវភាពរស់នៅ ការពារសន្តិសុខសង្គម និងការអភិវឌ្ឍប្រទេសជាតិប្រកបដោយចីរភាព។"
+                )
+
+        if not clean_desc.endswith("។") and not clean_desc.endswith("»") and not clean_desc.endswith("!") and not clean_desc.endswith("<ctrl42>"):
             clean_desc += "។"
 
         p1 = f"{dateline} {clean_desc}"
