@@ -325,9 +325,19 @@ class SuperSmartTelegramBot:
                         await self.send_message(chat_id, answer)
                     else:
                         records = defense_engine.get_border_archives(limit=5)
-                        title_hdr = "🛡️ *ប្រព័ន្ធស្រាវជ្រាវ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា និងព្រំដែនកម្ពុជា ៖*\n\n📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
-                        body_lines = [f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n*{item.get('title')}*" for idx, item in enumerate(records, 1)]
-                        await self.send_message(chat_id, title_hdr + "\n\n".join(body_lines))
+                        title_hdr = (
+                            "🛡️ *ប្រព័ន្ធស្រាវជ្រាវ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា និងព្រំដែនកម្ពុជា ៖*\n\n"
+                            "📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
+                        )
+                        body_items = []
+                        from khmer_auditor import khmer_auditor
+                        for idx, item in enumerate(records, 1):
+                            clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
+                            body_items.append(
+                                f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n"
+                                f"{clean_t}"
+                            )
+                        await self.send_message(chat_id, title_hdr + "\n\n".join(body_items))
 
                 elif text.startswith("/factcheck"):
                     claim = text.replace("/factcheck", "").strip()
