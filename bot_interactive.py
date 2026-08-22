@@ -271,6 +271,19 @@ class SuperSmartTelegramBot:
                 message_id = msg.get("message_id")
                 raw_text = msg.get("text", "").strip()
 
+                # 0. Anti-Spam Rate Limiter Check (Max 5 reqs/10s per user)
+                if security_sentinel.is_rate_limited(chat_id):
+                    await self.send_message(
+                        chat_id,
+                        "🛑 *[ANTI-SPAM LOCK ៖ សារត្រូវបានផ្អាកជាបណ្តោះអាសន្ន]*\n\n"
+                        "លោកអ្នកបានផ្ញើសារលឿនពេក។ ប្រព័ន្ធសន្តិសុខបានផ្អាកការឆ្លើយតបរយៈពេល ៣០ វិនាទី ដើម្បីការពារការរំខាន Spam!\n\n"
+                        "💡 *សូមរង់ចាំ ៣០ វិនាទី រួចសួរសារជាថ្មី!*"
+                    )
+                    return
+
+                # Sanitize input text payload against Prompt Injections, XSS, and Malware
+                raw_text = security_sentinel.sanitize_input_payload(raw_text)
+
                 # 1. Security Gatekeeper: Check for unauthorized media attachments (photo, video, document, etc.)
                 MEDIA_KEYS = ["photo", "video", "document", "voice", "audio", "animation", "sticker", "video_note"]
                 has_media = any(key in msg for key in MEDIA_KEYS)
