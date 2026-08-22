@@ -1,5 +1,7 @@
 import aiohttp
 import asyncio
+import time
+import os
 import logging
 from typing import Optional
 from config import config
@@ -8,38 +10,52 @@ logger = logging.getLogger(__name__)
 
 class FacebookPublisher:
     """
-    Facebook Graph API Publisher.
+    Facebook Graph API Sequential Queue Publisher.
     Features:
-    1. Automatic posting to Facebook Page Feed / Photos API with In-Memory Photo Buffer.
-    2. Strict 30-min Meta Pacing Governor for 100% Meta Code 368 Anti-Spam Compliance.
-    3. Zero Telegram Duplicate Messages (Silent Logging on FB Errors).
+    1. Async Queue Worker ensuring every post is published sequentially every 30 mins (1800s).
+    2. Guaranteed non-blocking execution (reads image bytes upfront into memory).
+    3. 100% Meta Code 368 Anti-Spam Safety Governor.
     """
     def __init__(self, page_id: str = config.FB_PAGE_ID, access_token: str = config.FB_PAGE_ACCESS_TOKEN):
         self.page_id = page_id
         self.access_token = access_token
         self.graph_url = f"https://graph.facebook.com/v19.0/{self.page_id}"
-        self.last_post_time = 0   # Rate Governor timestamp (Min 30 mins = 1800s between posts)
-        self.min_post_interval = 1800  # 30 mins safety interval for 100% Meta Policy Compliance
+        self.last_post_time = 0
+        self.min_post_interval = 1800  # 30 mins safety window
+        self.queue = asyncio.Queue()
+        self.worker_task = asyncio.create_task(self._facebook_queue_worker())
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
-        Non-blocking Facebook Page Publisher.
-        Reads image bytes upfront before main.py deletes the file, then paces post via 30-min Governor.
+        Non-blocking Facebook Enqueuer.
+        Reads image bytes into memory before temporary banner file is deleted, then queues post.
         """
-        import os
         image_bytes = None
         if image_path and os.path.exists(image_path):
             try:
                 with open(image_path, "rb") as f:
                     image_bytes = f.read()
             except Exception as e:
-                logger.warning(f"Could not read image file bytes for Facebook: {e}")
+                logger.warning(f"Could not read image bytes for Facebook: {e}")
 
-        asyncio.create_task(self._publish_with_pacing(caption, image_bytes))
+        await self.queue.put((caption, image_bytes))
+        logger.info(f"📥 [FACEBOOK QUEUED] News item added to Facebook Queue (Queue Depth: {self.queue.qsize()})")
         return True
 
-    async def _publish_with_pacing(self, caption: str, image_bytes: Optional[bytes] = None):
-        import time
+    async def _facebook_queue_worker(self):
+        """Sequential Queue Worker Loop for 30-minute Facebook pacing."""
+        while True:
+            try:
+                caption, image_bytes = await self.queue.get()
+                await self._execute_publish(caption, image_bytes)
+                self.queue.task_done()
+            except asyncio.CancelledError:
+                break
+            except Exception as e:
+                logger.error(f"Error in Facebook Queue Worker: {e}")
+                await asyncio.sleep(5)
+
+    async def _execute_publish(self, caption: str, image_bytes: Optional[bytes]):
         logger.info(f"[FACEBOOK PUBLISHER] Preparing to publish Flash News to Page ID: {self.page_id}...")
 
         if self.access_token in ("MOCK_FB_PAGE_ACCESS_TOKEN", "your_long_lived_facebook_page_access_token", ""):
@@ -49,6 +65,7 @@ class FacebookPublisher:
             logger.info(f"\n--- FACEBOOK POST PREVIEW ---\n{caption}\n-----------------------------")
             return
 
+        # Enforce 30-minute safety interval
         now = time.time()
         time_since_last = now - self.last_post_time
         if self.last_post_time > 0 and time_since_last < self.min_post_interval:
@@ -82,7 +99,6 @@ class FacebookPublisher:
                     error_obj = res_json.get("error", {})
                     error_msg = f"Graph API Error (HTTP {resp.status}): {error_obj.get('message', res_json)}"
                     logger.error(f"⚠️ [FACEBOOK PUBLISH NOTICE] {error_msg}")
-                    # Update governor timestamp on rate limit so we don't spam Meta
                     self.last_post_time = time.time()
         except Exception as e:
             logger.error(f"⚠️ [FACEBOOK EXCEPTION] {e}")

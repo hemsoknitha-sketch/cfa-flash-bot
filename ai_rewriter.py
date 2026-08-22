@@ -26,8 +26,9 @@ STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
 2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD): Scan the text to extract the exact geographical location/city/province where the event occurred. Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'ខេត្តបាត់ដំបង៖ ', 'ទីក្រុងវ៉ាស៊ីនតោន៖ ', 'ទីក្រុងហ្សឺណែវ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the lead news story.
 3. PARAGRAPH 2 (SUPER BRAIN DYNAMIC SOURCE): MUST start with: "យោងតាមប្រភពព័ត៌មានច្បាស់ការពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ បានបញ្ជាក់ឱ្យដឹងថា..." followed by details connecting to human rights, anti-corruption, or rule of law.
-4. PARAGRAPH 3 & 4 (IMPACT & CONCLUSION): Write fluid, elegant Khmer prose paragraphs analyzing the positive social impact, benefits to citizens, and national prestige. End the final paragraph with the official Khmer full stop "៕".
-5. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
+4. PARAGRAPH 3 (IMPACT & CONCLUSION): Write a fluid, elegant Khmer prose paragraph analyzing the positive social impact and benefits to citizens. End the final paragraph with the official Khmer full stop "៕".
+5. LENGTH & PROSE CONSTRAINT: Write exactly 3 complete, rich paragraphs with a total length of 600 to 800 characters so every sentence completes naturally with "៕" without requiring truncation.
+6. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
 
 Respond ONLY in valid JSON matching this schema:
 {
@@ -475,7 +476,15 @@ class SuperBrainAIRewriter:
         # Telegram Photo Caption Limit Safety Guard (1024 chars max)
         max_body_len = 980 - len(headline_clean) - len(leak_banner) - len(footer_signature)
         if len(body_clean) > max_body_len and max_body_len > 100:
-            body_clean = body_clean[:max_body_len].rsplit(" ", 1)[0] + "..."
+            truncated = body_clean[:max_body_len]
+            # Smart Sentence-Boundary Truncation: Find last Khmer sentence ending ('។' or '៕')
+            last_full_stop = max(truncated.rfind("។"), truncated.rfind("៕"))
+            if last_full_stop > 100:
+                body_clean = truncated[:last_full_stop + 1]
+                if body_clean.endswith("។"):
+                    body_clean = body_clean[:-1] + "៕"
+            else:
+                body_clean = truncated.rsplit(" ", 1)[0] + "៕"
 
         return f"*{headline_clean}*\n\n{body_clean}{leak_banner}{footer_signature}"
 

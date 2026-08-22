@@ -98,17 +98,17 @@ class BannerEngine:
     font-style: normal;
 }}"""
 
-        # Dynamic Font Size & Line Height calculation for Playwright
+        # Dynamic Font Size & Line Height calculation for Playwright (Super Large HD Typography)
         head_len = len(clean_headline)
         if head_len <= 60:
-            head_font_size = 48
-            line_height = 1.5
-        elif head_len <= 110:
-            head_font_size = 42
-            line_height = 1.5
-        else:
-            head_font_size = 36
+            head_font_size = 54
             line_height = 1.45
+        elif head_len <= 100:
+            head_font_size = 48
+            line_height = 1.45
+        else:
+            head_font_size = 42
+            line_height = 1.4
 
         html_content = f"""<!DOCTYPE html>
 <html>
@@ -318,26 +318,26 @@ body {{
         clean_head = self._sanitize_headline(headline)
         head_len = len(clean_head)
 
-        # Dynamic Font Size Selection with Auto-Reduction if needed
+        # Dynamic Font Size Selection for Super Large HD Typography
         if head_len <= 60:
+            initial_font_size = 52
+        elif head_len <= 100:
             initial_font_size = 46
-        elif head_len <= 110:
-            initial_font_size = 40
         else:
-            initial_font_size = 36
+            initial_font_size = 40
 
         max_line_width = 1000  # 100px margins on left & right
         current_font_size = initial_font_size
         
-        while current_font_size >= 28:
+        while current_font_size >= 34:
             font_head = ImageFont.truetype(battambang_path, current_font_size) if os.path.exists(battambang_path) else ImageFont.load_default()
             lines = self._split_khmer_text_pil(clean_head, font_head, max_line_width, draw)
             if len(lines) <= 3:
                 break
-            current_font_size -= 4
+            current_font_size -= 3
 
-        font_badge = ImageFont.truetype(battambang_path, 26) if os.path.exists(battambang_path) else ImageFont.load_default()
-        font_cat = ImageFont.truetype(moul_path, 40) if os.path.exists(moul_path) else (ImageFont.truetype(battambang_path, 40) if os.path.exists(battambang_path) else ImageFont.load_default())
+        font_badge = ImageFont.truetype(battambang_path, 28) if os.path.exists(battambang_path) else ImageFont.load_default()
+        font_cat = ImageFont.truetype(moul_path, 44) if os.path.exists(moul_path) else (ImageFont.truetype(battambang_path, 44) if os.path.exists(battambang_path) else ImageFont.load_default())
         font_head = ImageFont.truetype(battambang_path, current_font_size) if os.path.exists(battambang_path) else ImageFont.load_default()
         font_footer = ImageFont.truetype(battambang_path, 22) if os.path.exists(battambang_path) else ImageFont.load_default()
 

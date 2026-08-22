@@ -46,7 +46,17 @@ class TelegramBroadcaster:
                     photo_data = aiohttp.FormData()
                     photo_data.add_field("chat_id", str(dest_chat_id))
                     
-                    caption_text = message_text if len(message_text) <= 1020 else message_text[:1015] + "..."
+                    if len(message_text) <= 1020:
+                        caption_text = message_text
+                    else:
+                        truncated = message_text[:1010]
+                        last_stop = max(truncated.rfind("។"), truncated.rfind("៕"))
+                        if last_stop > 200:
+                            caption_text = truncated[:last_stop + 1]
+                            if caption_text.endswith("។"):
+                                caption_text = caption_text[:-1] + "៕"
+                        else:
+                            caption_text = truncated.rsplit(" ", 1)[0] + "៕"
                     photo_data.add_field("caption", caption_text)
                     photo_data.add_field("parse_mode", "Markdown")
                     photo_data.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
