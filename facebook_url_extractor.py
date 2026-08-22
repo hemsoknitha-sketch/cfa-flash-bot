@@ -74,11 +74,18 @@ class FacebookURLExtractorEngine:
                         if page_match:
                             source_name = f"Facebook Page [{html.unescape(page_match.group(1))}]"
                         
-                        # Clean view/reaction counts prefix e.g. "ចំនួនមើល 37 ពាន់ · ប្រតិកម្ម 4.3ពាន់ | "
-                        clean_title = re.sub(r'^ចំនួនមើល.*?\b\|\s*', '', title)
-                        clean_title = re.sub(r'\s*\|\s*Facebook$', '', clean_title).strip()
+                        # Clean view/reaction counts prefix & branding e.g. "ចំនួនមើល 37 ពាន់ · ប្រតិកម្ម 4.3ពាន់ | "
+                        def clean_fb_text(t: str) -> str:
+                            if not t:
+                                return ""
+                            t = re.sub(r'ចំនួនមើល[^\|]*?\|', '', t)
+                            t = re.sub(r'ប្រតិកម្ម[^\|]*?\|', '', t)
+                            t = re.sub(r'^\s*[\d\.\,]+\s*(?:ពាន់|លាន|K|M|views|reactions)\s*·?\s*', '', t, flags=re.IGNORECASE)
+                            t = re.sub(r'\s*\|\s*(?:Facebook|ពលរដ្ឋសកម្ម)$', '', t, flags=re.IGNORECASE).strip()
+                            return t
 
-                        clean_desc = re.sub(r'^ចំនួនមើល.*?\b\|\s*', '', desc).strip()
+                        clean_title = clean_fb_text(title)
+                        clean_desc = clean_fb_text(desc)
 
                         if clean_title and clean_desc and clean_title != clean_desc:
                             content_text = f"{clean_title}\n\n{clean_desc}"

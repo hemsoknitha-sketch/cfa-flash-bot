@@ -156,7 +156,7 @@ class KhmerLanguageAuditor:
         clean_body = self.sanitize_khmer_spelling_and_punctuation(clean_body)
 
         # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖')
-        clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖\s*((?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s<ctrl42>]+|ប្រទេស[^\s<ctrl42>]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖)', r'\1', clean_body)
+        clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', clean_body)
         clean_body = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', clean_body)
 
         # Split into paragraphs
@@ -176,19 +176,19 @@ class KhmerLanguageAuditor:
         for i, p in enumerate(paragraphs):
             # Clean duplicate location prefix on paragraph 1
             if i == 0:
-                p = re.sub(r'^(?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s៖]+|ប្រទេស[^\s៖]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖\s*((?:រាជធានីភ្នំពេញ|ខេត្ត[^\s៖]+|ក្រុង[^\s៖]+|ទីក្រុង[^\s<ctrl42>]+|ប្រទេស[^\s<ctrl42>]+|សហរដ្ឋអាមេរិក|ហុងកុង)៖)', r'\1', p)
+                p = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', p)
                 p = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', p)
 
             # Ensure paragraph ends with proper Khmer punctuation
             if not p.endswith('។') and not p.endswith('៕'):
                 p += '។'
             
-            # If it's the last paragraph, change final '។' to '<ctrl42>'
+            # If it's the last paragraph, change final '។' to '៕'
             if i == len(paragraphs) - 1:
-                if p.endswith('។'):
-                    p = p[:-1] + '៕'
-                elif not p.endswith('<ctrl42>'):
+                p = re.sub(r'[។\s]+$', '', p)
+                if not p.endswith('៕'):
                     p += '៕'
+                p = re.sub(r'៕+', '៕', p)
             
             formatted_paragraphs.append(p)
 
@@ -201,7 +201,7 @@ class KhmerLanguageAuditor:
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
         attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}"
-        if attribution_phrase not in body and source_name not in body:
+        if "យោងតាមប្រភព" not in body and source_name not in body:
             paragraphs = body.split('\n\n')
             if len(paragraphs) >= 2:
                 paragraphs[1] = f"{attribution_phrase} បានបញ្ជាក់ឱ្យដឹងថា " + paragraphs[1]
