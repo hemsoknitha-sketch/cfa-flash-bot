@@ -130,6 +130,16 @@ class DefenseIntelligenceEngine:
             "Provide a complete, accurate, 3-paragraph Khmer analysis response. End with '៕'."
         )
 
+        # 1. Try Hugging Face Fine-Tuned Model (hemsinath/cfa-flash-bot)
+        try:
+            from huggingface_engine import hf_polymath_ai
+            hf_res = hf_polymath_ai.ask_polymath_ai(f"វិភាគ និងឆ្លើយតបសំណួរស្រាវជ្រាវយោធា/ការទូត ៖ {question}\n\nបរិបទព័ត៌មានផ្លូវការ ៖\n{context_str}")
+            if hf_res and not hf_res.startswith("❌"):
+                return f"🤖 *[Hugging Face AI Fine-Tuned Model: hemsinath/cfa-flash-bot]*\n\n{hf_res}"
+        except Exception as e:
+            logger.warning(f"Hugging Face fine-tuned model query failed: {e}")
+
+        # 2. Try Gemini 3.6 Flash Multi-Key Engine
         try:
             from gemini_key_pool import gemini_key_pool
             client_tuple = gemini_key_pool.get_client()
