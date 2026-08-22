@@ -96,6 +96,27 @@ class DefenseIntelligenceEngine:
         except Exception as e:
             logger.error(f"Error saving defense archives: {e}")
 
+    def is_border_or_defense_news(self, title: str, content: str, source_name: str = "") -> bool:
+        """
+        Super Smart Border & Military Security Filter Gatekeeper.
+        Ensures 100% EXCLUSIVE focus on Cambodian border, military defense, diplomatic sovereignty, and territorial integrity news.
+        ABSOLUTELY EXCLUDES unrelated general news (sports, business, entertainment, etc.).
+        """
+        text = f"{title} {content} {source_name}".lower()
+
+        # Strict Cambodian Border & Military Defense Keywords
+        strict_border_keywords = [
+            "ព្រំដែន", "ច្រកទ្វារ", "បង្គោលព្រំដែន", "ខ្សែបន្ទាត់ព្រំដែន",
+            "អធិបតេយ្យ", "បូរណភាពទឹកដី", "ឈ្លានពាន", "ស្ទឹងបត់", "ប្រាសាទព្រះវិហារ",
+            "អានសេះ", "តាមាន់", "តាគ្របី", "ច្រកព្រំដែន", "ការពារជាតិ", "ក្រសួងការពារជាតិ",
+            "កងយោធពលខេមរភូមិន្ទ", "អគ្គបញ្ជាការ", "មេបញ្ជាការ", "យោធភូមិភាគ", "កងទ័ព",
+            "វីរយុទ្ធជន", "ជួរមុខ", "បន្ទាយ", "បញ្ជាការដ្ឋាន", "ក្រសួងការបរទេស", "mfaic",
+            "កំណត់ទូត", "រំលោភបំពាន", "សន្ធិសញ្ញាព្រំដែន", "អ្នកសង្កេតការណ៍អាស៊ាន",
+            "ក្រុមអ្នកសង្កេតការណ៍", "យោធា", "កងកម្លាំងប្រដាប់អាវុធ"
+        ]
+
+        return any(kw in text for kw in strict_border_keywords)
+
     def archive_post(
         self,
         post_id: str,
@@ -106,8 +127,13 @@ class DefenseIntelligenceEngine:
         timestamp: Optional[float] = None
     ) -> bool:
         """
-        Archives a military command or diplomatic statement with SHA-256 deduplication.
+        Archives a military command or diplomatic statement with SHA-256 deduplication and strict border filter.
         """
+        # Strict Border & Military Filter Check
+        if not self.is_border_or_defense_news(title, content, source_name):
+            logger.info(f"🛡️ [DEFENSE ENGINE REJECTED] Skipping non-border news: '{title[:40]}...'")
+            return False
+
         full_text = f"{title} - {content}"
         content_hash = hashlib.sha256(full_text.strip().encode("utf-8")).hexdigest()
 
