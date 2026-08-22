@@ -31,15 +31,23 @@ class SecuritySentinel:
 
     def sanitize_input_payload(self, text: str) -> str:
         """
-        Layer 2: Sanitizes incoming RSS / Web payloads against XSS and SQL Injection attacks.
+        Layer 2: Sanitizes incoming RSS / Web payloads against XSS, HTML tags (<p>, <div>), and HTML entities (&nbsp;).
         """
         if not text:
             return ""
 
-        # 1. Strip malicious script tags
+        import html
+
+        # 1. Strip all HTML tags e.g. <p>, </p>, <div>, <br>
+        text = re.sub(r'<[^>]+>', '', text)
+
+        # 2. Unescape HTML entities e.g. &nbsp; -> space, &quot; -> "
+        text = html.unescape(text)
+
+        # 3. Strip malicious script tags
         text = self.xss_pattern.sub('', text)
 
-        # 2. Neutralize suspicious SQL patterns
+        # 4. Neutralize suspicious SQL patterns
         text = self.sql_injection_pattern.sub('', text)
 
         return text.strip()
