@@ -26,11 +26,11 @@ def apply_chuon_nath_orthography(text: str) -> str:
 
 def super_smart_khmer_formatter(text: str) -> str:
     """
-    Super Smart Khmer Professional Literary & Journalistic Text Formatter.
+    Super Smart Khmer Professional Literary & Journalistic Text Formatter V5.0.
+    - Preserves all paragraph breaks (\n\n).
     - Enforces Chuon Nath Official Dictionary Orthography (វចនានុក្រម ជួន ណាត).
-    - Eliminates artificial word-by-word spaces (សរសេរ មួយ ពាក្យ ដក ឃ្លា មួយ ពាក្យ).
-    - Merges words into continuous natural Khmer clauses (សរសេរជាប់គ្នាតាមទម្រង់អក្សរសិល្បិ៍).
-    - Inserts natural clause/phrase spacing (ដកឃ្លាមួយវគ្គៗ) around conjunctions & clause boundaries.
+    - Preserves & enforces formal Honorific & Title spacing (ឯកឧត្តម, សម្តេច, លោកជំទាវ, នាយឧត្តមសេនីយ៍, សាស្ត្រាចារ្យ, etc.).
+    - Inserts natural clause/phrase spacing around connectors & punctuation.
     """
     if not text:
         return text
@@ -38,29 +38,43 @@ def super_smart_khmer_formatter(text: str) -> str:
     # Step 0: Chuon Nath Dictionary Spelling Normalization
     text = apply_chuon_nath_orthography(text)
 
-    # Step 1: Merge artificial spaces between Khmer characters
+    # Split into lines/paragraphs to preserve \n and \n\n structure
+    lines = text.split("\n")
+    formatted_lines = []
+
     khmer_char = r'[\u1780-\u17ff]'
-    prev = ''
-    curr = text
-    while prev != curr:
-        prev = curr
-        curr = re.sub(f'({khmer_char})\s+({khmer_char})', r'\1\2', curr)
 
-    # Step 2: Smart Clause Spacing around key Khmer connectors
-    connectors = ['និង', 'ហើយ', 'ដើម្បី', 'ដោយ', 'ដែល', 'កាលពី', 'ប៉ុន្តែ', 'ព្រមទាំង', 'ជាមួយ', 'តាម']
-    for conn in connectors:
-        curr = re.sub(rf'({khmer_char})({conn})({khmer_char})', r'\1 \2 \3', curr)
+    for line in lines:
+        if not line.strip():
+            formatted_lines.append("")
+            continue
 
-    # Step 3: Space after Khmer full stop (។), colon (៖), etc.
-    curr = re.sub(r'([។៖!?:])\s*', r'\1 ', curr)
+        curr = line.strip()
 
-    # Step 4: Spacing between Khmer characters and English words / numbers / symbols
-    curr = re.sub(rf'({khmer_char})([A-Za-z0-9%])', r'\1 \2', curr)
-    curr = re.sub(rf'([A-Za-z0-9%])({khmer_char})', r'\1 \2', curr)
+        # Step 1: Normalize horizontal spaces only (preserve words, do not collapse all spaces blindly)
+        curr = re.sub(r'[ \t]+', ' ', curr)
 
-    # Step 5: Normalize whitespace
-    curr = re.sub(r'\s+', ' ', curr).strip()
-    return curr
+        # Step 2: Ensure proper Honorific Spacing (ឯកឧត្តម, សម្តេច, លោកជំទាវ, នាយឧត្តមសេនីយ៍, សាស្ត្រាចារ្យ, ឧបនាយករដ្ឋមន្ត្រី, រដ្ឋមន្ត្រី, អភិបាល, ឥស្សរជន)
+        honorifics = [
+            'សម្តេចពិជ័យសេនា', 'សម្តេចតេជោ', 'សម្តេចកិត្តិព្រឹទ្ធបណ្ឌិត', 'សម្តេចធិបតី', 'សម្តេចមហារដ្ឋសភាធិការធិបតី', 'សម្តេច',
+            'ឯកឧត្តម', 'លោកជំទាវ', 'លោកស្រី', 'លោក', 'នាយឧត្តមសេនីយ៍', 'ឧត្តមសេនីយ៍', 'សាស្ត្រាចារ្យ', 'សាស្រ្តាចារ្យ',
+            'ឧបនាយករដ្ឋមន្ត្រី', 'រដ្ឋមន្ត្រី', 'អភិបាលរង', 'អភិបាល', 'មេបញ្ជាការ', 'ប្រធាន', 'អនុប្រធាន'
+        ]
+        for h in honorifics:
+            curr = re.sub(rf'({h})\s*({khmer_char})', r'\1 \2', curr)
+
+        # Step 3: Space after Khmer full stop (។), closing full stop (៕), colon (៖)
+        curr = re.sub(r'([។៖!?:])\s*', r'\1 ', curr)
+
+        # Step 4: Spacing between Khmer characters and English words / numbers / symbols
+        curr = re.sub(rf'({khmer_char})([A-Za-z0-9%])', r'\1 \2', curr)
+        curr = re.sub(rf'([A-Za-z0-9%])({khmer_char})', r'\1 \2', curr)
+
+        # Step 5: Clean up double spaces within the line
+        curr = re.sub(r'[ \t]+', ' ', curr).strip()
+        formatted_lines.append(curr)
+
+    return "\n".join(formatted_lines)
 
 # Alias for backward compatibility
 clean_khmer_spaces = super_smart_khmer_formatter

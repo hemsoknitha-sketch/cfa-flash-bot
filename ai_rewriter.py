@@ -24,10 +24,10 @@ Your mission is to evaluate incoming news from all global social networks and ne
 
 STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
-2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD): Scan the text to extract the exact geographical location/city/province where the event occurred. Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'ខេត្តបាត់ដំបង៖ ', 'ទីក្រុងវ៉ាស៊ីនតោន៖ ', 'ទីក្រុងហ្សឺណែវ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the lead news story.
-3. PARAGRAPH 2 (PROFESSIONAL JOURNALISTIC SOURCE ATTRIBUTION): Cite the official institution or news source cleanly in formal Khmer (e.g. "យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name} បានបញ្ជាក់ឱ្យដឹងថា..."). NEVER insert internal AI tier names, system technical terms, or "@CFAflashBot AI Super Brain" inside the news prose body!
-4. PARAGRAPH 3 (IMPACT & CONCLUSION): Write a fluid, elegant Khmer prose paragraph analyzing the positive social impact and benefits to citizens. End the final paragraph with the official Khmer full stop "៕".
-5. LENGTH & PROSE CONSTRAINT: Write exactly 3 complete, rich paragraphs with a total length of 600 to 800 characters so every sentence completes naturally with "៕" without requiring truncation.
+2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD STORY): Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the main lead story details.
+3. PARAGRAPH 2 (PROFESSIONAL JOURNALISTIC ATTRIBUTION & RULE OF LAW): MUST be separated by a double newline (\n\n). Cite official sources cleanly ("យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}...") analyzing leadership transparency, accountability, and rule of law. NEVER insert internal AI terms like "Super Brain System" in prose body!
+4. PARAGRAPH 3 (CONSTITUTIONAL & PUBLIC WELFARE CONCLUSION): MUST be separated by a double newline (\n\n). Connect the story to Cambodian Constitution Articles (Article 31, 35, 41, 51, or 52) and citizen benefits, ending cleanly with '៕'.
+5. THREE PARAGRAPH CONSTRAINT: Write EXACTLY 3 complete, distinct paragraphs separated by double newlines (\n\n). NEVER collapse paragraphs into a single long block!
 6. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
 
 Respond ONLY in valid JSON matching this schema:
@@ -459,11 +459,10 @@ class SuperBrainAIRewriter:
             clean_desc = clean_desc[:200] + "..."
 
         p1 = f"{dateline} {clean_desc}"
-        p2 = f"យោងតាមការបញ្ជាក់ពី {source_name} ដែលប្រព័ន្ធខួរក្បាលឆ្លាតវៃ @CFAflashBot AI Super Brain ឆែកឃើញ ព្រឹត្តិការណ៍នេះគឺជាជំហានដ៏សំខាន់ក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់ភាពអសកម្ម។"
-        p3 = f"ផ្អែកលើស្មារតី មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញកម្ពុជា ការការពាររបបដឹកនាំ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការរក្សាសន្តិភាព ស្ថិរភាព និងនីតិរដ្ឋ។"
-        p4 = f"ជាសន្និដ្ឋាន ការគោរពច្បាប់ និងប្រជាធិបតេយ្យសេរីពហុបក្ស នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពជូនជាតិ និងប្រជាជនទាំងមូល៕"
+        p2 = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name} បានបញ្ជាក់ឱ្យដឹងថា ព្រឹត្តិការណ៍នេះគឺជាជំហានដ៏សំខាន់ក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្ម។"
+        p3 = f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ និងមាត្រា ៥២ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរពច្បាប់ នីតិរដ្ឋ និងប្រជាធិបតេយ្យសេរីពហុបក្ស នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាព និងសុខសន្តិភាពជានិរន្តរ៍ជូនជាតិ និងប្រជាជនទាំងមូល៕"
 
-        body = f"{p1}\n\n{p2}\n\n{p3}\n\n{p4}"
+        body = f"{p1}\n\n{p2}\n\n{p3}"
         impact = "លើកកម្ពស់សិទ្ធិមនុស្ស មាត្រា ៥១ និងនីតិរដ្ឋនៅកម្ពុជា"
 
         formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, is_leak)
