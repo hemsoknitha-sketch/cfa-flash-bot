@@ -19,9 +19,9 @@ class BannerEngine:
     Features:
     1. High-Definition Playwright HTML5 OpenType Khmer Engine (HarfBuzz).
     2. Synchronized PIL/Pillow Fallback Engine with 100% Identical Branding:
-       - 100% Center-Aligned Typography (Badge, Category Title, Headline Lines)
+       - 100% Center-Aligned Typography (Badge Header, Category Title, Headline Lines)
        - Dynamic Font Sizing & Pixel-Width Precision Wrapping (0% Text Overflow past margins)
-       - Safe Khmer Syllable Cluster Splitting (0% Dotted Circles / Tofu Box Grapheme Protection)
+       - Syllable-Safe Splitting (0% Dotted Circles / Tofu Box Grapheme Protection)
        - Maximum 100% Ultra-Crisp Image Quality Output
     3. Optimized Linux VM launch flags (--no-sandbox, 30s max timeout).
     """
@@ -48,6 +48,12 @@ class BannerEngine:
                 logger.error(f"Failed to read font {font_name}: {e}")
         return ""
 
+    def _sanitize_headline(self, headline: str) -> str:
+        """Cleans input headline, removing newlines and redundant spaces."""
+        clean = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "")
+        clean = " ".join(clean.replace("\r", " ").replace("\n", " ").split())
+        return clean.strip()
+
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", use_playwright: bool = True) -> str:
         """
         Generates Ultra-Crisp 4K HD Banner Image (1200x630 JPEG, Quality=100) with 100% Center Alignment,
@@ -55,7 +61,7 @@ class BannerEngine:
         """
         logger.info(f"🎨 [BANNER ENGINE] Generating Banner for: '{headline[:60]}...'")
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
-        clean_headline = headline.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "").strip()
+        clean_headline = self._sanitize_headline(headline)
 
         # Method 1: High-Definition Playwright OpenType Khmer Engine (Primary Default when available)
         if use_playwright and async_playwright is not None:
@@ -72,7 +78,7 @@ class BannerEngine:
         battambang_b64 = self._get_font_b64("Battambang-Regular.ttf")
         moul_b64 = self._get_font_b64("Moul-Regular.ttf")
 
-        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 38px; width: auto; vertical-align: middle; border-radius: 6px;" />' if logo_b64 else '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
+        logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 38px; width: 38px; border-radius: 50%; vertical-align: middle; object-fit: cover;" />' if logo_b64 else '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
 
         font_faces = ""
         if battambang_b64:
@@ -166,7 +172,7 @@ body {{
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    max-width: 1080px;
+    max-width: 1000px;
     width: 100%;
     margin: 10px auto;
 }}
@@ -178,7 +184,7 @@ body {{
     line-height: {line_height};
     color: #ffffff;
     text-align: center;
-    max-width: 1080px;
+    max-width: 1000px;
     width: 100%;
     word-wrap: break-word;
     overflow-wrap: break-word;
@@ -246,64 +252,50 @@ body {{
 
     def _split_khmer_text_pil(self, text: str, font: ImageFont.FreeTypeFont, max_width: int, draw: ImageDraw.Draw) -> List[str]:
         """
-        Smart Khmer Syllable & Pixel-Width Line Wrapping for PIL Engine.
+        Super Smart Syllable & Pixel-Width Line Wrapping for PIL Engine.
+        Splits text into lines where EVERY line width <= max_width (1000px).
         Prevents breaking Khmer subscript characters (Coeng '\u17d2') to eliminate dotted circle '◌' tofu.
         """
-        bbox = draw.textbbox((0, 0), text, font=font)
+        clean_text = " ".join(text.replace("\r", " ").replace("\n", " ").split())
+        bbox = draw.textbbox((0, 0), clean_text, font=font)
         if (bbox[2] - bbox[0]) <= max_width:
-            return [text]
+            return [clean_text]
 
-        # Try space splitting first
-        words = text.replace('\u200b', ' ').split(' ')
-        if len(words) > 1:
-            lines = []
-            curr = ""
-            for w in words:
-                test = (curr + " " + w).strip() if curr else w
-                b = draw.textbbox((0, 0), test, font=font)
-                if (b[2] - b[0]) <= max_width:
-                    curr = test
-                else:
-                    if curr:
-                        lines.append(curr)
-                    curr = w
-            if curr:
-                lines.append(curr)
-            
-            all_fit = all((draw.textbbox((0, 0), l, font=font)[2] - draw.textbbox((0, 0), l, font=font)[0]) <= max_width for l in lines)
-            if all_fit:
-                return lines
-
-        # Syllable-safe splitting for continuous Khmer text without spaces
         coeng = '\u17d2'
-        safe_splits = []
-        i = 0
-        while i < len(text):
-            char = text[i]
-            if i + 1 < len(text) and text[i+1] == coeng:
-                i += 1
-                continue
-            if char == coeng:
-                i += 1
-                continue
-            safe_splits.append(i + 1)
-            i += 1
+        safe_indices = [0]
+        for i in range(1, len(clean_text)):
+            char = clean_text[i]
+            prev = clean_text[i-1]
+            if char == ' ' or (prev != coeng and char != coeng):
+                safe_indices.append(i)
+        safe_indices.append(len(clean_text))
 
         lines = []
-        curr_start = 0
-        last_safe = 0
-
-        for pos in safe_splits:
-            chunk = text[curr_start:pos]
-            b = draw.textbbox((0, 0), chunk, font=font)
-            chunk_w = b[2] - b[0]
-            if chunk_w > max_width and last_safe > curr_start:
-                lines.append(text[curr_start:last_safe].strip())
-                curr_start = last_safe
-            last_safe = pos
-
-        if curr_start < len(text):
-            lines.append(text[curr_start:].strip())
+        start_idx = 0
+        
+        while start_idx < len(clean_text):
+            best_end = start_idx + 1
+            for idx in safe_indices:
+                if idx <= start_idx:
+                    continue
+                sub = clean_text[start_idx:idx].strip()
+                if not sub:
+                    continue
+                b = draw.textbbox((0, 0), sub, font=font)
+                w = b[2] - b[0]
+                if w <= max_width:
+                    best_end = idx
+                else:
+                    break
+            
+            line_str = clean_text[start_idx:best_end].strip()
+            if line_str:
+                lines.append(line_str)
+            
+            if best_end <= start_idx:
+                start_idx += 1
+            else:
+                start_idx = best_end
 
         return lines
 
@@ -323,17 +315,30 @@ body {{
         battambang_path = os.path.join(self.base_dir, "fonts", "Battambang-Regular.ttf")
         moul_path = os.path.join(self.base_dir, "fonts", "Moul-Regular.ttf")
 
-        head_len = len(headline)
+        clean_head = self._sanitize_headline(headline)
+        head_len = len(clean_head)
+
+        # Dynamic Font Size Selection with Auto-Reduction if needed
         if head_len <= 60:
-            head_font_size = 46
+            initial_font_size = 46
         elif head_len <= 110:
-            head_font_size = 40
+            initial_font_size = 40
         else:
-            head_font_size = 36
+            initial_font_size = 36
+
+        max_line_width = 1000  # 100px margins on left & right
+        current_font_size = initial_font_size
         
+        while current_font_size >= 28:
+            font_head = ImageFont.truetype(battambang_path, current_font_size) if os.path.exists(battambang_path) else ImageFont.load_default()
+            lines = self._split_khmer_text_pil(clean_head, font_head, max_line_width, draw)
+            if len(lines) <= 3:
+                break
+            current_font_size -= 4
+
         font_badge = ImageFont.truetype(battambang_path, 26) if os.path.exists(battambang_path) else ImageFont.load_default()
         font_cat = ImageFont.truetype(moul_path, 40) if os.path.exists(moul_path) else (ImageFont.truetype(battambang_path, 40) if os.path.exists(battambang_path) else ImageFont.load_default())
-        font_head = ImageFont.truetype(battambang_path, head_font_size) if os.path.exists(battambang_path) else ImageFont.load_default()
+        font_head = ImageFont.truetype(battambang_path, current_font_size) if os.path.exists(battambang_path) else ImageFont.load_default()
         font_footer = ImageFont.truetype(battambang_path, 22) if os.path.exists(battambang_path) else ImageFont.load_default()
 
         # 1. Top Accent Line (#ef4444)
@@ -343,36 +348,42 @@ body {{
         badge_text = "សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA"
         badge_bbox = draw.textbbox((0, 0), badge_text, font=font_badge)
         badge_text_w = badge_bbox[2] - badge_bbox[0]
+        badge_text_h = badge_bbox[3] - badge_bbox[1]
         
         has_logo = os.path.exists(self.logo_path)
         logo_w = 40 if has_logo else 0
         gap = 14 if has_logo else 0
         total_badge_content_w = logo_w + gap + badge_text_w
-        badge_padding_x = 24
+        badge_padding_x = 26
         total_badge_w = total_badge_content_w + (badge_padding_x * 2)
 
         badge_start_x = (width - total_badge_w) / 2
-        draw.rounded_rectangle([badge_start_x, 46, badge_start_x + total_badge_w, 98], radius=26, fill=(239, 68, 68))
+        badge_top = 44
+        badge_bottom = 98
+        badge_center_y = (badge_top + badge_bottom) / 2
+
+        draw.rounded_rectangle([badge_start_x, badge_top, badge_start_x + total_badge_w, badge_bottom], radius=27, fill=(239, 68, 68))
 
         if has_logo:
             try:
                 logo_img = Image.open(self.logo_path).convert("RGBA")
                 logo_img = logo_img.resize((logo_w, logo_w), Image.Resampling.LANCZOS)
-                img.paste(logo_img, (int(badge_start_x + badge_padding_x), 52), logo_img)
+                img.paste(logo_img, (int(badge_start_x + badge_padding_x), int(badge_center_y - (logo_w / 2))), logo_img)
             except Exception as e:
                 logger.error(f"PIL logo paste failed: {e}")
 
         text_x = badge_start_x + badge_padding_x + logo_w + gap
-        draw.text((text_x, 58), badge_text, font=font_badge, fill=(255, 255, 255))
+        # Precise text vertical centering
+        text_y = badge_center_y - (badge_text_h / 2) - 5
+        draw.text((text_x, text_y), badge_text, font=font_badge, fill=(255, 255, 255))
 
         # 3. Centered Category Title
         cat_bbox = draw.textbbox((0, 0), category_title, font=font_cat)
         cat_w = cat_bbox[2] - cat_bbox[0]
-        draw.text(((width - cat_w) / 2, 118), category_title, font=font_cat, fill=(239, 68, 68))
+        draw.text(((width - cat_w) / 2, 116), category_title, font=font_cat, fill=(239, 68, 68))
 
-        # 4. Headline Text - Syllable-Safe Pixel-Width Line Wrapping (0% Margin Overflow)
-        max_line_width = 1040  # 80px side margins
-        lines = self._split_khmer_text_pil(headline, font_head, max_line_width, draw)
+        # 4. Headline Text - Syllable-Safe Line Wrapping (0% Margin Overflow)
+        lines = self._split_khmer_text_pil(clean_head, font_head, max_line_width, draw)
 
         # Truncate to maximum 3 lines if needed
         if len(lines) > 3:
@@ -382,7 +393,7 @@ body {{
                 lines[2] = lines[2] + "..."
 
         # Calculate Vertical Centering for Headline Box
-        line_height_px = head_font_size + 18
+        line_height_px = current_font_size + 18
         total_text_height = len(lines) * line_height_px
         box_center_y = 330
         start_y = box_center_y - (total_text_height / 2)
