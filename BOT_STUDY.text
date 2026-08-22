@@ -1,8 +1,8 @@
 ====================================================================================================
                🏛️ APEX SUPER BRAIN AI SYSTEM — CFA FLASH FEED MASTER MANUAL 🏛️
 ====================================================================================================
-កាលបរិច្ឆេទអាប់ដេតចុងក្រោយ ៖ ថ្ងៃទី ២១ ខែ សីហា ឆ្នាំ ២០២៦
-កំណែប្រែ ៖ APEX SUPER BRAIN AI ENGINE V4.0 (FULL PRODUCTION RELEASE)
+កាលបរិច្ឆេទអាប់ដេតចុងក្រោយ ៖ ថ្ងៃទី ២៣ ខែ សីហា ឆ្នាំ ២០២៦
+កំណែប្រែ ៖ APEX SUPER BRAIN AI ENGINE V6.0 (FULL PRODUCTION RELEASE)
 
 ----------------------------------------------------------------------------------------------------
 ១. 🏛️ ស្ថាបត្យកម្មប្រព័ន្ធសរុប (SUPER SMART SYSTEM ARCHITECTURE)
@@ -18,7 +18,7 @@
 ----------------------------------------------------------------------------------------------------
 ២. 📡 DATA SOURCES & REAL-TIME INGESTION ENGINE (`scraper.py` & `news_filter.py`)
 ----------------------------------------------------------------------------------------------------
-- Super Fast Parallel Async Engine (`asyncio.gather`) ៖ ស្កេន ១៦+ Feeds ទាំងអស់តំណាលគ្នាក្នុងពេលតែមួយ (Parallel Worker Pool) ជាមួយ 5.0s Timeout Guard កាត់បន្ថយរយៈពេលស្កេនពី ៤០ វិនាទី មកសល់ត្រឹម ៥ វិនាទី (<5s) ធ្វើឱ្យ Event Loop ទំនេរ ៩៩% និង Telegram Bot ឆ្លើយតបស្ទុះលឿន <10ms ភ្លាមៗ!
+- Super Fast Parallel Async Engine (`asyncio.gather`) ៖ ស្កេន ៣៧+ Feeds ទាំងអស់តំណាលគ្នាក្នុងពេលតែមួយ (Parallel Worker Pool) ជាមួយ 5.0s Timeout Guard កាត់បន្ថយរយៈពេលស្កេនពី ៤០ វិនាទី មកសល់ត្រឹម ៥ វិនាទី (<5s) ធ្វើឱ្យ Event Loop ទំនេរ ៩៩% និង Telegram Bot ឆ្លើយតបស្ទុះលឿន <10ms ភ្លាមៗ!
 - Zero-Shot Classifier ៖ រែកចម្រាញ់ព័ត៌មានក្លែងក្លាយ (Fake News Filter) និងកំណត់កម្រិតភាពជឿជាក់ (Credibility Score) ស្វ័យប្រវត្តិ។
 - Tier Standard ៖
     • Tier 1 ៖ ព័ត៌មានច្បាស់ការណ៍ផ្លូវការ (Verified Flash News)
@@ -29,7 +29,7 @@
 ៣. 🧠 SUPER BRAIN AI ENGINE & LENGTH OPTIMIZATION (`ai_rewriter.py`)
 ----------------------------------------------------------------------------------------------------
 - Smart Dynamic Geographic Dateline Engine ៖ ស្កេន និងសម្គាល់ទីតាំងភូមិសាស្ត្រ/ខេត្ត/ក្រុង/រាជធានីទាំង ២៥ នៃព្រះរាជាណាចក្រកម្ពុជា (សៀមរាប, ព្រះសីហនុ, បាត់ដំបង, កំពត, កែប, កោះកុង, ស្វាយរៀង, តាកែវ, ក្រចេះ, ស្ទឹងត្រែង, រតនគិរី, មណ្ឌលគិរី, ព្រះវិហារ, បន្ទាយមានជ័យ, ពោធិ៍សាត់, ភ្នំពេញ, ក្រុងប៉ោយប៉ែត, ក្រុងបាវិត...) និងទីក្រុងធំៗលើពិភពលោក (វ៉ាស៊ីនតោន, ហ្សឺណែវ, បេកាំង, បាងកក, ហាណូយ, ឡុងដ៍, ប៉ារីស, តូក្យូ, សេអ៊ូល...) ដោយប្តូរ Dateline ដើមកថាខណ្ឌទី ១ ទៅតាមទីតាំងជាក់ស្តែង (ឧ. 'ខេត្តសៀមរាប៖', 'ខេត្តព្រះសីហនុ៖', 'ទីក្រុងវ៉ាស៊ីនតោន៖') ដោយមិន Default ត្រឹម 'រាជធានីភ្នំពេញ៖' ឡើយ!
-- Gemini 3.6 Flash LLM Backend ៖ បង្កើត និងសរសេរព័ត៌មានឡើងវិញជាភាសាខ្មែរផ្លូវការ ៤ កថាខណ្ឌ ៖
+- Gemini 2.5 Flash / 3.6 LLM Backend ៖ បង្កើត និងសរសេរព័ត៌មានឡើងវិញជាភាសាខ្មែរផ្លូវការ ៤ កថាខណ្ឌ ៖
     • កថាខណ្ឌទី ១ ៖ រាយការណ៍ហេតុការណ៍ទាន់ហេតុការណ៍ (Dynamic Dateline ៖ ឈ្មោះទីតាំងភូមិសាស្ត្រ/ខេត្ត/រាជធានី/ក្រុង)
     • កថាខណ្ឌទី ២ ៖ ការវិភាគទស្សនៈវិទ្យាសាស្ត្រនយោបាយ / មតិមហាជន / ទស្សនៈវិជ្ជាដឹកនាំរដ្ឋ
     • កថាខណ្ឌទី ៣ ៖ ការការពាររដ្ឋធម្មនុញ្ញ មាត្រា ៥១ (លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស, នីតិរដ្ឋ, សន្តិភាព)
@@ -86,16 +86,20 @@
 ៩. ⚡ PERSISTENT DEDUPLICATION & INTERACTIVE BOT (`vector_store.py`, `bot_interactive.py` & `main.py`)
 ----------------------------------------------------------------------------------------------------
 - Deduplication Persistent Disk Caching ៖ រក្សាទុក News Content Hashes ក្នុង `seen_hashes.json` ការពារព័ត៌មានស្ទួនពេល Server Restart.
-- 24/7 Dual-Thread Orchestrator (`main.py`) ៖ រត់តំណាលគ្នា ២ Threads ស្វ័យប្រវត្តិ ២៤/៧ (Thread ទី ១ ៖ `SuperSmartTelegramBot().poll_updates_loop()` រង់ចាំឆ្លើយតបពាក្យបញ្ជា Telegram `/start`, `/latest`, `/status`, `/scan`, `/report`, `/backup`, `/ping`, `/help` ក្នុងរយៈពេល <10ms ភ្លាមៗ និង Thread ទី ២ ៖ Continuous Ingestion Loop រត់ស្កេន 16+ Feeds ជារៀងរាល់ ៦០ វិនាទី)!
-- 8-Button Interactive Menu Suite (`bot_interactive.py`) ៖
+- 24/7 Dual-Thread Orchestrator (`main.py`) ៖ រត់តំណាលគ្នា ២ Threads ស្វ័យប្រវត្តិ ២៤/៧ (Thread ទី ១ ៖ `SuperSmartTelegramBot().poll_updates_loop()` រង់ចាំឆ្លើយតបពាក្យបញ្ជា Telegram `/start`, `/latest`, `/status`, `/scan`, `/report`, `/backup`, `/ping`, `/help` ក្នុងរយៈពេល <10ms ភ្លាមៗ និង Thread ទី ២ ៖ Continuous Ingestion Loop រត់ស្កេន 37+ Feeds ជារៀងរាល់ ៦០ វិនាទី)!
+- 12-Button Interactive Menu Suite (`bot_interactive.py`) ៖
     • ប៊ូតុងទី ១ ៖ 📰 `ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ` (Latest Flash News)
-    • ប៊ូតុងទី ២ ៖ 🟢 `ស្ថានភាពប្រព័ន្ធ Server` (Real-Time VPS Telemetry)
-    • ប៊ូតុងទី ៣ ៖ 📦 `ZIP Backup ប្រព័ន្ធ` (Instant System Backup)
-    • ប៊ូតុងទី ៤ ៖ ⚡ `ពិនិត្យល្បឿន Ping` (Network Response Time <10ms)
-    • ប៊ូតុងទី ៥ ៖ ❓ `ការណែនាំប្រើប្រាស់` (User Guide & Docs)
-    • ប៊ូតុងទី ៦ ៖ 📊 `របាយការណ៍ស្កេន Feeds` (16 Institutional Feeds Report)
-    • ប៊ូតុងទី ៧ ៖ 🔄 `ស្កេនព័ត៌មានភ្លាមៗ` (Manual Instant Ingestion Scan)
-    • ប៊ូតុងទី ៨ ៖ 👥 `ទំនាក់ទំនង Admin Support` (Admin Contact & Channel Links)
+    • ប៊ូតុងទី ២ ៖ 🛡️ `សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC` (Official Defense News)
+    • ប៊ូតុងទី ៣ ៖ 📜 `កំណត់ត្រាយោធា & ព្រំដែនកម្ពុជា` (Cambodian Border Archives)
+    • ប៊ូតុងទី ៤ ៖ 🔍 `Fact-Check ផ្ទៀងផ្ទាត់ព័ត៌មាន` (Anti-Fake News Sentinel)
+    • ប៊ូតុងទី ៥ ៖ ⚖️ `ស្រាវជ្រាវច្បាប់ជាតិ & រដ្ឋធម្មនុញ្ញ` (Khmer Legal & Constitutional Engine)
+    • ប៊ូតុងទី ៦ ៖ 🏛️ `បញ្ជី ៣៧ ស្ថាប័នរដ្ឋ & ២៥ ខេត្ត` (37 National & Regional Desks)
+    • ប៊ូតុងទី ៧ ៖ 📂 `ឃ្លាំងអធិបតេយ្យភាពជាតិ` (Sovereignty Intelligence Vault)
+    • ប៊ូតុងទី ៨ ៖ 🟢 `ស្ថានភាពប្រព័ន្ធ Server 24/7` (Real-Time VPS Telemetry)
+    • ប៊ូតុងទី ៩ ៖ 📊 `របាយការណ៍ Feeds ស្កេន 24/7` (Institutional Feeds Report)
+    • ប៊ូតុងទី ១០ ៖ 🔄 `ស្កេនព័ត៌មានភ្លាមៗ` (Manual Instant Ingestion Scan)
+    • ប៊ូតុងទី ១១ ៖ 📦 `ZIP Backup ប្រព័ន្ធ` (Instant System Backup)
+    • ប៊ូតុងទី ១២ ៖ ⚡ `ពិនិត្យល្បឿន Ping` (Network Response Time <10ms)
 
 ----------------------------------------------------------------------------------------------------
 ១០. 🛡️ ស្ថាបត្យកម្មប្រព័ន្ធសុវត្ថិភាព ៥ ជាន់ (5-LAYER ENTERPRISE SECURITY SUITE) (`security_sentinel.py`)
@@ -124,9 +128,9 @@ flowchart TD
 
 ```mermaid
 flowchart TD
-    A["🏛️ National Ingestion Registry (50+ Feeds)"] --> B["📡 Scraper Engine (10s Timeout & Date Parsing)"]
+    A["🏛️ National Ingestion Registry (37 Feeds)"] --> B["📡 Scraper Engine (10s Timeout & Date Parsing)"]
     B --> C["🛡️ Dynamic SHA-256 Hash Deduplication (0% Duplicates)"]
-    C --> D["🧠 Gemini 3.6 Flash Rewriter (Dateline & Length <950 chars)"]
+    C --> D["🧠 Gemini 2.5 Flash Rewriter (Dateline & Length <950 chars)"]
     D --> E["📦 15-Min Paced Facebook Queue (1 Post / 15 Mins)"]
     E --> F["🚀 Telegram VIP Broadcast & Facebook Auto-Publishing"]
 ```
@@ -134,7 +138,7 @@ flowchart TD
 - **ស្ថាប័នរដ្ឋ & ក្រសួង/មន្ទីរ ៖** AKP (Agence Kampuchea Presse ព័ត៌មានរដ្ឋផ្លូវការ), ក្រសួងព័ត៌មាន, ក្រសួងការបរទេស, អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU), រដ្ឋបាលរាជធានី-ខេត្តទាំង ២៥ (ភ្នំពេញ, សៀមរាប, ព្រះសីហនុ, បាត់ដំបង...), តុលាការ និងសាលាដំបូង។
 - **អង្គការ សមាគម សិទ្ធិមនុស្ស & យុត្តិធម៌សង្គម ៖** Transparency International Cambodia (គណនេយ្យភាពសង្គម & ប្រឆាំងអំពើពុករលួយ), CCHR, LICADHO, ADHOC, គណៈកម្មាធិការសិទ្ធិមនុស្សកម្ពុជា។
 - **សារព័ត៌មានធំៗ ជាតិ & អន្តរជាតិ ៖** Khmer Times, Phnom Penh Post, ThmeyThmey, Fresh News, DAP News, CamboJA News, RFI Khmer, VOA Khmer, Reuters World, New York Times World។
-- **24/7 Continuous Feed Stream & 15-Min Facebook Pacing ៖** ស្កេន ៥០+ Feeds ជារៀងរាល់ ៦០ វិនាទី ច្រោះ SHA-256 Content Hash មិនឱ្យមានព័ត៌មានស្ទួនស្បត់ និងរៀបចំ Queue បោះពុម្ពផ្សាយចូល Facebook Page រៀងរាល់ ១៥ នាទីម្តង ឥតចន្លោះ!
+- **24/7 Continuous Feed Stream & 15-Min Facebook Pacing ៖** ស្កេន ៣៧ Feeds ជារៀងរាល់ ៦០ វិនាទី ច្រោះ SHA-256 Content Hash មិនឱ្យមានព័ត៌មានស្ទួនស្បត់ និងរៀបចំ Queue បោះពុម្ពផ្សាយចូល Facebook Page រៀងរាល់ ១៥ នាទីម្តង ឥតចន្លោះ!
 
 ----------------------------------------------------------------------------------------------------
 ១២. ⚡ ស្ថាបត្យកម្ម VIRTUAL MEMORY 3.0GB (2.0GiB SWAP) & HIGH-EFFICIENCY GRAPHIC ENGINE (`banner_engine.py`)
@@ -159,13 +163,15 @@ flowchart TD
 ----------------------------------------------------------------------------------------------------
 - **Strict Destination Output Scoping ៖** Facebook Page «សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA» (តាមរយៈ `FB_PAGE_ID` & `FB_PAGE_ACCESS_TOKEN`) ត្រូវបានកំណត់យ៉ាងម៉ឺងម៉ាត់ជា **ប្រព័ន្ធបោះពុម្ពផ្សាយចេញតែមួយមុខគត់ (Output Destination Only)**។
 - **0% Self-Ingestion Rule ៖** ដាច់ខាតមិនទាញយក ឬអានមាតិកាចេញពី Facebook Page មកសរសេរព័ត៌មានឡើងវិញឡើយ ដើម្បីការពារ ១០០% មិនឱ្យមានការសរសេរច្រំដែល ឬទាក់ទិន Loop ព័ត៌មានរបស់ខ្លួនឯង។
-- **Pure Institutional Ingestion ៖** ការទាញយកព័ត៌មានរ៉ូ (Raw News Ingestion) ធ្វើឡើងតែលើ ១៦ Institutional RSS Feeds ផ្លូវការ (AKP, MINFO, MFAIC, ACU, TI, CCHR, LICADHO, Khmer Times, Post...) ប៉ុណ្ណោះ!
+- **Pure Institutional Ingestion ៖** ការទាញយកព័ត៌មានរ៉ូ (Raw News Ingestion) ធ្វើឡើងតែលើ ៣៧ Institutional RSS Feeds ផ្លូវការ (AKP, MINFO, MFAIC, ACU, TI, CCHR, LICADHO, Khmer Times, Post...) ប៉ុណ្ណោះ!
+
 ----------------------------------------------------------------------------------------------------
 ១៥. 🏛️ MASTER KHMER LANGUAGE AUDITOR & 24-HOUR FRESHNESS SUITE (`khmer_auditor.py` & `main.py`)
 ----------------------------------------------------------------------------------------------------
 - **24-Hour News Freshness Gatekeeper (`audit_news_freshness`) ៖** ត្រួតពិនិត្យ និងច្រោះចោលព័ត៌មានចាស់ៗដាច់ខាត ប្រសិនបើកាលបរិច្ឆេទព័ត៌មាននោះមានអាយុកាលលើសពី ២៤ ម៉ោង (៨៦,៤០០ វិនាទី) ធានាថាព័ត៌មានដែលបោះពុម្ពផ្សាយទៅ Telegram & Facebook គឺជាព័ត៌មានថ្មីៗ ២៤/៧ ជានិច្ច!
 - **Khmer Literary Prose & Punctuation Structuring (`audit_prose_structure`) ៖** ពិនិត្យ និងរៀបចំអត្ថបទជា វគ្គ ឃ្លា យ៉ាងប្រកបដោយសោភ័ណភាព ធានាថារាល់កថាខណ្ឌទាំងអស់បញ្ចប់ដោយសញ្ញាខណ្ឌ «។» ហើយកថាខណ្ឌចុងក្រោយបញ្ចប់ដោយសញ្ញាចប់/បរិបូណ៌ «៕» ឥតមានចន្លោះឡើយ!
 - **Explicit Source Attribution Audit (`audit_source_attribution`) ៖** បញ្ជាក់ប្រភពព័ត៌មានយ៉ាងច្បាស់លាស់ដាច់ខាត (រួមទាំងឈ្មោះ Facebook Page / Account Name ផ្លូវការ) នៅក្នុងកថាខណ្ឌទី ២ នៃអត្ថបទ លើកកម្ពស់តម្លាភាព និងវិជ្ជាជីវៈសារព័ត៌មានកម្រិតខ្ពស់បំផុត!
+
 ----------------------------------------------------------------------------------------------------
 ១៦. 🔑 MULTI-KEY GEMINI API POOL & DEEP FACEBOOK URL EXTRACTOR ENGINE (`gemini_key_pool.py` & `facebook_url_extractor.py`)
 ----------------------------------------------------------------------------------------------------
@@ -176,12 +182,14 @@ flowchart TD
     • បញ្ជូនចូល **Super Brain AI Rewriter** បង្កើតជាអត្ថបទ ៤ កថាខណ្ឌយ៉ាងអស្ចារ្យ (មាត្រា ៥១)
     • Render រូបភាព **Banner 4K HD** (<0.05s)
     • បោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅកាន់ **Telegram VIP Channel & Facebook Page CFA** ភ្លាមៗ!
+
 ----------------------------------------------------------------------------------------------------
 ១៧. 🧹 EXCLUSIVE `/clearcache` BANNER & RAM PURGE WITH PUBLISHED HISTORY PROTECTION (`vector_store.py` & `bot_interactive.py`)
 ----------------------------------------------------------------------------------------------------
 - **Safe `/clearcache` Purge (`clear_news_cache`) ៖** ប្រើប្រាស់ពាក្យបញ្ជា `/clearcache` ដើម្បីលុប Temporary Banners (`banner_*.jpg`) លើ Disk, ដោះលែង RAM Unused Memory និងស្កេនបន្ថែម Baseline ព័ត៌មានបច្ចុប្បន្ន ៖
     • **រក្សាទុកការពារ `seen_hashes.json` ១០០% ៖** មិនលុបទិន្នន័យ Hashes នៃព័ត៌មានដែលធ្លាប់បានផ្សាយរួចចោលឡើយ ធានាដាច់ខាត ១០០% ថាព័ត៌មានចាស់ៗដែលធ្លាប់បានផ្សាយរួច មិនត្រូវយកមកចុះផ្សាយជាថ្មីដដែលៗឡើយ!
     • **User & Admin Config Protection ៖** មិនប៉ះពាល់ Telegram Bot Token, Admin Chat ID, FB Access Tokens ឬ `.env` ឡើយ!
+
 ----------------------------------------------------------------------------------------------------
 ១៨. 🌐 LOCATION DATELINE DE-DUPLICATION & DYNAMIC INTERNATIONAL PROSE ENGINE (`ai_rewriter.py` & `khmer_auditor.py`)
 ----------------------------------------------------------------------------------------------------
@@ -189,30 +197,36 @@ flowchart TD
 - **Dynamic Context-Aware News Prose (`_rule_based_fallback`) ៖** បំបែកការសរសេរយ៉ាងច្បាស់លាស់រវាងព័ត៌មានជាតិ (កម្ពុជា - មាត្រា ៥១) និងព័ត៌មានអន្តរជាតិ (ហុងកុង, អាមេរិក, ចិន, អង់គ្លេស...) ៖
     • លុបបាត់អត្ថបទ Stock Text "ឆបោកតាមអនឡាញ" ចោលទាំងស្រុងពីព័ត៌មានអន្តរជាតិ
     • បង្កើតអត្ថបទ ៤ កថាខណ្ឌយ៉ាងបត់បែន ស្របតាមខ្លឹមសារជាក់ស្តែងនៃព័ត៌មាននីមួយៗ និងបញ្ចប់ដោយសញ្ញាចប់/បរិបូណ៌ «៕» ជានិច្ច!
+
 ----------------------------------------------------------------------------------------------------
 ១៩. 🎯 STRICT 1 TELEGRAM & 1 FACEBOOK PAGE DESTINATION POLICY (`main.py` & `facebook_publisher.py`)
 ----------------------------------------------------------------------------------------------------
 - **Strict Telegram Single Post Policy (`main.py`) ៖** លុបបាត់ការផ្ញើសារស្ទួន 2 ដងទៅកាន់ Telegram Admin Chat ID ដោយប្រព័ន្ធកំណត់ឱ្យផ្ញើ **១ លើកគត់ទៅកាន់ Telegram Channel** (ប្រសិនបើ Telegram Admin Chat ID ដូចគ្នានឹង Telegram VIP Channel ID) ធានា ១០០% គ្មានការផ្ញើស្ទួន ២ ដងឡើយ!
 - **In-Memory Facebook Photo Buffer (`facebook_publisher.py`) ៖** អានទិន្នន័យរូបភាព Banner ជា Bytes ទុកក្នុងអង្គចងចាំ (Memory Buffer) មុនពេលប្រព័ន្ធលុបរូបភាពបណ្តោះអាសន្ន ធានាថាការបោះពុម្ពផ្សាយទៅកាន់ **Facebook Page** ដំណើរការបានជោគជ័យ ១០០% ដោយភ្ជាប់ជាមួយរូបភាព Banner 4K HD ឥតមានកំហុស File Not Found ឡើយ!
+
 ----------------------------------------------------------------------------------------------------
 ២០. ⚡ ACTIVE RAM MEMORY GARBAGE COLLECTION & RAM OPTIMIZATION (<25% RAM) (`main_loop.py`)
 ----------------------------------------------------------------------------------------------------
 - **Active Memory Recycling (`gc.collect`) ៖** បន្ថែមការបោសសម្អាត Memory អូតូ (`gc.collect()`) ភ្លាមៗរៀងរាល់បញ្ចប់ Cycle ស្កេន ៦០ វិនាទី ដោះលែង RAM Unused Objects ត្រឡប់ទៅ Linux OS វិញ ធានាកាត់បន្ថយការប្រើប្រាស់ RAM មកនៅក្រោម ២៥% (<២៥០ MB) ជានិច្ច!
+
 ----------------------------------------------------------------------------------------------------
 ២១. 🚫 ZERO DUPLICATE TELEGRAM MESSAGES & META 30-MIN PACING (`facebook_publisher.py`)
 ----------------------------------------------------------------------------------------------------
 - **Purge Emergency Telegram Alert Loop (`send_telegram_admin_alert` Removed) ៖** លុបបាត់ការផ្ញើសារស្ទួនទី២ ចូល Telegram Admin ពេល Facebook មានកំហុស (លុបបាត់ `send_telegram_admin_alert` ទាំងស្រុង) ធានាថា Telegram ទទួលបានសារ **១ លើកគត់យ៉ាងស្អាតបាត ១០០%**!
 - **Meta Code 368 30-Min Pacing Governor ៖** កំណត់ការបោះពុម្ពផ្សាយទៅ Facebook Page ឱ្យមានគម្លាត ៣០ នាទី (១៨០០ វិនាទី) រវាងអត្ថបទនីមួយៗ ស្របតាមគោលការណ៍ Anti-Spam Sentry របស់ Meta Graph API ១០០%!
+
 ----------------------------------------------------------------------------------------------------
 ២២. 🔒 HARDWARE-LEVEL SINGLE INSTANCE SYSTEM LOCK (`main_loop.py`)
 ----------------------------------------------------------------------------------------------------
 - **System-Wide SingleInstanceLock (`fcntl.flock`) ៖** បន្ថែមការចាក់សោប្រព័ន្ធកម្រិត Hardware/OS (`acquire_single_instance_lock()`) លើ file `/tmp/cfa_flash_bot_daemon.lock` ធានាថាទោះបីជាមាន Service ស្ទួនពីររត់លើ Server យ៉ាងណាក៏ដោយ ក៏ប្រព័ន្ធ **អនុញ្ញាតឱ្យ Process តែ ១ គត់រត់នៅលើ Server** ហើយ Process ទី២ នឹងត្រូវប្រព័ន្ធបិទ `sys.exit(0)` ភ្លាមៗ ការពារការផ្ញើសារស្ទួន ២ ដងជារៀងរហូត ១០០%!
+
 ----------------------------------------------------------------------------------------------------
 ២៣. 🛡️ CLEAN BOOT BASELINE PROTECTION & AUTOMATIC RSS RE-SEEDING (`vector_store.py` & `main.py`)
 ----------------------------------------------------------------------------------------------------
 - **Cold Boot & Restart Protection (`seed_baseline_from_rss_async`) ៖** នៅពេលប្រព័ន្ធ Restart ឬធ្វើការ Update លើ Google Cloud (ដែលនាំឱ្យ `seen_hashes.json` អាចទំនេរ) ឬនៅពេល Admin វាយពាក្យបញ្ជា `/clearcache` ៖
     • ប្រព័ន្ធនឹងធ្វើការស្កេន RSS Feeds ទាំងអស់ដើម្បីយក SHA-256 Hashes នៃព័ត៌មានបច្ចុប្បន្ន ចុះបញ្ជីចូល `seen_hashes.json` ជា Baseline ភ្លាមៗ (ដោយមិនផ្ញើសារ ឬ Render Banner ឡើយ)!
     • ធានាដាច់ខាត ១០០% ថា គ្មានព័ត៌មានចាស់ សារចាស់ ឬ Banner ចាស់ ត្រូវផ្ញើរំខានចូល Telegram VIP Channel ឬ Facebook Page ឡើយ នៅពេល Restart/Update លើ Google Cloud — គឺមានតែព័ត៌មានថ្មីៗស្រឡាងដែលទើបចេញបន្តបន្ទាប់ប៉ុណ្ណោះ នឹងត្រូវស្កេន និងផ្ញើចេញ!
+
 ----------------------------------------------------------------------------------------------------
 ២៤. 🎨 100% CENTER-ALIGNED HIGH-DEF BANNER & SYLLABLE-SAFE WRAPPING (`banner_engine.py`)
 ----------------------------------------------------------------------------------------------------
@@ -220,6 +234,7 @@ flowchart TD
 - **Dynamic Large Font Sizing (36px - 48px/52px) ៖** បង្កើនទំហំអក្សរ Headline ធំបន្ថែម ងាយស្រួលមើល និងច្បាស់ត្រចះត្រចង់ ជាមួយការគណនាទំហំអក្សរស្វ័យប្រវត្តិតាមប្រវែងចំណងជើង។
 - **0% Margin Overflow & Syllable-Safe Line Wrapping ៖** គណនា Pixel Width (១០៤០px) យ៉ាងច្បាស់លាស់ ដោយមិនឱ្យអក្សរជ្រុលហួសសន្លឹករូបភាព Banner ឡើយ ព្រមទាំងការពារមិនឱ្យបែកជើងអក្សរ (`្`) បង្កើតជារង្វង់ចុច `◌` ឡើយ!
 - **100% Quality Output ៖** រក្សាទុកក្នុងកម្រិត Quality 100 Maximum JPEG (Chroma 4:4:4) ធានារូបភាព Banner ច្បាស់កម្រិត 4K Ultra HD!
+
 ----------------------------------------------------------------------------------------------------
 ២៥. 🛡️ MILITARY & DIPLOMATIC INTELLIGENCE ARCHIVE ENGINE (`defense_intelligence_engine.py`)
 ----------------------------------------------------------------------------------------------------
@@ -230,4 +245,46 @@ flowchart TD
         - `/defense_news` ៖ អានសេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយពីក្រសួងការពារជាតិ & MFAIC។
         - `/border_archive [query]` ៖ ស្វែងរក និងទាញយកប្រវត្តិកត់ត្រាសកម្មភាពការពារព្រំដែនកម្ពុជា។
         - `/sync_defense_archive` ៖ ស្កេន និងធ្វើបច្ចុប្បន្នភាពទិន្នន័យយោធា & ការទូតចូលក្នុង Archive ស្វ័យប្រវត្តិ។
+
+----------------------------------------------------------------------------------------------------
+២៦. 🛡️ MASTER KHMER LANGUAGE AUDITOR V6.0 (`khmer_auditor.py`)
+----------------------------------------------------------------------------------------------------
+- **Foreign Vietnamese Word Purger ៖** ស្កេន និងជម្រះពាក្យភាសាវៀតណាម (`nhằm` -> `ដើម្បី`, `của` -> `របស់`, `và` -> `និង`, `tại` -> `នៅ`) និងពាក្យបរទេសជ្រែកចូលប្រយោគខ្មែរ ១០០% តាមរៀប Regex Word Boundary Masking។
+- **Chuon Nath Typo Auditor ៖** កែតម្រូវអក្ខរាវិរុទ្ធខ្មែរខុស (`កម្លាំងនប៉ុស្តិ៍` -> `កម្លាំងប៉ុស្តិ៍`, `លោក ជំទាវ` -> `លោកជំទាវ`, `ឧត្តមសេនីយ៍ ទោ` -> `ឧត្តមសេនីយ៍ទោ`) តាមវចនានុក្រមសម្តេចព្រះសង្ឃរាជ ជួន ណាត ដោយស្វ័យប្រវត្តិ។
+- **Strict 3-Paragraph Literary Enforcement ៖** ពិនិត្យ និងរៀបចំអត្ថបទជា ៣ កថាខណ្ឌយ៉ាងប្រណិត (កថាខណ្ឌទី១ ៖ សាច់សេចក្តី, កថាខណ្ឌទី២ ៖ យោងប្រភពផ្លូវការ, កថាខណ្ឌទី៣ ៖ ភ្ជាប់រដ្ឋធម្មនុញ្ញ មាត្រា ៥១/៥២ និងបញ្ចប់ដោយ `៕`)។
+
+----------------------------------------------------------------------------------------------------
+២៧. 🛡️ UNIVERSAL 3-LAYER KHMER AUDITOR GATEKEEPER (`facebook_publisher.py` & `bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- គ្រប់សកម្មភាពទាំងអស់នៃប្រព័ន្ធ CFA Flash Feed ទាំងការបាញ់ Post ផ្សាយចេញទៅ Telegram VIP Channel, Facebook Page Captions, សារ Telegram Bot Replies និងរាល់ Direct Commands ត្រូវបានបង្ខំឱ្យឆ្លងកាត់ `khmer_auditor.py` ពិនិត្យគុណភាពភាសាខ្មែរស្អាតបាត ១០០% មុននឹងចេញផ្សាយ!
+
+----------------------------------------------------------------------------------------------------
+២៨. 📱 SUPER SMART INTERACTIVE `/border_archive` & `/defense_news` ENGINES (`bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **Non-Truncated 100% Titles & Full Article Viewer ៖** បង្ហាញចំណងជើងពេញលេញលើបញ្ជី និងលើប៊ូតុងចុច ឥតមានការកាត់តួរអក្សរ `...` ឡើយ។
+- **5 Interactive Inline Item Buttons ៖** បំពាក់ប៊ូតុងចុច `📌 [1]`, `📌 [2]`, ..., `📌 [5]` ឬ `/border_archive 1`, `/defense_news 1` ធ្វើឱ្យអ្នកប្រើប្រាស់ចុចអានសាច់ព័ត៌មានពេញលេញ ៣ កថាខណ្ឌបានភ្លាមៗ!
+- **100% Strict Cambodian Border & Military Filter Gatekeeper ៖** ស្កេន និងអនុញ្ញាតតែព័ត៌មានយោធា អធិបតេយ្យ និងព្រំដែនកម្ពុជាប៉ុណ្ណោះចូល Archive (`is_border_or_defense_news`)។
+
+----------------------------------------------------------------------------------------------------
+២៩. ⚡ SUPER SMART LIVE SYNC ENGINE `/sync_defense_archive` (`defense_intelligence_engine.py`)
+----------------------------------------------------------------------------------------------------
+- ស្កេនប្រភពផ្លូវការទាំង ៣៧ ស្ថាប័នរដ្ឋ ជម្រះព័ត៌មានស្ទួនតាម SHA-256 Hashes និងកត់ត្រាចូលឃ្លាំង Archives រយៈពេល ២ឆ្នាំ (២០២៤-២០២៦) ដោយស្វ័យប្រវត្តិ។
+
+----------------------------------------------------------------------------------------------------
+៣០. 🔑 MULTI-TIER 84 GEMINI API KEYS POOL & HUGGING FACE AI FAILOVER (`gemini_key_pool.py` & `huggingface_engine.py`)
+----------------------------------------------------------------------------------------------------
+- **84 Gemini Free API Keys Pool ៖** បង្កើនល្បឿនសរុបដល់ **1,260 RPM / 126,000 RPD** ជាមួយការទាត់ Key ស្ទះចូល Quarantine 60s និងដូរ Key ថ្មីក្នុង <1ms។
+- **Hugging Face Fine-Tuned Model (`hemsinath/cfa-flash-bot`) Tier 2 Failover ៖** បម្រុងទុក 0% Downtime ពេល Gemini ស្ទះ។
+
+----------------------------------------------------------------------------------------------------
+៣១. 🤖 SUPER SMART FREE-FORM AI ASSISTANT (NO COMMAND PREFIX REQUIRED) (`bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **សួរដោយសេរីឥតដែនកំណត់ ៖** អ្នកប្រើប្រាស់អាចសួរសំណួរ ឬស្នើសុំឱ្យវិភាគព័ត៌មាន ដោយគ្រាន់តែផ្ញើសារ Text ធម្មតា **ដោយមិនបាច់វាយ Slash Command ដូចជា `/ask` ឬ `/factcheck` ឡើយ**!
+- **Automatic Facebook URL Analyzer ៖** ផ្ញើសារអត្ថបទភ្ជាប់ជាមួយ Facebook URL (`facebook.com`, `fb.watch`) ប្រព័ន្ធនឹងទាញយកអត្ថបទពី Facebook មកធ្វើ AI Fact-Check វិភាគភ្លាមៗ!
+
+----------------------------------------------------------------------------------------------------
+៣២. 🛡️ SECURITY GATEKEEPER AUTO-PURGER FOR MEDIA & EXTERNAL NON-FACEBOOK URLS (`bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **Auto-Delete Media Attachments ៖** ផ្ញើរូបភាព (Photo), វីដេអូ (Video), ឯកសារ (Document), ស្ទីកគ័រ... ប្រព័ន្ធនឹងរត់ Telegram API `deleteMessage` លុបចោលភ្លាមៗពី Chat/Group ការពារ Spam/Malware!
+- **Auto-Delete Non-Facebook URLs ៖** ផ្ញើតំណភ្ជាប់ (URL) ក្រៅពី Facebook ផ្លូវការ ប្រព័ន្ធនឹងលុបសារនោះចោលភ្លាមៗ ដើម្បីសុវត្ថិភាពខ្ពស់បំផុត!
 ====================================================================================================
