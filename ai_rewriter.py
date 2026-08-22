@@ -116,7 +116,8 @@ class SuperBrainAIRewriter:
             ("ជប៉ុន", "japan", "ប្រទេសជប៉ុន៖"),
             ("បារាំង", "france", "ប្រទេសបារាំង៖"),
             ("វៀតណាម", "vietnam", "ប្រទេសវៀតណាម៖"),
-            ("ថៃ", "thailand", "ប្រទេសថៃ៖"),
+            ("ថៃឡង់ដ៍", "thailand", "ប្រទេសថៃ៖"),
+            ("ប្រទេសថៃ", "thailand", "ប្រទេសថៃ៖"),
             ("ឡាវ", "laos", "ប្រទេសឡាវ៖"),
         ]
         for name_kh, name_en, dateline in intl_locations:

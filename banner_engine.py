@@ -103,12 +103,19 @@ class BannerEngine:
         if head_len <= 60:
             head_font_size = 54
             line_height = 1.45
+            line_clamp = 3
         elif head_len <= 100:
-            head_font_size = 48
-            line_height = 1.45
-        else:
-            head_font_size = 42
+            head_font_size = 44
             line_height = 1.4
+            line_clamp = 3
+        elif head_len <= 140:
+            head_font_size = 36
+            line_height = 1.35
+            line_clamp = 4
+        else:
+            head_font_size = 30
+            line_height = 1.3
+            line_clamp = 4
 
         html_content = f"""<!DOCTYPE html>
 <html>
@@ -190,7 +197,7 @@ body {{
     overflow-wrap: break-word;
     overflow: hidden;
     display: -webkit-box;
-    -webkit-line-clamp: 3;
+    -webkit-line-clamp: {line_clamp};
     -webkit-box-orient: vertical;
     text-shadow: 0 2px 8px rgba(0,0,0,0.5);
 }}
