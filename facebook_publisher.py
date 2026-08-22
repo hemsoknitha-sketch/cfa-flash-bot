@@ -23,13 +23,22 @@ class FacebookPublisher:
         self.last_post_time = 0
         self.min_post_interval = 1800  # 30 mins safety window
         self.queue = asyncio.Queue()
-        self.worker_task = asyncio.create_task(self._facebook_queue_worker())
+        self.worker_task = None
+
+    def _ensure_worker_started(self):
+        if self.worker_task is None or self.worker_task.done():
+            try:
+                loop = asyncio.get_running_loop()
+                self.worker_task = loop.create_task(self._facebook_queue_worker())
+            except RuntimeError:
+                pass
 
     async def publish_news(self, caption: str, image_path: Optional[str] = None) -> bool:
         """
         Non-blocking Facebook Enqueuer.
         Reads image bytes into memory before temporary banner file is deleted, then queues post.
         """
+        self._ensure_worker_started()
         image_bytes = None
         if image_path and os.path.exists(image_path):
             try:
