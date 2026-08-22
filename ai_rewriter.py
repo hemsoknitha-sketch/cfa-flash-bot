@@ -196,6 +196,29 @@ class SuperBrainAIRewriter:
                         logger.warning(f"Gemini API model [{m_name}] error: {e}")
                         break
 
+        # Option B.2: Hugging Face Fine-Tuned Model (hemsinath/cfa-flash-bot) Failover
+        try:
+            from huggingface_engine import hf_polymath_ai
+            hf_prompt = f"ចំណងជើង ៖ {title}\nខ្លឹមសារ ៖ {content}\nប្រភព ៖ {source}"
+            hf_res = hf_polymath_ai.ask_polymath_ai(f"រៀបចំអត្ថបទសារព័ត៌មានផ្លូវការជាភាសាខ្មែរ ៖\n{hf_prompt}")
+            if hf_res and not hf_res.startswith("❌"):
+                headline = title
+                body = hf_res
+                impact = "លើកកម្ពស់សិទ្ធិមនុស្ស នីតិរដ្ឋ និងអធិបតេយ្យភាពជាតិកម្ពុជា"
+                formatted_post = self._build_telegram_markdown("⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ", headline, body, impact, 95.0, source, is_unverified)
+                return ProcessedNewsArticle(
+                    original_id=raw_id,
+                    credibility_score=95.0,
+                    is_unverified_leak=is_unverified,
+                    status_label="⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ",
+                    khmer_headline=headline,
+                    khmer_body=body,
+                    impact_analysis=impact,
+                    formatted_telegram_post=formatted_post
+                )
+        except Exception as e:
+            logger.warning(f"Hugging Face rewriter failover skipped: {e}")
+
         # Option C: Intelligent Rule-Based Fallback Engine
         return self._rule_based_fallback(raw_id, title, content, source, source_tier, is_unverified)
 
