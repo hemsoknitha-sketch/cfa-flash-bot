@@ -177,11 +177,11 @@ flowchart TD
     • Render រូបភាព **Banner 4K HD** (<0.05s)
     • បោះពុម្ពផ្សាយស្វ័យប្រវត្តិទៅកាន់ **Telegram VIP Channel & Facebook Page CFA** ភ្លាមៗ!
 ----------------------------------------------------------------------------------------------------
-១៧. 🧹 EXCLUSIVE `/clearcache` NEWS PURGE ENGINE & USER DATA PROTECTION (`vector_store.py` & `bot_interactive.py`)
+១៧. 🧹 EXCLUSIVE `/clearcache` BANNER & RAM PURGE WITH PUBLISHED HISTORY PROTECTION (`vector_store.py` & `bot_interactive.py`)
 ----------------------------------------------------------------------------------------------------
-- **Exclusive `/clearcache` News Purge (`clear_news_cache`) ៖** ប្រើប្រាស់ពាក្យបញ្ជាតែមួយគត់ `/clearcache` ក្នុង Telegram ឬប្រព័ន្ធ ដើម្បីលុបទិន្នន័យ Hash ព័ត៌មានចាស់ៗ (`seen_hashes.json`) និង Temporary Banners ចោល ១០០% ៖
-    • ការពារដាច់ខាតមិនឱ្យប្រព័ន្ធផ្ញើព័ត៌មានច្រំដែលៗ ឬស្ទួន ពេលរត់ស្កេន ឬពេល Restart / New Update ឡើយ!
-    • មិនប៉ះពាល់ មិនលុប ឬប៉ះពាល់ដល់ Telegram Bot Token, Admin Chat ID, FB Access Tokens ឬ `.env` ឡើយ (១០០% User & Admin Config Protected)!
+- **Safe `/clearcache` Purge (`clear_news_cache`) ៖** ប្រើប្រាស់ពាក្យបញ្ជា `/clearcache` ដើម្បីលុប Temporary Banners (`banner_*.jpg`) លើ Disk, ដោះលែង RAM Unused Memory និងស្កេនបន្ថែម Baseline ព័ត៌មានបច្ចុប្បន្ន ៖
+    • **រក្សាទុកការពារ `seen_hashes.json` ១០០% ៖** មិនលុបទិន្នន័យ Hashes នៃព័ត៌មានដែលធ្លាប់បានផ្សាយរួចចោលឡើយ ធានាដាច់ខាត ១០០% ថាព័ត៌មានចាស់ៗដែលធ្លាប់បានផ្សាយរួច មិនត្រូវយកមកចុះផ្សាយជាថ្មីដដែលៗឡើយ!
+    • **User & Admin Config Protection ៖** មិនប៉ះពាល់ Telegram Bot Token, Admin Chat ID, FB Access Tokens ឬ `.env` ឡើយ!
 ----------------------------------------------------------------------------------------------------
 ១៨. 🌐 LOCATION DATELINE DE-DUPLICATION & DYNAMIC INTERNATIONAL PROSE ENGINE (`ai_rewriter.py` & `khmer_auditor.py`)
 ----------------------------------------------------------------------------------------------------

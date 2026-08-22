@@ -76,14 +76,17 @@ class VectorDeduplicator:
         return removed_count
 
     def clear_news_cache(self) -> int:
-        """Clears all old cached news hashes and history while keeping user/admin settings 100% intact."""
-        count = len(self.seen_hashes)
-        self.seen_hashes.clear()
+        """
+        Clears temporary banner files on disk and transient memory buffers while 
+        PROTECTING seen_hashes.json so past published news is NEVER re-sent.
+        """
+        import gc
+        removed_banners = self.purge_temp_banner_files()
         self.history.clear()
-        self._save_seen_hashes()
-        self.purge_temp_banner_files()
-        logger.info(f"🧹 [NEWS DEDUPLICATION CACHE PURGED] Cleared {count} old news hashes & temp banner files.")
-        return count
+        gc.collect()
+        total_protected_hashes = len(self.seen_hashes)
+        logger.info(f"🧹 [CACHE PURGED] Removed {removed_banners} temp banner files. RAM recycled. Protected {total_protected_hashes} published news hashes.")
+        return removed_banners
 
     async def seed_baseline_from_rss_async(self, ingestion_engine) -> int:
         """

@@ -381,14 +381,14 @@ class SuperSmartTelegramBot:
 
             elif text.startswith("/clearcache"):
                 from main import pipeline_engine
-                cleared_count, removed_banners, seeded_count = await pipeline_engine.clear_all_cache_and_seed_baseline()
+                protected_hashes, removed_banners, seeded_count = await pipeline_engine.clear_all_cache_and_seed_baseline()
 
                 await self.send_message(
                     chat_id,
-                    f"🧹 *សម្អាតទិន្នន័យព័ត៌មានចាស់ៗចំនួន `{cleared_count}` items និង Banner Cache ចំនួន `{removed_banners}` files ចោលរួចរាល់ ១០០%!*\n\n"
-                    f"🛡️ *ប្រព័ន្ធបានបង្កើត Baseline ព័ត៌មានបច្ចុប្បន្នចំនួន `{seeded_count}` items ទុកជាព័ត៌មានចាស់រួចរាល់!*\n"
-                    "⚡ *ប្រព័ន្ធស្កេននឹងមិនផ្ញើព័ត៌មានច្រំដែលៗ សារចាស់ ឬ Banner ចាស់ ពេលរត់ស្កេន ឬពេល Restart / New Update លើ Google Cloud ឡើយ! (មានតែព័ត៌មានថ្មីៗបន្តផ្ញើប៉ុណ្ណោះ)*\n"
-                    "🔒 *ព័ត៌មាន Admin/VIP, API Keys និង Telegram Config នៅរក្សាទុក ១០០% សុវត្ថិភាពខ្ពស់បំផុត!*"
+                    f"🧹 *សម្អាត Banner Cache ចំនួន `{removed_banners}` files និងដោះលែង RAM ជូនរួចរាល់ ១០០%!*\n\n"
+                    f"🔒 *ទិន្នន័យ Hashes ព័ត៌មានដែលធ្លាប់បានផ្សាយរួចចំនួន `{protected_hashes}` items ត្រូវរក្សាទុកការពារ ១០០%!*\n"
+                    f"🛡️ *ប្រព័ន្ធបានស្កេន និងបន្ថែម Baseline ព័ត៌មានបច្ចុប្បន្នចំនួន `{seeded_count}` items បន្ថែមទៀត!*\n"
+                    "⚡ *ធានា ១០០% គ្មានព័ត៌មានចាស់ៗដែលធ្លាប់បានចុះផ្សាយរួច ត្រូវយកមកចុះផ្សាយជាថ្មីដដែលៗឡើយ! (មានតែព័ត៌មានថ្មីស្រឡាងបន្តផ្ញើប៉ុណ្ណោះ)*"
                 )
 
             elif text.startswith("/analyze") or fb_url_extractor.is_facebook_url(text):

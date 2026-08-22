@@ -23,17 +23,18 @@ class FlashNewsSuperBrainPipeline:
 
     async def clear_all_cache_and_seed_baseline(self):
         """
-        Executes full cache purge & baseline re-seeding:
-        1. Purges all old seen news hashes.
-        2. Deletes all temporary banner images and files.
-        3. Seeds current RSS feed items as baseline so no old news/banners are ever re-sent.
-        Returns: (cleared_hashes_count, removed_banners_count, seeded_baseline_count)
+        Executes safe cache purge & RSS re-seeding:
+        1. Deletes all temporary banner images and files on disk.
+        2. Recycles RAM memory.
+        3. Preserves all past published news hashes in seen_hashes.json.
+        4. Seeds any missing current RSS items into seen_hashes.json as baseline.
+        Returns: (protected_hashes_count, removed_banners_count, seeded_baseline_count)
         """
-        cleared_count = self.dedup_store.clear_news_cache()
-        removed_banners = self.dedup_store.purge_temp_banner_files()
+        protected_hashes = len(self.dedup_store.seen_hashes)
+        removed_banners = self.dedup_store.clear_news_cache()
         seeded_count = await self.dedup_store.seed_baseline_from_rss_async(self.ingestion)
-        logger.info(f"🧹 [FULL CACHE PURGE & SEED COMPLETE] Cleared: {cleared_count} hashes | Banners removed: {removed_banners} | Baseline seeded: {seeded_count}")
-        return cleared_count, removed_banners, seeded_count
+        logger.info(f"🧹 [SAFE CACHE PURGE COMPLETE] Protected: {protected_hashes} hashes | Banners removed: {removed_banners} | Baseline seeded: {seeded_count}")
+        return protected_hashes, removed_banners, seeded_count
 
 # Global pipeline instance
 pipeline_engine = FlashNewsSuperBrainPipeline()
