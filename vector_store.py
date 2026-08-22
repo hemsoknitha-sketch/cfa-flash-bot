@@ -153,23 +153,40 @@ class VectorDeduplicator:
 
     def is_duplicate(self, text: str) -> Tuple[bool, float, str]:
         """
-        Check if text is duplicate (similarity >= threshold or exact SHA256 hash match).
+        Check if text is duplicate (similarity >= threshold or exact/normalized SHA256 hash match).
         Returns: (is_dup: bool, max_similarity: float, matched_id: str)
         """
         import hashlib
+        import re
+        
+        # 1. Exact full text hash match
         content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
         if content_hash in self.seen_hashes:
             return True, 1.0, f"hash_{content_hash[:8]}"
+
+        # 2. Normalized text hash match (stripping punctuation/symbols for zero repeat protection)
+        norm_text = re.sub(r'[^\w\u1780-\u17ff]+', '', text.strip().lower())
+        if norm_text:
+            norm_hash = hashlib.sha256(norm_text.encode('utf-8')).hexdigest()
+            if norm_hash in self.seen_hashes:
+                return True, 1.0, f"norm_{norm_hash[:8]}"
 
         if self.qdrant_enabled:
             return self._is_duplicate_qdrant(text)
         return self._is_duplicate_tfidf(text)
 
     def add_item(self, item_id: str, text: str):
-        """Add a processed news item to the vector history and content hash cache."""
+        """Add a processed news item to vector history and persistent content hash cache on disk."""
         import hashlib
+        import re
         content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
         self.seen_hashes.add(content_hash)
+
+        norm_text = re.sub(r'[^\w\u1780-\u17ff]+', '', text.strip().lower())
+        if norm_text:
+            norm_hash = hashlib.sha256(norm_text.encode('utf-8')).hexdigest()
+            self.seen_hashes.add(norm_hash)
+
         self._save_seen_hashes()
 
         if self.qdrant_enabled:
