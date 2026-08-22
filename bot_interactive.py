@@ -47,6 +47,7 @@ class SuperSmartTelegramBot:
             {"command": "factcheck", "description": "🔍 Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន (0-100%)"},
             {"command": "national_desks", "description": "🏛️ បញ្ជីស្ថាប័នរដ្ឋ & ២៥ រាជធានី-ខេត្ត (37 Desks)"},
             {"command": "sovereignty_vault", "description": "📂 ឃ្លាំងប្រវត្តិសាស្ត្រយោធា ការទូត & ព្រំដែន"},
+            {"command": "laws", "description": "⚖️ ផ្ទៀងផ្ទាត់ & ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញ"},
             {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
             {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
             {"command": "report", "description": "📊 របាយការណ៍ស្កេន 16 Institutional Feeds"},
@@ -377,7 +378,7 @@ class SuperSmartTelegramBot:
                 PUBLIC_COMMAND_PREFIXES = [
                     "/start", "/help", "/latest", "/defense_news",
                     "/border_archive", "/sync_defense_archive", "/ask", "/ping",
-                    "/factcheck", "/national_desks", "/sovereignty_vault"
+                    "/factcheck", "/national_desks", "/sovereignty_vault", "/laws"
                 ]
 
                 is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES)
@@ -530,6 +531,21 @@ class SuperSmartTelegramBot:
                         msg += f"📌 *[{idx}] {r.get('date')} | {r.get('source_name')}*\n*{r.get('title')}*\n\n"
                     msg += "💡 *លោកអ្នកអាចសួរ AI អំពីព្រំដែនកម្ពុជាបានតាម ៖* `/border_archive <សំណួរ>`"
                     await self.send_message(chat_id, msg)
+
+                elif text.startswith("/laws"):
+                    query = text.replace("/laws", "").strip()
+                    from khmer_legal_engine import legal_engine
+                    if query:
+                        await self.send_message(chat_id, f"⚖️ *ប្រព័ន្ធ AI Legal Engine កំពុងវិភាគ និងទាញយកបទប្បញ្ញត្តិច្បាប់ជាតិកម្ពុជាសម្រាប់ ៖*\n`{query}`...")
+                        ans = await legal_engine.answer_legal_question(query)
+                        await self.send_message(chat_id, ans)
+                    else:
+                        laws = legal_engine.laws
+                        msg = "⚖️ *ប្រព័ន្ធផ្ទៀងផ្ទាត់ & ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញកម្ពុជា ៖*\n\n"
+                        msg += "💡 *របៀបប្រើប្រាស់ ៖* វាយពាក្យបញ្ជាដកឃ្លាតតាមដោយពាក្យគន្លឹះ ឬសំណួរច្បាប់ ៖\n• `/laws <សំណួរ ឬពាក្យគន្លឹះច្បាប់>`\n\n📌 *មាត្រាច្បាប់គំរូក្នុងប្រព័ន្ធ ៖*\n"
+                        for l in laws[:4]:
+                            msg += f"• *{l.get('code_name')} ({l.get('article')}) ៖* {l.get('title')}\n"
+                        await self.send_message(chat_id, msg)
 
                 elif text.startswith("/latest"):
                     latest_text = (
