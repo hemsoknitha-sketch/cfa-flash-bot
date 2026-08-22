@@ -99,9 +99,10 @@ class SuperSmartTelegramBot:
         payload = {
             "chat_id": chat_id,
             "text": text,
-            "parse_mode": "Markdown",
-            "reply_markup": reply_markup or self._build_inline_keyboard()
+            "parse_mode": "Markdown"
         }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
         try:
             session = await self.get_session()
             async with session.post(f"{self.api_url}/sendMessage", json=payload, timeout=aiohttp.ClientTimeout(total=10)) as resp:
