@@ -41,10 +41,13 @@ class SuperSmartTelegramBot:
         commands = [
             {"command": "start", "description": "⚡ បើកម៉ឺនុយមេ (Main Menu)"},
             {"command": "latest", "description": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
+            {"command": "defense_news", "description": "🛡️ សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC"},
+            {"command": "border_archive", "description": "📂 ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា"},
+            {"command": "sync_defense_archive", "description": "📡 ស្កេន & ធ្វើបច្ចុប្បន្នភាព Archive យោធា"},
             {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
             {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
             {"command": "report", "description": "📊 របាយការណ៍ស្កេន 16 Institutional Feeds"},
-            {"command": "clearcache", "description": "🧹 សម្អាតទិន្នន័យព័ត៌មានចាស់ៗទាំងអស់"},
+            {"command": "clearcache", "description": "🧹 សម្អាតទិន្នន័យ Banner Cache & RAM"},
             {"command": "backup", "description": "📦 ទាញយក ZIP Backup ប្រព័ន្ធ"},
             {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
             {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់ & Support"}
@@ -58,11 +61,15 @@ class SuperSmartTelegramBot:
             logger.error(f"Failed to register bot commands: {e}")
 
     def _build_inline_keyboard(self):
-        """Super Smart 8-Button Inline Keyboard."""
+        """Super Smart 10-Button Inline Keyboard."""
         return {
             "inline_keyboard": [
                 [
                     {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ", "callback_data": "cmd_latest"}
+                ],
+                [
+                    {"text": "🛡️ ក្រសួងការពារជាតិ & MFAIC", "callback_data": "cmd_defense_news"},
+                    {"text": "📂 កំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែន", "callback_data": "cmd_border_archive"}
                 ],
                 [
                     {"text": "🟢 ស្ថានភាពប្រព័ន្ធ Server", "callback_data": "cmd_status"},
@@ -501,7 +508,7 @@ class SuperSmartTelegramBot:
             if not security_sentinel.verify_admin_access(chat_id):
                 return
 
-            if data == "cmd_latest":
+            elif data == "cmd_latest":
                 latest_text = (
                     "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
                     "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
@@ -515,6 +522,30 @@ class SuperSmartTelegramBot:
                     "• ADMIN: *@Sokpheatonsai*"
                 )
                 await self.send_message(chat_id, latest_text)
+
+            elif data == "cmd_defense_news":
+                from defense_intelligence_engine import defense_engine
+                latest_items = defense_engine.get_latest_defense_news(5)
+                if not latest_items:
+                    await self.send_message(chat_id, "🛡️ *មិនទាន់មានកំណត់ត្រាសេចក្តីថ្លែងការណ៍យោធា ឬការទូតក្នុង Archive នៅឡើយទេ។*\n⚡ *សូមប្រើពាក្យបញ្ជា /sync_defense_archive ដើម្បីស្កេន និងទាញយកទិន្នន័យ!*")
+                else:
+                    msg = "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយ (ក្រសួងការពារជាតិ & ក្រសួងការបរទេស) ៖*\n\n"
+                    for idx, item in enumerate(latest_items, 1):
+                        msg += f"📌 *{idx}. {item.get('title')}*\n  └ 📅 *កាលបរិច្ឆេទ ៖* `{item.get('date')}` | *ប្រភព ៖* `{item.get('source_name')}`\n\n"
+                    await self.send_message(chat_id, msg)
+
+            elif data == "cmd_border_archive":
+                from defense_intelligence_engine import defense_engine
+                records = defense_engine.get_border_archives(limit=5)
+                if not records:
+                    await self.send_message(chat_id, "📂 *ពុំទាន់រកឃើញកំណត់ត្រាយោធា ឬកំណត់ទូតព្រំដែនក្នុង Archive នៅឡើយទេ។*")
+                else:
+                    title_hdr = f"🛡️ *កំណត់ត្រាប្រវត្តិសាស្ត្រយោធា & ព្រំដែនកម្ពុជា ({len(records)} ករណីចុងក្រោយ) ៖*\n\n"
+                    body_lines = []
+                    for idx, item in enumerate(records, 1):
+                        body_lines.append(f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n*ចំណងជើង ៖* {item.get('title')}\n*ខ្លឹមសារ ៖*\n{item.get('content')[:300]}...\n----------------------------------------")
+                    await self.send_message(chat_id, title_hdr + "\n\n".join(body_lines))
+
             elif data == "cmd_status":
                 await self.send_message(chat_id, self.get_vps_status_report())
             elif data == "cmd_report":
@@ -539,10 +570,13 @@ class SuperSmartTelegramBot:
                     "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
                     "• /start - បើកម៉ឺនុយមេ (CFA Flash Feed)\n"
                     "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
+                    "• /defense_news - អានសេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC\n"
+                    "• /border_archive - ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា\n"
+                    "• /sync_defense_archive - ស្កេន & ធ្វើបច្ចុប្បន្នភាព Archive យោធា\n"
                     "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
                     "• /scan - ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ\n"
                     "• /report - មើលរបាយការណ៍ 16 Feeds\n"
-                    "• /clearcache - សម្អាតទិន្នន័យព័ត៌មានចាស់ៗទាំងអស់\n"
+                    "• /clearcache - សម្អាតទិន្នន័យ Banner Cache & RAM\n"
                     "• /analyze <fb_url> - វិភាគ Facebook URL ស្វ័យប្រវត្តិ\n"
                     "• /backup - ទាញយក ZIP Backup ប្រព័ន្ធ\n"
                     "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
