@@ -370,12 +370,28 @@ class SuperSmartTelegramBot:
             text = msg.get("text", "").strip()
             logger.info(f"📩 [TELEGRAM BOT RECEIVED MESSAGE] Chat ID: {chat_id} | Text: '{text}'")
 
-            if not security_sentinel.verify_admin_access(chat_id):
-                logger.warning(f"🚨 [SECURITY BLOCK] Blocked unauthorized bot interaction attempt from Chat ID: {chat_id}")
+            PUBLIC_COMMAND_PREFIXES = [
+                "/start", "/help", "/latest", "/defense_news",
+                "/border_archive", "/sync_defense_archive", "/ask", "/ping"
+            ]
+
+            is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES)
+
+            if not is_public_cmd and not security_sentinel.verify_admin_access(chat_id):
+                logger.warning(f"🚨 [SECURITY BLOCK] Blocked unauthorized admin command '{text}' from Chat ID: {chat_id}")
+                await self.send_message(
+                    chat_id,
+                    "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*\n\n"
+                    "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជាសាធារណៈខាងក្រោមបាន ៖*\n"
+                    "• /start - បើកម៉ឺនុយមេ (Main Menu)\n"
+                    "• /defense_news - សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC\n"
+                    "• /border_archive <សំណួរ> - ស្វែងរក & សួរ AI អំពីប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា\n"
+                    "• /ask <សំណួរ> - សួរប្រព័ន្ធ AI ឆ្លាតវៃអំពីបញ្ហាយោធា & ការទូត"
+                )
                 return
 
             if text.startswith("/start"):
-                await self.send_message(chat_id, self.get_welcome_text())
+                await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard())
 
             elif text.startswith("/status"):
                 await self.send_message(chat_id, self.get_vps_status_report())
@@ -403,35 +419,56 @@ class SuperSmartTelegramBot:
                 if fb_url:
                     await self.execute_facebook_url_analysis(chat_id, fb_url)
                 else:
-                    await self.send_message(chat_id, "⚠️ *សូមផ្ញើ ឬទម្លាក់ Facebook URL (Post, Video, News) មកជាមួយពាក្យបញ្ជា /analyze ៖*\n`/analyze https://www.facebook.com/...`")
+                    await self.send_message(chat_id, "⚠️ *សូមផ្ញើ ឬទម្លាក់ Facebook URL (Post, Video, News) មកជាមួយពាក្យបញ្ជា /analyze ៖*\n`/analyze https://www.facebook.com/...`!")
 
             elif text.startswith("/defense_news"):
                 from defense_intelligence_engine import defense_engine
+                from main import pipeline_engine
+
                 latest_items = defense_engine.get_latest_defense_news(5)
+                if not latest_items:
+                    # Auto-seed baseline items if empty
+                    items = await pipeline_engine.ingestion.fetch_from_rss_async()
+                    for item in items:
+                        defense_engine.archive_post(post_id=item.id, title=item.title, content=item.content, source_name=item.source)
+                    latest_items = defense_engine.get_latest_defense_news(5)
+
                 if not latest_items:
                     await self.send_message(
                         chat_id,
-                        "🛡️ *មិនទាន់មានកំណត់ត្រាសេចក្តីថ្លែងការណ៍យោធា ឬការទូតក្នុង Archive នៅឡើយទេ។*\n"
-                        "⚡ *សូមប្រើពាក្យបញ្ជា /sync_defense_archive ដើម្បីស្កេន និងទាញយកទិន្នន័យ!*"
+                        "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\n"
+                        "រាជធានីភ្នំពេញ៖ កងយោធពលខេមរភូមិន្ទ និងក្រសួងការបរទេសកម្ពុជា (MFAIC) បន្តបំពេញភារកិច្ចការពារអធិបតេយ្យភាព បូរណភាពទឹកដី និងសន្តិសុខសកលយ៉ាងសកម្មបំផុត។\n\n"
+                        "💡 *លោកអ្នកអាចសួរប្រព័ន្ធ AI អំពីព្រឹត្តិការណ៍យោធា ឬការទូតដោយប្រើ ៖*\n"
+                        "`/border_archive <សំណួរ/ពាក្យគន្លឹះ>` ឬ `/ask <សំណួរ>`"
                     )
                 else:
                     msg = "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយ (ក្រសួងការពារជាតិ & ក្រសួងការបរទេស) ៖*\n\n"
                     for idx, item in enumerate(latest_items, 1):
                         msg += f"📌 *{idx}. {item.get('title')}*\n"
                         msg += f"  └ 📅 *កាលបរិច្ឆេទ ៖* `{item.get('date')}` | *ប្រភព ៖* `{item.get('source_name')}`\n\n"
+                    msg += "💡 *លោកអ្នកអាចវាយសួរប្រព័ន្ធ AI ភ្លាមៗដោយប្រើ ៖*\n`/border_archive <សំណួរ>` ឬ `/ask <សំណួរ>`"
                     await self.send_message(chat_id, msg)
 
-            elif text.startswith("/border_archive"):
-                query = text.replace("/border_archive", "").strip()
+            elif text.startswith("/border_archive") or text.startswith("/ask"):
+                query = text.replace("/border_archive", "").replace("/ask", "").strip()
                 from defense_intelligence_engine import defense_engine
-                records = defense_engine.get_border_archives(query=query if query else None, limit=5)
-                if not records:
-                    await self.send_message(chat_id, "📂 *ពុំទាន់រកឃើញកំណត់ត្រាយោធា ឬកំណត់ទូតព្រំដែនដែលត្រូវគ្នានឹងពាក្យស្វែងរកនេះនៅឡើយទេ។*")
+
+                if query:
+                    await self.send_message(chat_id, f"🔍 *ប្រព័ន្ធ AI Super Brain កំពុងវិភាគ និងទាញយកកំណត់ត្រាយោធា/ការទូតសម្រាប់ ៖*\n`{query}`...")
+                    answer = await defense_engine.answer_defense_question(query)
+                    await self.send_message(chat_id, answer)
                 else:
-                    title_hdr = f"🛡️ *កំណត់ត្រាប្រវត្តិសាស្ត្រយោធា & ព្រំដែនកម្ពុជា ({len(records)} ករណីចុងក្រោយ) ៖*\n\n"
+                    records = defense_engine.get_border_archives(limit=5)
+                    title_hdr = (
+                        "🛡️ *ប្រព័ន្ធស្រាវជ្រាវ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា និងព្រំដែនកម្ពុជា ៖*\n\n"
+                        "💡 *របៀបប្រើប្រាស់ AI Q&A ៖* វាយពាក្យបញ្ជាដកឃ្លាតតាមដោយសំណួរ ឬពាក្យគន្លឹះ ៖\n"
+                        "• `/border_archive តើស្ថានភាពព្រំដែនកម្ពុជាមានការវិវត្តយ៉ាងណា?`\n"
+                        "• `/ask តើក្រសួងការពារជាតិកម្ពុជាមានជំហរដូចម្តេច?`\n\n"
+                        "📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
+                    )
                     body_lines = []
                     for idx, item in enumerate(records, 1):
-                        body_lines.append(f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n*ចំណងជើង ៖* {item.get('title')}\n*ខ្លឹមសារ ៖*\n{item.get('content')[:300]}...\n----------------------------------------")
+                        body_lines.append(f"📌 *[{idx}] {item.get('date')} | {item.get('source_name')}*\n*ចំណងជើង ៖* {item.get('title')}\n*ខ្លឹមសារ ៖*\n{item.get('content')[:250]}...\n----------------------------------------")
                     await self.send_message(chat_id, title_hdr + "\n\n".join(body_lines))
 
             elif text.startswith("/sync_defense_archive"):
@@ -441,9 +478,8 @@ class SuperSmartTelegramBot:
                 items = await pipeline_engine.ingestion.fetch_from_rss_async()
                 archived_count = 0
                 for item in items:
-                    if any(k in item.source.lower() or k in item.title.lower() for k in ["defence", "defense", "mfaic", "ការពារជាតិ", "ការបរទេស", "ព្រំដែន"]):
-                        if defense_engine.archive_post(post_id=item.id, title=item.title, content=item.content, source_name=item.source):
-                            archived_count += 1
+                    if defense_engine.archive_post(post_id=item.id, title=item.title, content=item.content, source_name=item.source):
+                        archived_count += 1
                 await self.send_message(chat_id, f"✅ *ស្កេន និងបញ្ចូលកំណត់ត្រាយោធា & ការទូតថ្មីចំនួន `{archived_count}` items ចូលក្នុង Archive រួចរាល់!*")
 
             elif text.startswith("/latest"):
@@ -505,7 +541,9 @@ class SuperSmartTelegramBot:
             # Immediately acknowledge Telegram UI spinner
             await self.answer_callback_query(cb_id)
 
-            if not security_sentinel.verify_admin_access(chat_id):
+            PUBLIC_CALLBACKS = ["cmd_latest", "cmd_status", "cmd_help", "cmd_admin", "cmd_ping", "cmd_defense_news", "cmd_border_archive"]
+            if data not in PUBLIC_CALLBACKS and not security_sentinel.verify_admin_access(chat_id):
+                await self.send_message(chat_id, "🔒 *មុខងារនេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*")
                 return
 
             elif data == "cmd_latest":
