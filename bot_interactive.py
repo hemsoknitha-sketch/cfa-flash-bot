@@ -309,15 +309,40 @@ class SuperSmartTelegramBot:
                     await self.send_message(chat_id, f"🧹 *សម្អាត Banner Cache ចំនួន `{removed_banners}` files និងដោះលែង RAM រួចរាល់!*")
 
                 elif text.startswith("/defense_news"):
+                    query = text.replace("/defense_news", "").strip()
                     from defense_intelligence_engine import defense_engine
-                    latest_items = defense_engine.get_latest_defense_news(5)
-                    if not latest_items:
-                        await self.send_message(chat_id, "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\nរាជធានីភ្នំពេញ៖ កងយោធពលខេមរភូមិន្ទ និងក្រសួងការបរទេសកម្ពុជា បន្តបំពេញភារកិច្ចការពារអធិបតេយ្យភាព បូរណភាពទឹកដី និងសន្តិសុខសកលយ៉ាងសកម្មបំផុត។")
+                    from khmer_auditor import khmer_auditor
+
+                    if query and query.isdigit():
+                        idx = int(query) - 1
+                        latest_items = defense_engine.get_latest_defense_news(10)
+                        if 0 <= idx < len(latest_items):
+                            rec = latest_items[idx]
+                            clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
+                            clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
+                            full_msg = (
+                                f"📜 *សេចក្តីថ្លែងការណ៍ផ្លូវការ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\n"
+                                f"*{clean_title}*\n\n"
+                                f"{clean_body}\n\n"
+                                f"📅 *កាលបរិច្ឆេទ ៖* `{rec.get('date')}`\n"
+                                f"🏛️ *ប្រភព ៖* `{rec.get('source_name')}`"
+                            )
+                            await self.send_message(chat_id, full_msg)
+                        else:
+                            await self.send_message(chat_id, f"⚠️ *រកមិនឃើញសេចក្តីថ្លែងការណ៍ទី {query} ឡើយ!*")
                     else:
-                        msg = "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\n"
-                        for idx, item in enumerate(latest_items, 1):
-                            msg += f"📌 *{idx}. {item.get('title')}*\n  └ 📅 `{item.get('date')}` | ប្រភព ៖ `{item.get('source_name')}`\n\n"
-                        await self.send_message(chat_id, msg)
+                        latest_items = defense_engine.get_latest_defense_news(5)
+                        if not latest_items:
+                            await self.send_message(chat_id, "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\nរាជធានីភ្នំពេញ៖ កងយោធពលខេមរភូមិន្ទ និងក្រសួងការបរទេសកម្ពុជា បន្តបំពេញភារកិច្ចការពារអធិបតេយ្យភាព បូរណភាពទឹកដី និងសន្តិសុខសកលយ៉ាងសកម្មបំផុត។")
+                        else:
+                            msg = "🛡️ *សេចក្តីថ្លែងការណ៍ផ្លូវការចុងក្រោយ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\n"
+                            inline_btns = []
+                            for idx, item in enumerate(latest_items, 1):
+                                clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
+                                clean_date = khmer_auditor.sanitize_khmer_spelling_and_punctuation(item.get("date", ""))
+                                msg += f"📌 *{idx}. {clean_t}*\n  └ 📅 `{clean_date}` | ប្រភព ៖ `{item.get('source_name')}`\n\n"
+                                inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"def_{idx-1}"}])
+                            await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
 
                 elif text.startswith("/border_archive") or text.startswith("/ask"):
                     query = text.replace("/border_archive", "").replace("/ask", "").strip()
@@ -484,6 +509,27 @@ class SuperSmartTelegramBot:
                         for idx, item in enumerate(latest_items, 1):
                             msg += f"📌 *{idx}. {item.get('title')}*\n  └ 📅 `{item.get('date')}` | ប្រភព ៖ `{item.get('source_name')}`\n\n"
                         await self.send_message(chat_id, msg)
+
+                elif data.startswith("def_"):
+                    from defense_intelligence_engine import defense_engine
+                    from khmer_auditor import khmer_auditor
+                    try:
+                        idx = int(data.replace("def_", ""))
+                        latest_items = defense_engine.get_latest_defense_news(10)
+                        if 0 <= idx < len(latest_items):
+                            rec = latest_items[idx]
+                            clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
+                            clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
+                            full_msg = (
+                                f"📜 *សេចក្តីថ្លែងការណ៍ផ្លូវការពេញលេញ (ក្រសួងការពារជាតិ & MFAIC) ៖*\n\n"
+                                f"*{clean_title}*\n\n"
+                                f"{clean_body}\n\n"
+                                f"📅 *កាលបរិច្ឆេទ ៖* `{rec.get('date')}`\n"
+                                f"🏛️ *ប្រភព ៖* `{rec.get('source_name')}`"
+                            )
+                            await self.send_message(chat_id, full_msg)
+                    except Exception as e:
+                        logger.error(f"Error handling defense news callback: {e}")
 
                 elif data == "cmd_border_archive":
                     from defense_intelligence_engine import defense_engine
