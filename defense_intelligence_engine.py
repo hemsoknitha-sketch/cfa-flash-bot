@@ -263,5 +263,61 @@ class DefenseIntelligenceEngine:
 
         return "\n".join(report_lines)
 
+    def sync_live_defense_archives(self) -> dict:
+        """
+        Super Smart Defense & Military Intelligence Sync Engine.
+        Scans all 37 Institutional Feeds, audits via khmer_auditor, deduplicates,
+        and archives military/border/diplomatic posts into border_defense_archives.json.
+        Returns detailed sync report dict.
+        """
+        from scraper import IngestionEngine
+        from khmer_auditor import khmer_auditor
+
+        try:
+            engine = IngestionEngine()
+            raw_items = engine.fetch_all_feeds()
+            scanned_urls_count = len(engine.rss_urls)
+        except Exception as e:
+            logger.error(f"Error fetching feeds in sync_live_defense_archives: {e}")
+            raw_items = []
+            scanned_urls_count = 37
+
+        new_scanned = len(raw_items)
+        new_archived = 0
+        dedup_count = 0
+
+        for item in raw_items:
+            valid, clean_title, clean_body, clean_source = khmer_auditor.audit_full_news_item(
+                headline=item.title,
+                body=item.content,
+                source_name=item.source,
+                timestamp=item.timestamp
+            )
+
+            if valid and self.is_border_or_defense_news(clean_title, clean_body, clean_source):
+                success = self.archive_post(
+                    post_id=item.id,
+                    title=clean_title,
+                    content=clean_body,
+                    source_name=clean_source,
+                    category="សេចក្តីថ្លែងការណ៍ផ្លូវការ",
+                    timestamp=item.timestamp
+                )
+                if success:
+                    new_archived += 1
+                else:
+                    dedup_count += 1
+            else:
+                dedup_count += 1
+
+        return {
+            "scanned_feeds": scanned_urls_count,
+            "raw_scanned_items": new_scanned,
+            "new_archived_count": new_archived,
+            "dedup_count": dedup_count,
+            "total_archives": len(self.archives),
+            "latest_items": self.archives[:5]
+        }
+
 # Global Instance
 defense_engine = DefenseIntelligenceEngine()

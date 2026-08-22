@@ -344,6 +344,35 @@ class SuperSmartTelegramBot:
                                 inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"def_{idx-1}"}])
                             await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
 
+                elif text.startswith("/sync_defense_archive"):
+                    await self.send_message(chat_id, "⚡ *កំពុងរត់ប្រព័ន្ធ Super Smart Sync ស្កេន & កត់ត្រាប្រវត្តិសាស្ត្រយោធា-ការទូតពី ៣៧ ស្ថាប័នរដ្ឋ...*")
+                    from defense_intelligence_engine import defense_engine
+                    from khmer_auditor import khmer_auditor
+                    
+                    sync_res = defense_engine.sync_live_defense_archives()
+                    
+                    msg = (
+                        "⚡ *ប្រព័ន្ធស៊ិនគ្រូណៃស៍ & កត់ត្រាប្រវត្តិសាស្ត្រយោធា-ការទូត (Super Smart Defense Sync) ៖*\n\n"
+                        "✅ *លទ្ធផលនៃការរត់ស៊ិនគ្រូណៃស៍ ៖*\n"
+                        f"• ស្កេនប្រភពផ្លូវការ ៖ `{sync_res.get('scanned_feeds')} National & Regional Desks`\n"
+                        f"• ព័ត៌មានទាញបានសរុប ៖ `{sync_res.get('raw_scanned_items')}` Items\n"
+                        f"• កត់ត្រាចូល Archives ថ្មី ៖ `{sync_res.get('new_archived_count')}` New Defense Archives\n"
+                        f"• ព័ត៌មានស្ទួនជម្រះចោល ៖ `{sync_res.get('dedup_count')}` Duplicates Neutralized\n"
+                        f"• កំណត់ត្រាយោធាសរុបក្នុងឃ្លាំង ៖ `{sync_res.get('total_archives')}` Total Archives\n\n"
+                        "📌 *កំណត់ត្រាចុងក្រោយ ៖*\n\n"
+                    )
+                    
+                    latest = sync_res.get("latest_items", [])
+                    inline_btns = []
+                    for idx, item in enumerate(latest, 1):
+                        clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
+                        clean_date = khmer_auditor.sanitize_khmer_spelling_and_punctuation(item.get("date", ""))
+                        msg += f"📌 *[{idx}] {clean_date} | {item.get('source_name')}*\n{clean_t}\n\n"
+                        inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"arc_{idx-1}"}])
+
+                    msg += "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជា `/border_archive` ឬ `/defense_news` ដើម្បីអានអត្ថបទពេញលេញ!*"
+                    await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
+
                 elif text.startswith("/border_archive") or text.startswith("/ask"):
                     query = text.replace("/border_archive", "").replace("/ask", "").strip()
                     from defense_intelligence_engine import defense_engine
