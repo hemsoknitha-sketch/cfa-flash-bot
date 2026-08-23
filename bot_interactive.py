@@ -97,10 +97,7 @@ class SuperSmartTelegramBot:
         return {"inline_keyboard": keyboard}
 
     async def send_message(self, chat_id: int, text: str, reply_markup=None):
-        """Send message via Telegram API with 100% Khmer Auditor linguistic audit."""
-        from khmer_auditor import khmer_auditor
-        text = khmer_auditor.sanitize_khmer_spelling_and_punctuation(text)
-
+        """Send message via Telegram API with clean preserved formatting."""
         payload = {
             "chat_id": chat_id,
             "text": text,
@@ -240,22 +237,22 @@ class SuperSmartTelegramBot:
         return (
             "🟢 *CFA FLASH FEED — VPS SERVER TELEMETRY*\n\n"
             "💻 *១. ស្ថានភាពម៉ាស៊ីន VPS (Server Telemetry) ៖*\n"
-            f"• *OS System ៖*  `Linux {platform.release()}`\n"
-            f"• *CPU Usage ៖*  `Load: {cpu_load:.2f} (Google Cloud VM)`\n"
-            f"• *RAM Memory ៖*  `{ram_used_mb} MB / {ram_total_mb} MB ({ram_percent}%)`\n"
-            f"• *Disk Storage ៖*  `{disk_used_gb} GB / {disk_total_gb} GB ({disk_percent}% Used)`\n"
-            "• *Server Status ៖*  `Active 24/7 365 (Google Cloud VM)`\n\n\n"
+            f"• *OS System ៖* `Linux {platform.release()}`\n"
+            f"• *CPU Usage ៖* `Load: {cpu_load:.2f} (Google Cloud VM)`\n"
+            f"• *RAM Memory ៖* `{ram_used_mb} MB / {ram_total_mb} MB ({ram_percent}%)`\n"
+            f"• *Disk Storage ៖* `{disk_used_gb} GB / {disk_total_gb} GB ({disk_percent}% Used)`\n"
+            "• *Server Status ៖* `Active 24/7 365 (Google Cloud VM)`\n\n\n"
             "🤖 *២. ព័ត៌មានប្រព័ន្ធ AI & Vector Database ៖*\n"
-            f"• *Active Feeds ៖*  `{feed_count} ស្ថាប័នរដ្ឋ ខេត្ត & សារព័ត៌មានឌីជីថល`\n"
-            "• *AI Engine ៖*  `Hugging Face (hemsinath/cfa-flash-bot) + Gemini 3.6 Flash`\n"
-            "• *Vector Store ៖*  `SHA-256 + TF-IDF Deduplication Active`\n"
-            "• *Khmer Standard ៖*  `វចនានុក្រម សម្តេច ព្រះសង្ឃរាជ ជួន ណាត`\n"
-            "• *Legal Engine ៖*  `រដ្ឋធម្មនុញ្ញ មាត្រា ៥១ & ច្បាប់ជាតិកម្ពុជា`\n\n\n"
+            f"• *Active Feeds ៖* `{feed_count} ស្ថាប័នរដ្ឋ ខេត្ត & សារព័ត៌មានឌីជីថល`\n"
+            "• *AI Engine ៖* `Hugging Face (hemsinath/cfa-flash-bot) + Gemini 3.6 Flash`\n"
+            "• *Vector Store ៖* `SHA-256 + TF-IDF Deduplication Active`\n"
+            "• *Khmer Standard ៖* `វចនានុក្រម សម្តេច ព្រះសង្ឃរាជ ជួន ណាត`\n"
+            "• *Legal Engine ៖* `រដ្ឋធម្មនុញ្ញ មាត្រា ៥១ & ច្បាប់ជាតិកម្ពុជា`\n\n\n"
             "🛡️ *៣. ប្រព័ន្ធសុវត្ថិភាព & ភាពឯកជន ៖*\n"
-            "• *Secrets Vault ៖*  `.env Encrypted & Secured`\n"
-            "• *API Connection ៖*  `TLS 1.3 High-Speed`\n"
-            "• *Auto-Recovery ៖*  `systemd 24/7 Daemon Active`\n"
-            "• *ចំណាយ ៖*  `$0.00 / ឥតគិតថ្លៃ ១០០ % រហូត`"
+            "• *Secrets Vault ៖* `.env Encrypted & Secured`\n"
+            "• *API Connection ៖* `TLS 1.3 High-Speed`\n"
+            "• *Auto-Recovery ៖* `systemd 24/7 Daemon Active`\n"
+            "• *ចំណាយ ៖* `$0.00 / ឥតគិតថ្លៃ ១០០% រហូត`"
         )
 
     def get_feeds_report(self) -> str:
