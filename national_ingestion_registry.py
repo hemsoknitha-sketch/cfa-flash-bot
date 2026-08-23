@@ -277,7 +277,7 @@ MAINSTREAM_NEWS_FEEDS = [
 # 5. Influential Cambodian Social Journalists & Media Desks
 INFLUENTIAL_SOCIAL_JOURNALIST_DESKS = [
     {
-        "name": "Phorn Vannak News (អ្នកសារព័ត៌មាន ផន វណ្ណះ)",
+        "name": "Pheng Vannak News (អ្នកសារព័ត៌មានលោក ផែង វណ្ណះ)",
         "url": "https://www.facebook.com/pvannakblue",
         "category": "Social Media Journalist & Breaking News",
         "tier": 1
