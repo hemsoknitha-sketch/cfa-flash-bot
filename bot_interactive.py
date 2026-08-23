@@ -624,9 +624,7 @@ class SuperSmartTelegramBot:
                             from khmer_auditor import khmer_auditor
 
                             rewriter = SuperBrainAIRewriter()
-                            ans = rewriter._query_llm_chain(
-                                f"សូជួយឆ្លើយតបសំណួរ ឬវិភាគអត្ថបទខាងក្រោមជាភាសាខ្មែរផ្លូវការ ដោយយោងតាមរដ្ឋធម្មនុញ្ញ មាត្រា ៥១/៥២ និងវចនានុក្រម ជួន ណាត ៖\n{text}"
-                            )
+                            ans = rewriter.answer_freeform_question(text)
                             clean_ans = khmer_auditor.sanitize_khmer_spelling_and_punctuation(ans)
                             await self.send_message(chat_id, clean_ans)
                         except Exception as e:

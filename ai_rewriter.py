@@ -54,6 +54,68 @@ class SuperBrainAIRewriter:
             except Exception as e:
                 logger.error(f"Failed to initialize Gemini Client: {e}")
 
+    def answer_freeform_question(self, user_query: str) -> str:
+        """
+        Answers general free-form user questions using Multi-Tier AI Engine Architecture:
+        1. Multi-Key Gemini API Pool Rotation
+        2. Hugging Face fine-tuned model (hemsinath/cfa-flash-bot) Failover
+        3. Constitutional Rule of Law Fallback Engine
+        """
+        system_instruction = (
+            "You are the APEX Super Brain AI Legal & News Assistant for Cambodia (CFA Flash Feed). "
+            "Respond in formal, eloquent, authoritative Khmer prose adhering to Chuon Nath Khmer Dictionary orthography "
+            "and Article 51/52 of the Cambodian Constitution. Provide clear, professional, objective answers ending with '៕'."
+        )
+
+        # 1. Multi-Key Gemini API Pool Rotation
+        from gemini_key_pool import gemini_key_pool
+        client_tuple = gemini_key_pool.get_client()
+        if client_tuple:
+            client, active_key = client_tuple
+            models_to_try = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+            for m_name in models_to_try:
+                try:
+                    response = client.models.generate_content(
+                        model=m_name,
+                        contents=f"{system_instruction}\n\nUser Question: {user_query}",
+                    )
+                    if response and response.text:
+                        ans = response.text.strip()
+                        if not ans.endswith("៕") and not ans.endswith("។"):
+                            ans += "៕"
+                        return ans
+                except Exception as e:
+                    err_str = str(e)
+                    if "429" in err_str or "RESOURCE_EXHAUSTED" in err_str:
+                        gemini_key_pool.mark_key_exhausted(active_key)
+                        new_client_tuple = gemini_key_pool.get_client()
+                        if new_client_tuple:
+                            client, active_key = new_client_tuple
+                        continue
+                    else:
+                        break
+
+        # 2. Hugging Face Fine-Tuned Model Failover
+        try:
+            from huggingface_engine import hf_polymath_ai
+            hf_res = hf_polymath_ai.ask_polymath_ai(f"{system_instruction}\n{user_query}")
+            if hf_res and not hf_res.startswith("❌"):
+                return hf_res
+        except Exception as e:
+            logger.warning(f"Hugging Face freeform answer failover skipped: {e}")
+
+        # 3. Intelligent Legal & Constitutional Fallback Engine
+        from khmer_legal_engine import legal_engine
+        legal_ans = legal_engine._rule_based_legal_search(user_query)
+        if legal_ans:
+            return legal_ans
+
+        return (
+            f"ផ្អែកលើការពិនិត្យរបស់ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain សំណួរអំពី «{user_query[:50]}» "
+            f"ទាមទារឱ្យមានការគោរពនូវព្រំដែនសមត្ថកិច្ច នីតិរដ្ឋ និងការបែងចែកអំណាចរដ្ឋ ស្របតាមស្មារតីនៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា មាត្រា ៥១ (ថ្មី) "
+            f"ដែលចែងថា ប្រទេសកម្ពុជាប្រកាន់យករបបប្រជាធិបតេយ្យសេរីពហុបក្ស និងមាត្រា ៥២ អំពីការរក្សាស្ថិរភាព និងសុខសន្តិភាពសង្គមជានិរន្តរ៍ជូនជាតិ និងប្រជាជនទាំងមូល៕"
+        )
+
     def extract_geographic_location(self, title: str, content: str) -> str:
         """
         Smart Geographic Location Extractor.
