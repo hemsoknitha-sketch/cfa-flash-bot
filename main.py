@@ -79,7 +79,25 @@ async def process_news(news_text: str, news_id: str):
     logger.info(f"Step 3 & 4: AI Rewriting & Khmer Translation Completed -> Score: {processed_article.credibility_score}%")
 
     # 5. រៀបចំរូបភាព Banner & ផ្ញើទៅ Telegram (VIP Channel + Admin Chat) & Facebook Page
-    image_path = await pipeline_engine.ai_rewriter.generate_banner_image(processed_article.khmer_headline)
+    badge_label = "⚡ VERIFIED FLASH NEWS"
+    badge_color = "red"
+    try:
+        from social_viral_radar import viral_radar
+        v_res = viral_radar.analyze_viral_trend(processed_article.khmer_headline, processed_article.khmer_body)
+        if v_res.get("is_viral"):
+            badge_label = "🔥 VIRAL TRENDING — ព័ត៌មានសង្គមក្តៅៗ"
+            badge_color = "fire"
+        elif processed_article.credibility_score >= 90:
+            badge_label = "🟢 VERIFIED 95% — ព័ត៌មានផ្លូវការ"
+            badge_color = "green"
+    except Exception:
+        pass
+
+    image_path = await pipeline_engine.ai_rewriter.generate_banner_image(
+        processed_article.khmer_headline,
+        badge_label=badge_label,
+        badge_color=badge_color
+    )
     
     # 🎙️ Generate Khmer AI Voice Bulletin (.mp3)
     audio_path = None
