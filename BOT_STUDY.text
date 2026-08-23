@@ -2,7 +2,7 @@
                🏛️ APEX SUPER BRAIN AI SYSTEM — CFA FLASH FEED MASTER MANUAL 🏛️
 ====================================================================================================
 កាលបរិច្ឆេទអាប់ដេតចុងក្រោយ ៖ ថ្ងៃទី ២៣ ខែ សីហា ឆ្នាំ ២០២៦
-កំណែប្រែ ៖ APEX SUPER BRAIN AI ENGINE V6.0 (FULL PRODUCTION RELEASE)
+កំណែប្រែ ៖ APEX SUPER BRAIN AI ENGINE V7.0 (FULL PRODUCTION RELEASE)
 
 ----------------------------------------------------------------------------------------------------
 ១. 🏛️ ស្ថាបត្យកម្មប្រព័ន្ធសរុប (SUPER SMART SYSTEM ARCHITECTURE)
@@ -287,4 +287,45 @@ flowchart TD
 ----------------------------------------------------------------------------------------------------
 - **Auto-Delete Media Attachments ៖** ផ្ញើរូបភាព (Photo), វីដេអូ (Video), ឯកសារ (Document), ស្ទីកគ័រ... ប្រព័ន្ធនឹងរត់ Telegram API `deleteMessage` លុបចោលភ្លាមៗពី Chat/Group ការពារ Spam/Malware!
 - **Auto-Delete Non-Facebook URLs ៖** ផ្ញើតំណភ្ជាប់ (URL) ក្រៅពី Facebook ផ្លូវការ ប្រព័ន្ធនឹងលុបសារនោះចោលភ្លាមៗ ដើម្បីសុវត្ថិភាពខ្ពស់បំផុត!
+
+----------------------------------------------------------------------------------------------------
+៣៣. 📢 ADMIN MEDIA & TEXT BROADCAST ENGINE (`/broadcast` & `/announce`) (`bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **Admin Broadcast Engine ៖** អនុញ្ញាតឱ្យ ADMIN ផ្ញើសារប្រកាសអាសន្ន ឬសារព័ត៌មានអមជាមួយរូបភាព (Photo) និងវីដេអូ (Video) ទៅកាន់ប្រជាពលរដ្ឋ Subscribers ទាំងអស់ដែលបានចុះឈ្មោះក្នុងប្រព័ន្ធ (`data/subscribers.json`) ក្នុងពេលតែមួយ!
+- **Admin Security Sentinel Bypass ៖** ប្រព័ន្ធ Security Sentinel ផ្ទៀងផ្ទាត់សិទ្ធិ និងអនុញ្ញាតឱ្យតែ Telegram Admin ផ្លូវការប៉ុណ្ណោះ អាចផ្ញើសារអមរូបភាព/វីដេអូបាន ដោយមិនត្រូវបានលុបសារចោលឡើយ។
+- **Auto Subscriber Registration ៖** ប្រព័ន្ធរត់កត់ត្រា និងធ្វើបច្ចុប្បន្នភាពបញ្ជី Chat ID និងឈ្មោះអ្នកប្រើប្រាស់ (Subscribers Database) ដោយស្វ័យប្រវត្តិនៅរាល់ពេលដែលអ្នកប្រើប្រាស់ទាក់ទងមកកាន់ Bot!
+
+----------------------------------------------------------------------------------------------------
+៣៤. 📊 TELEGRAM LIVE TELEMETRY & INTERACTIVE ENGAGEMENT ENGINE V7.0 (`telegram_engagement_engine.py` & `telegram_broadcaster.py`)
+----------------------------------------------------------------------------------------------------
+- **Live Interactive Engagement Keyboard Bar ៖** ភ្ជាប់ប៊ូតុងអន្តរកម្មស្វ័យប្រវត្តិកែច្នៃក្រោមរាល់អត្ថបទព័ត៌មាន Telegram ទាំងអស់ ៖
+    `[ 👍 0 ]  [ ❤️ 0 ]  [ 🔥 0 ]  [ 🇰🇭 0 ]`
+    `[ 💬 មតិពិភាក្សា (0) ]  [ 📲 ចែករំលែក (0) ]  [ 👁️ 1 Views ]`
+- **1-Click Dynamic Reactions ៖** អ្នកប្រើប្រាស់ចុចប៊ូតុង `👍`, `❤️`, `🔥`, `🇰🇭` ប្រព័ន្ធនឹងកត់ត្រាចំនួន និងធ្វើបច្ចុប្បន្នភាពតួលេខលើប៊ូតុងផ្ទាល់ភ្លាមៗ (Dynamic `editMessageReplyMarkup` API Update) ដោយមិនបាច់ Refresh សារ!
+- **Live Discussion Threads (`/comment`) ៖** ចុចមើលមតិពិភាក្សា និងបញ្ចេញមតិផ្ទាល់ខ្លួនតាមរយៈពាក្យបញ្ជា `/comment <ID_អត្ថបទ> <មតិរបស់អ្នក>` ចូលក្នុងប្រព័ន្ធភ្លាមៗ!
+- **1-Click Share & Forward Tracker ៖** បង្កើតតំណភ្ជាប់ 1-Click Telegram Forward Share Link (ឧ. `https://t.me/share/url?...`) ចែករំលែកទៅកាន់ Group ឬ មិត្តភក្តិបានយ៉ាងលឿនបំផុត!
+- **Real-Time View Reader Counter ៖** កត់ត្រា និងបង្ហាញចំនួនអ្នកបើកអានអត្ថបទ (Live Page Views) ស្វ័យប្រវត្តិ 24/7!
+
+----------------------------------------------------------------------------------------------------
+៣៥. 🛡️ KHMER UNSEGMENTED TEXT CHARACTER N-GRAM & HEADLINE DEDUPLICATION VAULT (`vector_store.py`)
+----------------------------------------------------------------------------------------------------
+- **Khmer Character 3-Gram & 4-Gram Tokenizer ៖** ដោះស្រាយបញ្ហាអត្ថបទខ្មែរគ្មានដកឃ្លា (Unsegmented Text) ដោយបំបែកអត្ថបទជាសទ្ទានុក្រមអក្សរ 3-Gram & 4-Gram ក្នុង TF-IDF Cosine Similarity Calculation ធានាការស្កេន និងប្រៀបធៀបភាពដូចគ្នានៃព័ត៌មានខ្មែរបានច្បាស់លាស់ ១០០%!
+- **Headline 80-Char Normalized Hash Guard ៖** បន្ថែម Content Hash លើចំណងជើង normalized ៨០ តួអក្សរដំបូង (1.0 Similarity Match) ធានា **០% មិនមានព័ត៌មានស្ទួនបាញ់ចូល Telegram/Facebook ឡើយ**!
+
+----------------------------------------------------------------------------------------------------
+៣៦. 📰 PROFESSIONAL KHMER DOUBLE-SPACED PARAGRAPHING ENGINE (`translator.py` & `ai_rewriter.py`)
+----------------------------------------------------------------------------------------------------
+- **Automatic Sentence Boundary Paragraphing (`format_professional_khmer_paragraphs`) ៖** បំបែកអត្ថបទនៅរាល់ពេលបញ្ចប់ល្បះដោយសញ្ញាខណ្ឌ (`។` ឬ `៕`) ទៅជាខថាខណ្ឌ (Paragraphs) ស្អាតបាត ភ្ជាប់ដោយការចុះបន្ទាត់ពីរបន្ទាត់ (`\n\n`)!
+- **Journalistic Readability ៖** លុបបាត់ការសរសេរកកកុញលើបន្ទាត់តែមួយ ដោយផ្តល់នូវគម្លាតខថាខណ្ឌសមរម្យ មានរបៀប រៀបរយ និងមានវិជ្ជាជីវៈសារព័ត៌មានខ្មែរស្ដង់ដារ!
+
+----------------------------------------------------------------------------------------------------
+៣៧. 🔕 CONFIGURABLE KHMER AI VOICE BULLETIN FEATURE FLAG (`config.py` & `khmer_voice_engine.py`)
+----------------------------------------------------------------------------------------------------
+- **Configurable Voice News Flag (`ENABLE_VOICE_NEWS = False`) ៖** កំណត់ Flag បិទ/បើក មុខងារ Khmer AI Voice Bulletin តាមតម្រូវការរបស់អ្នកប្រើប្រាស់ ដោយរំលងការបង្កើត និងបាញ់ audio mp3 ពេល Quality មិនទាន់គ្រប់បទដ្ឋាន ធ្វើឱ្យប្រព័ន្ធរត់កាន់តែលឿន និងរក្សា Pipe line Text/Image នៅកម្រិត Peak Efficiency!
+
+----------------------------------------------------------------------------------------------------
+៣៨. 🛡️ SINGLE INSTANCE PROCESS & SYSTEMD AUTO-RECOVERY HARDENING (`main_loop.py` & `bot_interactive.py`)
+----------------------------------------------------------------------------------------------------
+- **Auto-Recovery & Exception Safety ៖** បំពាក់ `import time` និង `import aiohttp` នៅគ្រប់ Module ទាំងអស់ ការពារកំហុស `NameError` លើ Telegram Listener Thread ពេលមាន Transient Network Interruption។
+- **100% 24/7 Google Cloud Uptime ៖** ធានាថាកម្មវិធី CFA Flash Feed រត់ស្វ័យប្រវត្តិ ២៤ ម៉ោង / ៧ ថ្ងៃ ឥតមានការគាំង ឬ Downtime ឡើយ!
 ====================================================================================================
