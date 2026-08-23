@@ -54,10 +54,10 @@ class BannerEngine:
         clean = " ".join(clean.replace("\r", " ").replace("\n", " ").split())
         return clean.strip()
 
-    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", use_playwright: bool = True) -> str:
+    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", use_playwright: bool = True) -> str:
         """
         Generates Ultra-Crisp 4K HD Banner Image (1200x630 JPEG, Quality=100) with 100% Center Alignment,
-        Dynamic Large Fonts, and Zero Margin Overflow.
+        Dynamic Large Fonts, AI Verification Watermark Badges, and Zero Margin Overflow.
         """
         logger.info(f"🎨 [BANNER ENGINE] Generating Banner for: '{headline[:60]}...'")
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
@@ -66,19 +66,29 @@ class BannerEngine:
         # Method 1: High-Definition Playwright OpenType Khmer Engine (Primary Default when available)
         if use_playwright and async_playwright is not None:
             try:
-                return await self._generate_banner_playwright(clean_headline, category_title, image_filename)
+                return await self._generate_banner_playwright(clean_headline, category_title, badge_label, badge_color, image_filename)
             except Exception as e:
                 logger.warning(f"Playwright HTML rendering fallback ({e}). Switching to PIL fallback engine.")
 
         # Method 2: Synchronized PIL/Pillow Fallback Engine with Embedded Khmer TTF Fonts
         return await asyncio.to_thread(self._generate_banner_pil, clean_headline, category_title, image_filename)
 
-    async def _generate_banner_playwright(self, clean_headline: str, category_title: str, image_filename: str) -> str:
+    async def _generate_banner_playwright(self, clean_headline: str, category_title: str, badge_label: str, badge_color: str, image_filename: str) -> str:
         logo_b64 = self._get_logo_b64()
         battambang_b64 = self._get_font_b64("Battambang-Regular.ttf")
         moul_b64 = self._get_font_b64("Moul-Regular.ttf")
 
         logo_html = f'<img src="data:image/png;base64,{logo_b64}" style="height: 38px; width: 38px; border-radius: 50%; vertical-align: middle; object-fit: cover;" />' if logo_b64 else '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>'
+
+        if badge_color == "green":
+            badge_bg = "linear-gradient(90deg, #10b981 0%, #059669 100%)"
+            badge_shadow = "rgba(16, 185, 129, 0.4)"
+        elif badge_color in ("gold", "fire", "amber"):
+            badge_bg = "linear-gradient(90deg, #f59e0b 0%, #dc2626 100%)"
+            badge_shadow = "rgba(245, 158, 11, 0.4)"
+        else:
+            badge_bg = "linear-gradient(90deg, #ef4444 0%, #dc2626 100%)"
+            badge_shadow = "rgba(239, 68, 68, 0.4)"
 
         font_faces = ""
         if battambang_b64:
@@ -148,7 +158,7 @@ body {{
 }}
 
 .badge {{
-    background: linear-gradient(90deg, #ef4444 0%, #dc2626 100%);
+    background: {badge_bg};
     color: white;
     font-family: 'Battambang', sans-serif;
     font-size: 26px;
@@ -160,7 +170,7 @@ body {{
     justify-content: center;
     gap: 14px;
     letter-spacing: 0.5px;
-    box-shadow: 0 10px 25px rgba(239, 68, 68, 0.4);
+    box-shadow: 0 10px 25px {badge_shadow};
     margin: 0 auto;
 }}
 
@@ -232,7 +242,7 @@ body {{
     <div class="header-container">
         <div class="badge">
             {logo_html}
-            <span>សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA</span>
+            <span>{badge_label}</span>
         </div>
         <div class="category-title">{category_title}</div>
     </div>
