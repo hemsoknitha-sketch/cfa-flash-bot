@@ -104,9 +104,15 @@ class FacebookURLExtractorEngine:
         if not content_text:
             content_text = f"មាតិកាក្នុង Facebook Post/Video URL: {fb_url}"
 
+        first_line = content_text.split('\n')[0].strip()
+        if len(first_line) > 200:
+            first_line = first_line[:200].rsplit(' ', 1)[0].strip()
+
+        final_title = clean_title if clean_title else first_line
+
         return {
             "url": fb_url,
-            "title": content_text[:100],
+            "title": final_title,
             "content": content_text,
             "source_name": source_name,
             "timestamp": pub_timestamp

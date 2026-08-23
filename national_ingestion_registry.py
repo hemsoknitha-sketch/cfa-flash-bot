@@ -274,12 +274,47 @@ MAINSTREAM_NEWS_FEEDS = [
     }
 ]
 
+# 5. Influential Cambodian Social Journalists & Media Desks
+INFLUENTIAL_SOCIAL_JOURNALIST_DESKS = [
+    {
+        "name": "Phorn Vannak News (អ្នកសារព័ត៌មាន ផន វណ្ណះ)",
+        "url": "https://www.facebook.com/pvannakblue",
+        "category": "Social Media Journalist & Breaking News",
+        "tier": 1
+    },
+    {
+        "name": "News Today Khmer (សារព័ត៌មាន News Today Khmer)",
+        "url": "https://www.facebook.com/newstodaykhmer",
+        "category": "Social Media Digital News",
+        "tier": 1
+    },
+    {
+        "name": "VOD Khmer (សារព័ត៌មាន VOD Khmer)",
+        "url": "https://www.facebook.com/VODKhmer",
+        "category": "Social Media Digital News",
+        "tier": 1
+    },
+    {
+        "name": "RFA Khmer (វិទ្យុអាស៊ីសេរី)",
+        "url": "https://www.facebook.com/rfacambodia",
+        "category": "Social Media International News",
+        "tier": 1
+    },
+    {
+        "name": "Social Media Journalist Desk (អ្នកសារព័ត៌មានសង្គមឌីជីថល)",
+        "url": "https://www.facebook.com/profile.php?id=61568942406243",
+        "category": "Social Media Journalist & Breaking News",
+        "tier": 1
+    }
+]
+
 def get_all_national_feeds() -> List[Dict[str, Any]]:
-    """Combines all national institutional, provincial, civil society, and news feeds."""
+    """Combines all national institutional, provincial, civil society, news, and social journalist desks."""
     all_feeds = []
     all_feeds.extend(MINISTRY_INSTITUTION_FEEDS)
     all_feeds.extend(PROVINCIAL_ADMIN_FEEDS)
     all_feeds.extend(HUMAN_RIGHTS_JUSTICE_FEEDS)
     all_feeds.extend(MAINSTREAM_NEWS_FEEDS)
+    all_feeds.extend(INFLUENTIAL_SOCIAL_JOURNALIST_DESKS)
     logger.info(f"🌐 [NATIONAL REGISTRY V5.0] Loaded {len(all_feeds)} Institutional Feeds across Cambodia & Global Desks.")
     return all_feeds

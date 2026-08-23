@@ -530,6 +530,9 @@ class SuperBrainAIRewriter:
         if clean_desc.startswith(clean_title):
             clean_desc = clean_desc[len(clean_title):].strip(" -:៖\t\n")
 
+        if dateline and clean_desc.startswith(dateline):
+            clean_desc = clean_desc[len(dateline):].strip(" -:៖\t\n")
+
         if any(c.isalpha() and ord(c) < 128 for c in clean_desc[:100]):
             clean_desc = fallback_translate_to_khmer(clean_desc)
         

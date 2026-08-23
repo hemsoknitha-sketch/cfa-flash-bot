@@ -32,6 +32,8 @@ class KhmerLanguageAuditor:
             (r'៖([^\s])', r'៖ \1'),
             (r'([^\s])។', r'\1។'),
             (r'(?<!\d)[\!\?]+|(?<!\d)\.(?!\d)', '។'),
+            (r'(?:[។\s]{2,})', '។ '),
+            (r'។+', '។'),
         ]
 
         # Samdach Presh Sangkareach Chuon Nath Khmer Dictionary Orthographic Rules & Typo Fixes
@@ -155,8 +157,9 @@ class KhmerLanguageAuditor:
         clean_body = self.strip_thai_and_foreign_scripts(body)
         clean_body = self.sanitize_khmer_spelling_and_punctuation(clean_body)
 
-        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖')
+        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖' or 'ខេត្តក្រចេះ៖ រចេះ៖' -> 'ខេត្តក្រចេះ៖')
         clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', clean_body)
+        clean_body = re.sub(r'^(ខេត្ត[^\s៖]+៖)\s*[^\s៖]{1,5}៖\s*', r'\1 ', clean_body)
         clean_body = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', clean_body)
 
         # Split into paragraphs
