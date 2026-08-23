@@ -145,13 +145,12 @@ class SuperSmartTelegramBot:
             logger.error(f"Error answering callback query: {e}")
 
     def get_welcome_text(self) -> str:
-        """Returns Super Smart & Beautiful Main Menu Welcome Text V7.0."""
+        """Returns Main Menu Welcome Text."""
         return (
             "🏛️ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA — CFA FLASH FEED*\n"
             "🇰🇭 *មជ្ឈមណ្ឌលព័ត៌មានជាតិកម្ពុជា & AI SUPER BRAIN INTELLIGENCE HUB*\n\n"
             "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធព័ត៌មានជាតិ និងខួរក្បាលឆ្លាតវៃ APEX Super Brain! "
             "ប្រព័ន្ធបំពេញភារកិច្ចស្កេន ផ្ទៀងផ្ទាត់ និងបោះពុម្ពផ្សាយព័ត៌មានផ្លូវការ 24/7/365។\n\n"
-            f"{self.get_vps_status_report()}\n\n"
             "💡 *សូមជ្រើសរើសមុខងារ ឬចុចប៊ូតុងខាងក្រោម ៖*"
         )
 
