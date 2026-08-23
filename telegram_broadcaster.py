@@ -145,6 +145,26 @@ class TelegramBroadcaster:
             logger.error(f"Failed to send Audio Bulletin: {e}")
             return False
 
+    async def broadcast_to_multiple_public_channels(self, message_text: str, image_path: Optional[str] = None, channel_list: Optional[List[str]] = None) -> List[bool]:
+        """
+        Broadcasting to multiple Telegram Public Channels simultaneously.
+        """
+        if not channel_list:
+            import os
+            raw_channels = os.getenv("TELEGRAM_PUBLIC_CHANNELS", "")
+            channel_list = [c.strip() for c in raw_channels.split(",") if c.strip()]
+
+        if not channel_list:
+            return []
+
+        logger.info(f"📲 [TELEGRAM MULTI-BROADCAST] Distributing to {len(channel_list)} Telegram Public Channels...")
+        results = []
+        for chan in channel_list:
+            res = await self.broadcast_to_vip_channel(message_text, image_path, target_chat_id=chan)
+            results.append(res)
+
+        return results
+
     async def enqueue_direct_messages(self, user_ids: List[int], message_text: str):
         """Enqueue individual DM jobs for users."""
         for uid in user_ids:

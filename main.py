@@ -102,6 +102,22 @@ async def process_news(news_text: str, news_id: str):
             image_path=image_path
         )
 
+        # 📲 Multi-Channel Broadcast: ផ្ញើទៅ Telegram Multiple Public Channels ផ្សេងទៀត
+        await pipeline_engine.broadcaster.broadcast_to_multiple_public_channels(
+            message_text=processed_article.formatted_telegram_post,
+            image_path=image_path
+        )
+
+        # 📲 Multi-Channel Broadcast: ផ្ញើទៅ Meta Threads
+        try:
+            from threads_publisher import threads_publisher
+            await threads_publisher.publish_threads_post(
+                text=processed_article.formatted_telegram_post,
+                image_url_or_path=image_path
+            )
+        except Exception as th_err:
+            logger.error(f"Meta Threads Auto-Broadcast notice: {th_err}")
+
         if tg_success or fb_success:
             # Index in Qdrant Vector DB
             pipeline_engine.dedup_store.add_item(news_id, news_text)
