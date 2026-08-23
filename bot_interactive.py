@@ -5,6 +5,7 @@ import asyncio
 import logging
 import platform
 import shutil
+import aiohttp
 from typing import List, Dict, Optional
 from config import config
 
