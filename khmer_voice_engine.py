@@ -43,6 +43,11 @@ class KhmerVoiceBulletinEngine:
         """
         Generates Khmer Audio Bulletin (.mp3) using gTTS (Google Text-To-Speech Khmer).
         """
+        from config import config
+        if not getattr(config, "ENABLE_VOICE_NEWS", False):
+            logger.info("🎙️ [KHMER VOICE ENGINE] Voice News disabled via ENABLE_VOICE_NEWS=False.")
+            return None
+
         full_text = f"ព័ត៌មានទាន់ហេតុការណ៍។ {headline}។ {body}"
         speech_text = self.sanitize_for_speech(full_text)
         

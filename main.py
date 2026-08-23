@@ -103,14 +103,15 @@ async def process_news(news_text: str, news_id: str):
     
     # 🎙️ Generate Khmer AI Voice Bulletin (.mp3)
     audio_path = None
-    try:
-        from khmer_voice_engine import khmer_voice_engine
-        audio_path = await khmer_voice_engine.generate_voice_bulletin(
-            headline=processed_article.khmer_headline,
-            body=processed_article.khmer_body
-        )
-    except Exception as voice_err:
-        logger.error(f"Khmer Voice Bulletin generation notice: {voice_err}")
+    if getattr(config, "ENABLE_VOICE_NEWS", False):
+        try:
+            from khmer_voice_engine import khmer_voice_engine
+            audio_path = await khmer_voice_engine.generate_voice_bulletin(
+                headline=processed_article.khmer_headline,
+                body=processed_article.khmer_body
+            )
+        except Exception as voice_err:
+            logger.error(f"Khmer Voice Bulletin generation notice: {voice_err}")
 
     try:
         # ផ្ញើទៅ Telegram VIP Channel ជាមួយរូបភាព Banner (១ លើកគត់)
