@@ -128,6 +128,11 @@ class DefenseIntelligenceEngine:
                 hashes.add(h)
 
         existing_data.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        try:
+            with open(self.archive_file, "w", encoding="utf-8") as f:
+                json.dump(existing_data, f, ensure_ascii=False, indent=2)
+        except Exception as e:
+            logger.error(f"Error persisting initial defense archives to disk: {e}")
         return existing_data
 
     def _save_archives(self):
