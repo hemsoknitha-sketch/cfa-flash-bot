@@ -77,7 +77,6 @@ class SecuritySentinel:
         incoming_id = str(chat_id).strip()
         if self.admin_chat_id and incoming_id == self.admin_chat_id:
             return True
-        logger.warning(f"🚨 [SECURITY SENTINEL] Unauthorized command attempt blocked from Chat ID: {incoming_id}")
         return False
 
     def sanitize_input_payload(self, text: str) -> str:
