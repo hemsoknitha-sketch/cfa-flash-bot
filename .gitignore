@@ -9,5 +9,6 @@ test_*.jpg
 venv/
 qdrant_storage/
 seen_hashes.json
+data/*.json
 scratch/
 
