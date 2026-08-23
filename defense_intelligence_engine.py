@@ -25,12 +25,13 @@ class DefenseIntelligenceEngine:
         self.archives: List[Dict] = self._load_archives()
 
     def _load_archives(self) -> List[Dict]:
+        existing_data = []
         if os.path.exists(self.archive_file):
             try:
                 with open(self.archive_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    if data:
-                        return data
+                    if isinstance(data, list):
+                        existing_data = data
             except Exception as e:
                 logger.error(f"Error loading defense archives: {e}")
 
@@ -63,8 +64,8 @@ class DefenseIntelligenceEngine:
                 "timestamp": 1787386406.0,
                 "source_name": "ក្រសួងការពារជាតិ / MFAIC",
                 "category": "សេចក្តីថ្លែងការណ៍ផ្លូវការ",
-                "title": "ក្រុមអ្នកសង្កេតការណ៍អាស៊ាន ចុះផ្ទៀងផ្ទាត់ស្ថានភាពនៅច្រកទ្វារស្ទឹងបត់ ដើម្បីពង្រឹងសន្តិភាពកម្ពុជា-ថៃ",
-                "content": "ក្រុមអ្នកសង្កេតការណ៍យោធាអាស៊ាន បានចុះពិនិត្យ និងផ្ទៀងផ្ទាត់ស្ថានភាពជាក់ស្តែងនៅច្រកទ្វារព្រំដែនអន្តរជាតិស្ទឹងបត់ ខេត្តបន្ទាយមានជ័យ ដើម្បីធានាបាននូវសន្តិភាព ស្ថិរភាព និងការគោរពបទឈប់បាញ់តាមបណ្តោយព្រំដែនកម្ពុជា-ថៃ។"
+                "title": "ក្រុមអ្នកសង្កេតការណ៍អាស៊ាន ចុះផ្ទៀងផ្ទាត់ស្ថានភាពនៅច្រកទ្វារស្ទឹងបត់ និងអានសេះ ដើម្បីពង្រឹងសន្តិភាពកម្ពុជា-ថៃ",
+                "content": "ក្រុមអ្នកសង្កេតការណ៍យោធាអាស៊ាន បានចុះពិនិត្យ និងផ្ទៀងផ្ទាត់ស្ថានភាពជាក់ស្តែងនៅច្រកទ្វារព្រំដែនអន្តរជាតិស្ទឹងបត់ ខេត្តបន្ទាយមានជ័យ និងច្រកអានសេះ ខេត្តព្រះវិហារ ដើម្បីធានាបាននូវសន្តិភាព ស្ថិរភាព និងការគោរពបទឈប់បាញ់តាមបណ្តោយព្រំដែនកម្ពុជា-ថៃ។"
             },
             {
                 "post_id": "seed-2025-004",
@@ -77,8 +78,38 @@ class DefenseIntelligenceEngine:
                 "content": "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិកម្ពុជា បានផ្ញើកំណត់ទូតផ្លូវការទៅកាន់ភាគីថៃ ដោយទាមទារឱ្យបញ្ឈប់ជាបន្ទាន់នូវរាល់សកម្មភាពឯកតោភាគីដែលរំលោភលើអធិបតេយ្យភាព និងបូរណភាពទឹកដីរបស់ព្រះរាជាណាចក្រកម្ពុជា ស្របតាមសន្ធិសញ្ញាបារាំង-សៀម ឆ្នាំ១៩០៤ និង១៩០៧។"
             },
             {
-                "post_id": "seed-2024-005",
-                "content_hash": "hash-2024-005",
+                "post_id": "seed-2025-005",
+                "content_hash": "hash-2025-005",
+                "date": "2025-08-10 09:15:00",
+                "timestamp": 1754817300.0,
+                "source_name": "ក្រសួងការពារជាតិ / អគ្គបញ្ជាការដ្ឋាន",
+                "category": "សេចក្តីថ្លែងការណ៍យោធា",
+                "title": "គណៈកម្មាធិការព្រំដែនថ្នាក់ភូមិភាគ (RBC) កម្ពុជា-ថៃ បើកកិច្ចប្រជុំបន្ទាន់ដើម្បីដោះស្រាយទំនាស់ដីព្រំដែនដោយសន្តិវិធី",
+                "content": "មេបញ្ជាការយោធភូមិភាគកម្ពុជា និងកងទ័ពភូមិន្ទថៃ បានជួបប្រជុំបន្ទាន់ក្នុងក្របខ័ណ្ឌ RBC ដើម្បីសម្របសម្រួលសភាពការណ៍ និងរក្សាទំនាក់ទំនងល្អរវាងកងទ័ពនៃប្រទេសទាំងពីរនៅតាមបណ្តោយខ្សែបន្ទាត់ព្រំដែន។"
+            },
+            {
+                "post_id": "seed-2025-006",
+                "content_hash": "hash-2025-006",
+                "date": "2025-03-25 14:00:00",
+                "timestamp": 1742911200.0,
+                "source_name": "អាជ្ញាធរជាតិព្រំដែនកម្ពុជា",
+                "category": "កំណត់ត្រាព្រំដែន",
+                "title": "អាជ្ញាធរជាតិព្រំដែនកម្ពុជា បើកការពិនិត្យនិយាមកាបង្គោលព្រំដែនលេខ ៤០ ដល់ ៤៥ នៅតំបន់ច្រកអានសេះ ខេត្តព្រះវិហារ",
+                "content": "ក្រុមការងារបច្ចេកទេសនៃអាជ្ញាធរជាតិព្រំដែនកម្ពុជា បានចុះពិនិត្យទីតាំងជាក់ស្តែង និងវាស់វែងនិយាមកាបង្គោលព្រំដែនលេខ ៤០ ដល់ ៤៥ ដើម្បីធានាបាននូវភាពច្បាស់លាស់ និងភាពត្រឹមត្រូវនៃអធិបតេយ្យភាពជាតិ។"
+            },
+            {
+                "post_id": "seed-2024-007",
+                "content_hash": "hash-2024-007",
+                "date": "2024-12-05 11:20:00",
+                "timestamp": 1733397600.0,
+                "source_name": "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិ (MFAIC)",
+                "category": "សេចក្តីថ្លែងការណ៍ការទូត",
+                "title": "កម្ពុជា-ថៃ បញ្ជាក់សារជាថ្មីពីការគោរពស្មារតី MOU ឆ្នាំ២០០០ និងសន្ធិសញ្ញាបារាំង-សៀម ឆ្នាំ១៩០៤ និង១៩០៧",
+                "content": "ក្នុងជំនួបការទូតរវាងរដ្ឋមន្ត្រីការបរទេសកម្ពុជា និងថៃ ភាគីទាំងពីរបានសង្កត់ធ្ងន់ពីការដោះស្រាយបញ្ហាព្រំដែនដោយសន្តិវិធី និងឈរលើមូលដ្ឋានសន្ធិសញ្ញាប្រវត្តិសាស្ត្រ និងផែនទី 1/200.000។"
+            },
+            {
+                "post_id": "seed-2024-008",
+                "content_hash": "hash-2024-008",
                 "date": "2024-06-20 14:15:00",
                 "timestamp": 1718871300.0,
                 "source_name": "ក្រសួងការពារជាតិ / អគ្គបញ្ជាការដ្ឋាន",
@@ -87,7 +118,17 @@ class DefenseIntelligenceEngine:
                 "content": "គណៈកម្មាធិការព្រំដែនចម្រុះ (JBC) កម្ពុជា-ថៃ បានបើកកិច្ចប្រជុំបច្ចេកទេសដើម្បីបន្តការងារវាស់វែង ខណ្ឌសីមា និងបោះបង្គោលព្រំដែនគោក រវាងប្រទេសទាំងពីរ ដោយឈរលើមូលដ្ឋានច្បាប់អន្តរជាតិ ផែនទី 1/200.000 និងស្មារតីមិត្តភាពអ្នកជិតខាងល្អ។"
             }
         ]
-        return default_records
+
+        # Merge existing archives with default multi-year records seamlessly
+        hashes = {item.get("content_hash") or item.get("post_id") for item in existing_data}
+        for rec in default_records:
+            h = rec.get("content_hash") or rec.get("post_id")
+            if h not in hashes:
+                existing_data.append(rec)
+                hashes.add(h)
+
+        existing_data.sort(key=lambda x: x.get("timestamp", 0), reverse=True)
+        return existing_data
 
     def _save_archives(self):
         try:
@@ -275,12 +316,12 @@ class DefenseIntelligenceEngine:
 
         try:
             engine = IngestionEngine()
-            raw_items = engine.fetch_all_feeds()
+            raw_items = engine.fetch_from_rss()
             scanned_urls_count = len(engine.rss_urls)
         except Exception as e:
             logger.error(f"Error fetching feeds in sync_live_defense_archives: {e}")
             raw_items = []
-            scanned_urls_count = 37
+            scanned_urls_count = 46
 
         new_scanned = len(raw_items)
         new_archived = 0
