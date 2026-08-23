@@ -127,7 +127,20 @@ class KhmerLanguageAuditor:
 
         # 6. Format Khmer spaces and honorifics cleanly
         text = super_smart_khmer_formatter(text)
+        text = self.protect_khmer_grapheme_clusters(text)
 
+        return text.strip()
+
+    def protect_khmer_grapheme_clusters(self, text: str) -> str:
+        """
+        Khmer Unicode Grapheme Cluster Protection V7.0.
+        Ensures dependent vowels (\u17b4-\u17d3) and subscript coeng sign (\u17d2) 
+        NEVER dangle at string ends or line breaks. Strips dotted circle (\u25cc).
+        """
+        if not text:
+            return ""
+        text = text.replace("\u25cc", "")
+        text = re.sub(r'[\u17b4-\u17d3\u17d2]+$', '', text)
         return text.strip()
 
     def audit_headline_purity(self, headline: str) -> str:

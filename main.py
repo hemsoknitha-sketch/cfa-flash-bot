@@ -65,7 +65,9 @@ async def process_news(news_text: str, news_id: str):
         logger.warning(f"⚠️ [SKIPPED DUPLICATE] News is {similarity*100:.1f}% similar to previous item [{matched_id}].")
         return
 
-    logger.info(f"Step 2: Qdrant Vector Check -> Unique News Verified (Similarity: {similarity*100:.1f}% < 80%).")
+    # Instantly lock in dedup store to prevent concurrency race condition duplicate publishing
+    pipeline_engine.dedup_store.add_item(news_id, news_text)
+    logger.info(f"Step 2: Qdrant Vector Check -> Unique News Verified & Locked (Similarity: {similarity*100:.1f}% < 80%).")
 
     # 3. សង្ខេបអត្ថបទ (Local Qwen 2.5 3B / Gemini AI) & 4. បកប្រែខ្មែរ (Meta NLLB-200)
     processed_article = pipeline_engine.ai_rewriter.process_news(

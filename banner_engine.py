@@ -203,8 +203,9 @@ body {{
     text-align: center;
     max-width: 1000px;
     width: 100%;
-    word-wrap: break-word;
-    overflow-wrap: break-word;
+    word-break: keep-all;
+    overflow-wrap: normal;
+    word-wrap: normal;
     overflow: hidden;
     display: -webkit-box;
     -webkit-line-clamp: {line_clamp};
