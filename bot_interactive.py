@@ -183,6 +183,38 @@ class SuperSmartTelegramBot:
             "• *ADMIN ៖* `@Sokpheatonsai`"
         )
 
+    async def notify_admin_audit(self, user_info: dict, request_text: str, response_text: str, is_fb: bool = False):
+        """Sends a real-time Audit Alert to Admin Telegram chat."""
+        try:
+            from security_sentinel import security_sentinel
+            admin_id = getattr(security_sentinel, "admin_chat_id", None) or config.TELEGRAM_ADMIN_CHAT_ID
+            if not admin_id:
+                return
+
+            user_id = user_info.get("id", "Unknown")
+            first_name = user_info.get("first_name", "")
+            last_name = user_info.get("last_name", "")
+            full_name = f"{first_name} {last_name}".strip() or "Anonymous User"
+            username = f"@{user_info.get('username')}" if user_info.get("username") else "No Username"
+
+            # Do not send alert to admin if the request came from the admin themselves
+            if str(user_id) == str(admin_id):
+                return
+
+            icon = "🌐 [REAL-TIME AUDIT ៖ FACEBOOK URL]" if is_fb else "🧠 [REAL-TIME AUDIT ៖ USER QUESTION]"
+
+            alert_msg = (
+                f"🔔 *{icon}*\n"
+                f"👤 *អ្នកប្រើប្រាស់ ៖* `{full_name}` ({username})\n"
+                f"🆔 *Chat ID ៖* `{user_id}`\n\n"
+                f"📥 *សំណើ/URL ផ្ញើចូល ៖*\n`{request_text}`\n\n"
+                f"📤 *ចម្លើយ AI Super Brain ៖*\n{response_text[:350]}...\n\n"
+                f"⏱️ *កាលបរិច្ឆេទ ៖* `{time.strftime('%Y-%m-%d %H:%M:%S')}`"
+            )
+            await self.send_message(admin_id, alert_msg)
+        except Exception as e:
+            logger.error(f"Error sending admin audit notification: {e}")
+
     def get_vps_status_report(self) -> str:
         """Generates real-time Server Telemetry Report."""
         try:
@@ -614,6 +646,10 @@ class SuperSmartTelegramBot:
                                 f"⚡ *វិភាគដោយ ៖* `APEX Super Brain AI System`"
                             )
                             await self.send_message(chat_id, reply_text)
+
+                            # Real-time Admin Telemetry Audit Alert
+                            user_info = msg.get("from", {})
+                            await self.notify_admin_audit(user_info, text, reply_text, is_fb=True)
                         except Exception as e:
                             logger.error(f"Error extracting/analyzing Facebook URL: {e}")
                             await self.send_message(
@@ -642,6 +678,10 @@ class SuperSmartTelegramBot:
                             )
                             full_response = clean_ans + footnote
                             await self.send_message(chat_id, full_response)
+
+                            # Real-time Admin Telemetry Audit Alert
+                            user_info = msg.get("from", {})
+                            await self.notify_admin_audit(user_info, text, full_response, is_fb=False)
                         except Exception as e:
                             logger.error(f"Error in free-form AI response: {e}")
                             await self.send_message(chat_id, "⚠️ *សុំទោស! ប្រព័ន្ធ AI កំពុងមានបម្រែបម្រួលបច្ចេកទេស។ សូមព្យាយាមម្តងទៀត!*")
