@@ -207,9 +207,33 @@ MAINSTREAM_NEWS_FEEDS = [
         "tier": 1
     },
     {
-        "name": "Fresh News Asia",
+        "name": "Fresh News Asia (សារព័ត៌មាន Fresh News)",
         "url": "https://freshnewsasia.com/index.php/en/news-feed.xml",
         "category": "National Media",
+        "tier": 1
+    },
+    {
+        "name": "Koh Santepheap Daily (កោះសន្តិភាព)",
+        "url": "https://kohsantepheapdaily.com.kh/feed",
+        "category": "National Media & Social Trends",
+        "tier": 1
+    },
+    {
+        "name": "Kampuchea Thmey Daily (កម្ពុជាថ្មី)",
+        "url": "https://www.kampucheathmey.com/feed/",
+        "category": "National Media & Social Trends",
+        "tier": 1
+    },
+    {
+        "name": "Popular Magazine News (សារព័ត៌មានប្រជាប្រិយ)",
+        "url": "https://www.popular.com.kh/feed/",
+        "category": "Social & Cultural Media",
+        "tier": 1
+    },
+    {
+        "name": "KPT Plus News (សារព័ត៌មាន ខេភីធី ផ្លាស់)",
+        "url": "https://kpt-plus.com/feed/",
+        "category": "National Media & Breaking News",
         "tier": 1
     },
     {
