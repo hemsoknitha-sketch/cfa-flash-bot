@@ -26,8 +26,8 @@ Your mission is to evaluate incoming news from all global social networks and ne
 STRICT JOURNALISTIC FORMATTING RULES:
 1. HEADLINE: Write a powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍".
 2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD STORY): Start Paragraph 1 with a dynamic dateline (e.g. 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ', 'រាជធានីភ្នំពេញ៖ ') followed by the main lead story details.
-3. PARAGRAPH 2 (PROFESSIONAL JOURNALISTIC ATTRIBUTION & RULE OF LAW): MUST be separated by a double newline (\n\n). Cite official sources cleanly ("យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}...") analyzing leadership transparency, accountability, and rule of law. NEVER insert internal AI terms like "Super Brain System" in prose body!
-4. PARAGRAPH 3 (CONSTITUTIONAL & PUBLIC WELFARE CONCLUSION): MUST be separated by a double newline (\n\n). Connect the story to Cambodian Constitution Articles (Article 31, 35, 41, 51, or 52) and citizen benefits, ending cleanly with '៕'.
+3. PARAGRAPH 2 (PROFESSIONAL JOURNALISTIC ATTRIBUTION & RULE OF LAW): MUST be separated by a double newline (\n\n). Cite official sources cleanly ("យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}...") analyzing leadership transparency, accountability, national laws, and rule of law. NEVER insert internal AI terms like "Super Brain System" in prose body!
+4. PARAGRAPH 3 (CONSTITUTIONAL & LEGAL RULE OF LAW CONCLUSION): MUST be separated by a double newline (\n\n). Connect the story to Cambodian Constitution Articles (Article 31, 35, 41, 51, or 52) and specific Cambodian National Laws, ending cleanly with '៕'.
 5. THREE PARAGRAPH CONSTRAINT: Write EXACTLY 3 complete, distinct paragraphs separated by double newlines (\n\n). NEVER collapse paragraphs into a single long block!
 6. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
 
@@ -57,14 +57,20 @@ class SuperBrainAIRewriter:
     def answer_freeform_question(self, user_query: str) -> str:
         """
         Answers general free-form user questions using Multi-Tier AI Engine Architecture:
-        1. Multi-Key Gemini API Pool Rotation
-        2. Hugging Face fine-tuned model (hemsinath/cfa-flash-bot) Failover
+        1. Multi-Key Gemini API Pool Rotation + Super Smart Legal Engine Context
+        2. Hugging Face fine-tuned model Failover
         3. Constitutional Rule of Law Fallback Engine
         """
+        from khmer_legal_engine import legal_engine
+        matched_laws = legal_engine.search_relevant_laws(user_query, limit=3)
+        laws_context = "\n".join([f"[{item.get('code_name')} - {item.get('article')}] {item.get('title')}: {item.get('summary')}" for item in matched_laws])
+
         system_instruction = (
-            "You are the APEX Super Brain AI Legal & News Assistant for Cambodia (CFA Flash Feed). "
-            "Respond in formal, eloquent, authoritative Khmer prose adhering to Chuon Nath Khmer Dictionary orthography "
-            "and Article 51/52 of the Cambodian Constitution. Provide clear, professional, objective answers ending with '៕'."
+            "You are the APEX Super Brain AI Legal & News Assistant for Cambodia (CFA Flash Feed).\n"
+            "Respond in formal, eloquent, authoritative Khmer prose adhering to Chuon Nath Khmer Dictionary orthography\n"
+            "and Article 51/52 of the Cambodian Constitution as well as current Cambodian National Laws.\n\n"
+            f"=== AUTHORITATIVE CAMBODIAN LEGAL CONTEXT ===\n{laws_context}\n\n"
+            "Provide a clear, professional, objective answer in 3 paragraphs in formal Khmer ending with '៕'."
         )
 
         # 1. Multi-Key Gemini API Pool Rotation
@@ -105,15 +111,12 @@ class SuperBrainAIRewriter:
             logger.warning(f"Hugging Face freeform answer failover skipped: {e}")
 
         # 3. Intelligent Legal & Constitutional Fallback Engine
-        from khmer_legal_engine import legal_engine
-        legal_ans = legal_engine._rule_based_legal_search(user_query)
-        if legal_ans:
-            return legal_ans
-
+        law_summary = "\n".join([f"• *{l.get('code_name')} ({l.get('article')})* ៖ {l.get('summary')}" for l in matched_laws])
         return (
-            f"ផ្អែកលើការពិនិត្យរបស់ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain សំណួរអំពី «{user_query[:50]}» "
-            f"ទាមទារឱ្យមានការគោរពនូវព្រំដែនសមត្ថកិច្ច នីតិរដ្ឋ និងការបែងចែកអំណាចរដ្ឋ ស្របតាមស្មារតីនៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា មាត្រា ៥១ (ថ្មី) "
-            f"ដែលចែងថា ប្រទេសកម្ពុជាប្រកាន់យករបបប្រជាធិបតេយ្យសេរីពហុបក្ស និងមាត្រា ៥២ អំពីការរក្សាស្ថិរភាព និងសុខសន្តិភាពសង្គមជានិរន្តរ៍ជូនជាតិ និងប្រជាជនទាំងមូល៕"
+            f"⚖️ *ការវិភាគច្បាប់ជាតិ និងនីតិរដ្ឋកម្ពុជា ៖ «{user_query[:50]}»*\n\n"
+            f"រាជធានីភ្នំពេញ៖ យោងតាមក្របខ័ណ្ឌច្បាប់ និងរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ៖\n\n"
+            f"{law_summary}\n\n"
+            f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ និង មាត្រា ៥២ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងអនុវត្តច្បាប់គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព និងស្ថិរភាពសង្គមជាតិជានិរន្តរ៍ជូនប្រជាជាតិទាំងមូល៕"
         )
 
     def extract_geographic_location(self, title: str, content: str) -> str:
@@ -597,12 +600,16 @@ class SuperBrainAIRewriter:
     def _build_telegram_markdown(self, status: str, headline: str, body: str, impact: str, score: float, source: str, is_leak: bool) -> str:
         from translator import clean_khmer_spaces, format_professional_khmer_paragraphs
         from khmer_auditor import khmer_auditor
+        from khmer_legal_engine import legal_engine
 
         leak_banner = "\n\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
 
         headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()).replace("*", "").replace("_", "").strip()
         body_clean = khmer_auditor.audit_khmer_text(format_professional_khmer_paragraphs(body)).replace("*", "").replace("_", "").strip()
         
+        # Super Smart AI Legal Citation Cross-Referencing
+        legal_citation = legal_engine.generate_legal_compliance_citation(headline_clean, body_clean)
+
         footer_signature = (
             f"\n\n🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
             f"• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
@@ -612,7 +619,7 @@ class SuperBrainAIRewriter:
         )
 
         # Telegram Photo Caption Limit Safety Guard (1024 chars max)
-        max_body_len = 980 - len(headline_clean) - len(leak_banner) - len(footer_signature)
+        max_body_len = 980 - len(headline_clean) - len(legal_citation) - len(leak_banner) - len(footer_signature)
         if len(body_clean) > max_body_len and max_body_len > 100:
             truncated = body_clean[:max_body_len]
             # Smart Sentence-Boundary Truncation: Find last Khmer sentence ending ('។' or '៕')
@@ -624,7 +631,7 @@ class SuperBrainAIRewriter:
             else:
                 body_clean = truncated.rsplit(" ", 1)[0] + "៕"
 
-        return f"*{headline_clean}*\n\n{body_clean}{leak_banner}{footer_signature}"
+        return f"*{headline_clean}*\n\n{body_clean}{legal_citation}{leak_banner}{footer_signature}"
 
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red") -> str:
         """
