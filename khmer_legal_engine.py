@@ -20,33 +20,77 @@ class KhmerLegalEngine:
         self._load_laws()
 
     def _load_laws(self):
-        """Loads Cambodian legal articles repository."""
-        if os.path.exists(LAWS_FILE):
-            try:
-                with open(LAWS_FILE, "r", encoding="utf-8") as f:
-                    self.laws = json.load(f)
-                logger.info(f"⚖️ [LEGAL ENGINE] Loaded {len(self.laws)} Cambodian National Legal Provisions.")
-            except Exception as e:
-                logger.error(f"Error loading Cambodian laws JSON: {e}")
-        else:
-            logger.warning(f"Cambodian laws JSON file missing at: {LAWS_FILE}")
+        """Loads Cambodian legal articles repository from master file and specialized law files."""
+        seen_keys = set()
+        laws_list = []
+
+        # List of candidate law files to load from DATA_DIR
+        candidate_files = [LAWS_FILE]
+        if os.path.exists(DATA_DIR):
+            for filename in os.listdir(DATA_DIR):
+                if filename.endswith(".json") and filename != "news_engagement_db.json" and filename != "seen_hashes.json":
+                    file_path = os.path.join(DATA_DIR, filename)
+                    if file_path not in candidate_files:
+                        candidate_files.append(file_path)
+
+        for file_path in candidate_files:
+            if os.path.exists(file_path):
+                try:
+                    with open(file_path, "r", encoding="utf-8") as f:
+                        items = json.load(f)
+                        if isinstance(items, list):
+                            for item in items:
+                                key = (item.get("code_name", ""), item.get("article", ""))
+                                if key not in seen_keys:
+                                    seen_keys.add(key)
+                                    laws_list.append(item)
+                except Exception as e:
+                    logger.error(f"Error loading Cambodian laws JSON from {file_path}: {e}")
+
+        self.laws = laws_list
+        logger.info(f"⚖️ [LEGAL ENGINE] Loaded {len(self.laws)} Cambodian National Legal Provisions.")
 
     def search_relevant_laws(self, text: str, limit: int = 3) -> List[Dict[str, Any]]:
         """Finds Cambodian legal articles relevant to a given news topic or user question."""
         matched = []
-        text_lower = text.lower()
+        text_lower = text.lower().strip()
+        
+        # 1. Exact or keyword match
         for law in self.laws:
-            # Check keywords or article match
+            # Check explicit keywords
+            kw_match = False
             for kw in law.get("keywords", []):
                 if kw.lower() in text_lower:
-                    matched.append(law)
+                    kw_match = True
                     break
+            
+            if kw_match:
+                matched.append(law)
+                continue
 
-        # Fallback to default Article 51 & 41 if no specific match
-        if not matched and self.laws:
-            matched = self.laws[:limit]
+            # Check title, article, or category
+            title = law.get("title", "").lower()
+            article = law.get("article", "").lower()
+            category = law.get("category", "").lower()
+            summary = law.get("summary", "").lower()
+            
+            if any(term in text_lower for term in [title, article, category]) or any(term in text_lower for term in title.split()):
+                matched.append(law)
 
-        return matched[:limit]
+        # Remove duplicate matched dicts while preserving order
+        unique_matched = []
+        seen = set()
+        for item in matched:
+            k = (item.get("code_name"), item.get("article"))
+            if k not in seen:
+                seen.add(k)
+                unique_matched.append(item)
+
+        # Fallback to default provisions if no specific match
+        if not unique_matched and self.laws:
+            unique_matched = self.laws[:limit]
+
+        return unique_matched[:limit]
 
     def generate_legal_compliance_citation(self, title: str, content: str) -> str:
         """Generates legal compliance citation footnote for Khmer news articles."""

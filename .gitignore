@@ -7,8 +7,8 @@ test_*.jpg
 .tempmediaStorage/
 .system_generated/
 venv/
-qdrant_storage/
 seen_hashes.json
-data/*.json
+data/news_engagement_db.json
 scratch/
+
 
