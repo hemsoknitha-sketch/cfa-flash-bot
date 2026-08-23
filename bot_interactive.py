@@ -149,9 +149,38 @@ class SuperSmartTelegramBot:
         return (
             "🏛️ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA — CFA FLASH FEED*\n"
             "🇰🇭 *មជ្ឈមណ្ឌលព័ត៌មានជាតិកម្ពុជា & AI SUPER BRAIN INTELLIGENCE HUB*\n\n"
-            "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធព័ត៌មានជាតិ និងខួរក្បាលឆ្លាតវៃ APEX Super Brain AI! "
+            "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធព័ត៌មានជាតិ និងខួរក្បាលឆ្លាតវៃ APEX Super Brain! "
             "ប្រព័ន្ធបំពេញភារកិច្ចស្កេន ផ្ទៀងផ្ទាត់ និងបោះពុម្ពផ្សាយព័ត៌មានផ្លូវការ 24/7/365។\n\n"
             "💡 *សូមជ្រើសរើសមុខងារ ឬចុចប៊ូតុងខាងក្រោម ៖*"
+        )
+
+    def get_help_text(self) -> str:
+        """Generates Super Smart /help guide detailing 7 Public Menu commands with official CFA Footnote."""
+        return (
+            "❓ *ការណែនាំ និងរបៀបប្រើប្រាស់ប្រព័ន្ធ (CFA FLASH FEED HELP GUIDE)*\n\n"
+            "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធព័ត៌មានជាតិ និងខួរក្បាលឆ្លាតវៃ APEX Super Brain! "
+            "លោកអ្នកអាចប្រើប្រាស់ **Menu សាធារណៈទាំង ៧** ខាងក្រោមបានដោយសេរី ២៤/៧ ៖\n\n"
+            "១. 📰 *ព័ត៌មានទាន់ហេតុការណ៍ (/latest) ៖*\n"
+            "  └ អានអត្ថបទព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយបំផុត ដែលត្រូវបានទាញយក និងផ្ទៀងផ្ទាត់ដោយ AI។\n\n"
+            "២. 🛡️ *ក្រសួងការពារជាតិ & MFAIC (/defense_news) ៖*\n"
+            "  └ អានសេចក្តីថ្លែងការណ៍ និងសេចក្តីប្រកាសព័ត៌មានផ្លូវការរបស់ ក្រសួងការពារជាតិ និងក្រសួងការបរទេសកម្ពុជា។\n\n"
+            "៣. 🔍 *Fact-Check (0-100%) (/factcheck) ៖*\n"
+            "  └ ផ្ទៀងផ្ទាត់ភាពជឿជាក់ និងស្កេនរកព័ត៌មានក្លែងក្លាយ (Anti-Fake News Index) ដោយប្រើបញ្ជា `/factcheck <អត្ថបទ/URL>`។\n\n"
+            "៤. ⚖️ *ស្រាវជ្រាវច្បាប់ជាតិ (/laws) ៖*\n"
+            "  └ ស្រាវជ្រាវក្រមច្បាប់ រដ្ឋធម្មនុញ្ញ (មាត្រា ៥១/៥២) និងនីតិរដ្ឋកម្ពុជា ដោយប្រើបញ្ជា `/laws <សំណួរច្បាប់>`។\n\n"
+            "៥. 🇰🇭 *ប័ណ្ណសារព្រំដែនជាតិ (/border_archive) ៖*\n"
+            "  └ ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រយោធា ការទូត និងការការពារអធិបតេយ្យភាពដែនដីកម្ពុជា។\n\n"
+            "៦. ⚡ *ពិនិត្យល្បឿន Ping (/ping) ៖*\n"
+            "  └ ពិនិត្យមើលល្បឿនឆ្លើយតប (Response Time Latency) របស់ប្រព័ន្ធ AI ក្នុងកម្រិត milliseconds (ms)។\n\n"
+            "៧. ❓ *ការណែនាំប្រើប្រាស់ (/help) ៖*\n"
+            "  └ បង្ហាញសៀវភៅណែនាំ និងរបៀបប្រើប្រាស់ប្រព័ន្ធព័ត៌មានទាំងមូល។\n\n"
+            "💡 *ជំនួយបន្ថែម ៖* លោកអ្នកអាចផ្ញើសារសួរសំណួរ (Text) ដោយសេរី ឬផ្ញើ URL Facebook (Reels/Videos) ចូលក្នុង Telegram Bot នេះដោយផ្ទាល់ ឥតបាច់ប្រើ slash (`/`) ឡើយ!\n\n"
+            "----------------------------------\n"
+            "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ ៖*\n"
+            "• *បច្ចេកទេស ៖* `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain`\n"
+            "• *ផលិតដោយ ៖* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
+            "• *Telegram ៖* `CFA Flash Feed | @CFAflashBot`\n"
+            "• *ADMIN ៖* `@Sokpheatonsai`"
         )
 
     def get_vps_status_report(self) -> str:
@@ -541,21 +570,7 @@ class SuperSmartTelegramBot:
                     await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
 
                 elif text.startswith("/help"):
-                    help_text = (
-                        "❓ *ការណែនាំអំពី CFA FLASH FEED BOT*\n\n"
-                        "១. *ពាក្យបញ្ជាសំខាន់ៗ៖*\n"
-                        "• /start - បើកម៉ឺនុយមេ (CFA Flash Feed)\n"
-                        "• /latest - អានព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ\n"
-                        "• /factcheck <អត្ថបទ> - Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់\n"
-                        "• /laws <សំណួរ> - ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញ\n"
-                        "• /defense_news - អានសេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC\n"
-                        "• /border_archive - ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែន\n"
-                        "• /national_desks - បញ្ជី ៣៧ ស្ថាប័នរដ្ឋ & ២៥ រាជធានី-ខេត្ត\n"
-                        "• /status - ពិនិត្យមើលស្ថានភាព Server 24/7\n"
-                        "• /ping - ពិនិត្យមើលល្បឿន Response Time\n\n"
-                        "💡 *ចំណាំ ៖* លោកអ្នកអាចផ្ញើសារសួរសំណួរដោយសេរី ឬផ្ញើ Facebook URL ចូលប្រព័ន្ធដោយផ្ទាល់ ឥតបាច់ប្រើ slash (`/`) ឡើយ!"
-                    )
-                    await self.send_message(chat_id, help_text)
+                    await self.send_message(chat_id, self.get_help_text())
 
                 else:
                     # 3. Free-form AI Questions & Facebook URLs Handler
@@ -761,7 +776,7 @@ class SuperSmartTelegramBot:
                     latency_ms = int((time.time() - start_time) * 1000)
                     await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
                 elif data == "cmd_help":
-                    await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard())
+                    await self.send_message(chat_id, self.get_help_text())
 
         except Exception as e:
             logger.error(f"Error handling Telegram update: {e}", exc_info=True)
