@@ -5,7 +5,7 @@ import asyncio
 import logging
 import platform
 import shutil
-import aiohttp
+from typing import List, Dict, Optional
 from config import config
 
 logging.basicConfig(
@@ -140,6 +140,211 @@ class SuperSmartTelegramBot:
                 await resp.json()
         except Exception as e:
             logger.error(f"Error answering callback query: {e}")
+    async def send_photo(self, chat_id: int, photo: str, caption: str = "", reply_markup: dict = None):
+        """Sends photo via Telegram sendPhoto API (supports file_id, URL or file path)."""
+        payload = {
+            "chat_id": chat_id,
+            "photo": photo,
+            "caption": caption,
+            "parse_mode": "Markdown"
+        }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
+        try:
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/sendPhoto", json=payload, timeout=aiohttp.ClientTimeout(total=15)) as resp:
+                return await resp.json()
+        except Exception as e:
+            logger.error(f"Error sending photo to chat {chat_id}: {e}")
+            return None
+
+    async def send_video(self, chat_id: int, video: str, caption: str = "", reply_markup: dict = None):
+        """Sends video via Telegram sendVideo API (supports file_id, URL or file path)."""
+        payload = {
+            "chat_id": chat_id,
+            "video": video,
+            "caption": caption,
+            "parse_mode": "Markdown"
+        }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
+        try:
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/sendVideo", json=payload, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+                return await resp.json()
+        except Exception as e:
+            logger.error(f"Error sending video to chat {chat_id}: {e}")
+            return None
+
+    async def send_document(self, chat_id: int, document: str, caption: str = "", reply_markup: dict = None):
+        """Sends document/file via Telegram sendDocument API."""
+        payload = {
+            "chat_id": chat_id,
+            "document": document,
+            "caption": caption,
+            "parse_mode": "Markdown"
+        }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
+        try:
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/sendDocument", json=payload, timeout=aiohttp.ClientTimeout(total=20)) as resp:
+                return await resp.json()
+        except Exception as e:
+            logger.error(f"Error sending document to chat {chat_id}: {e}")
+            return None
+
+    def register_subscriber(self, user_info: dict):
+        """Registers user chat_id into data/subscribers.json with zero duplication."""
+        try:
+            chat_id = user_info.get("id")
+            if not chat_id:
+                return
+            chat_str = str(chat_id)
+            sub_file = os.path.join(os.path.dirname(__file__), "data", "subscribers.json")
+            os.makedirs(os.path.dirname(sub_file), exist_ok=True)
+            
+            subs = {}
+            if os.path.exists(sub_file):
+                try:
+                    with open(sub_file, "r", encoding="utf-8") as f:
+                        subs = json.load(f)
+                except Exception:
+                    subs = {}
+            
+            if chat_str not in subs:
+                subs[chat_str] = {
+                    "chat_id": chat_id,
+                    "first_name": user_info.get("first_name", ""),
+                    "last_name": user_info.get("last_name", ""),
+                    "username": user_info.get("username", ""),
+                    "joined_at": time.strftime("%Y-%m-%d %H:%M:%S")
+                }
+                with open(sub_file, "w", encoding="utf-8") as f:
+                    json.dump(subs, f, ensure_ascii=False, indent=2)
+                logger.info(f"👤 [NEW SUBSCRIBER REGISTERED] Chat ID: {chat_id} | Total Subscribers: {len(subs)}")
+        except Exception as e:
+            logger.error(f"Error registering subscriber: {e}")
+
+    def get_subscribers(self) -> List[int]:
+        """Returns list of registered subscriber chat IDs."""
+        sub_file = os.path.join(os.path.dirname(__file__), "data", "subscribers.json")
+        sub_ids = set()
+        if config.TELEGRAM_ADMIN_CHAT_ID:
+            try:
+                sub_ids.add(int(config.TELEGRAM_ADMIN_CHAT_ID))
+            except Exception:
+                pass
+        
+        if os.path.exists(sub_file):
+            try:
+                with open(sub_file, "r", encoding="utf-8") as f:
+                    subs = json.load(f)
+                    for cid_str in subs.keys():
+                        try:
+                            sub_ids.add(int(cid_str))
+                        except Exception:
+                            pass
+            except Exception as e:
+                logger.error(f"Error reading subscribers: {e}")
+        
+        return list(sub_ids)
+
+    async def execute_admin_broadcast(self, chat_id: int, msg: dict, cmd_text: str):
+        """
+        Executes Admin Media & Text Broadcast Engine to all registered users.
+        Supports sending Photo, Video, Document, or Text announcements.
+        """
+        import asyncio
+        start_t = time.time()
+        subscribers = self.get_subscribers()
+        
+        if not subscribers:
+            await self.send_message(chat_id, "⚠️ *គ្មានអ្នកប្រើប្រាស់ក្នុងបញ្ជី Subscribers នៅឡើយទេ!*")
+            return
+
+        # Extract Media or Text details
+        caption = cmd_text.replace("/broadcast", "").replace("/announce", "").strip()
+        photo_id = None
+        video_id = None
+        doc_id = None
+        media_type = "Text Announcement"
+
+        # Check direct media attached in current message
+        if "photo" in msg and msg["photo"]:
+            photo_id = msg["photo"][-1]["file_id"]
+            media_type = "📷 Photo Broadcast"
+        elif "video" in msg and msg["video"]:
+            video_id = msg["video"]["file_id"]
+            media_type = "🎥 Video Broadcast"
+        elif "document" in msg and msg["document"]:
+            doc_id = msg["document"]["file_id"]
+            media_type = "📄 Document Broadcast"
+        
+        # Check replied message if Admin replied to a media post with /broadcast
+        elif "reply_to_message" in msg:
+            reply = msg["reply_to_message"]
+            if "photo" in reply and reply["photo"]:
+                photo_id = reply["photo"][-1]["file_id"]
+                media_type = "📷 Photo Broadcast (Replied)"
+            elif "video" in reply and reply["video"]:
+                video_id = reply["video"]["file_id"]
+                media_type = "🎥 Video Broadcast (Replied)"
+            elif "document" in reply and reply["document"]:
+                doc_id = reply["document"]["file_id"]
+                media_type = "📄 Document Broadcast (Replied)"
+            if not caption:
+                caption = reply.get("caption", reply.get("text", "")).strip()
+
+        if not caption and not photo_id and not video_id and not doc_id:
+            await self.send_message(
+                chat_id,
+                "⚠️ *សូមបញ្ចូលអត្ថបទសារប្រកាស ឬផ្ញើរូបភាព/វីដេអូ អមជាមួយពាក្យបញ្ជា `/broadcast <សារ>`!*"
+            )
+            return
+
+        await self.send_message(
+            chat_id,
+            f"⚡ *កំពុងរត់ប្រព័ន្ធផ្សព្វផ្សាយសារ Admin ({media_type}) ទៅកាន់អ្នកប្រើប្រាស់ `{len(subscribers)}` នាក់...*"
+        )
+
+        success_count = 0
+        failed_count = 0
+
+        for sub_id in subscribers:
+            try:
+                if photo_id:
+                    res = await self.send_photo(sub_id, photo_id, caption=caption)
+                elif video_id:
+                    res = await self.send_video(sub_id, video_id, caption=caption)
+                elif doc_id:
+                    res = await self.send_document(sub_id, doc_id, caption=caption)
+                else:
+                    res = await self.send_message(sub_id, caption)
+
+                if res and res.get("ok"):
+                    success_count += 1
+                else:
+                    failed_count += 1
+            except Exception as broadcast_err:
+                logger.error(f"Broadcast error to user {sub_id}: {broadcast_err}")
+                failed_count += 1
+
+            # Prevent Telegram API 429 Rate Limit (max 20 msgs/sec)
+            await asyncio.sleep(0.05)
+
+        elapsed = time.time() - start_t
+
+        report = (
+            "📢 *[ADMIN MEDIA BROADCAST COMPLETED]*\n\n"
+            f"• 🎥 *ប្រភេទប្រព័ន្ធ ៖* `{media_type}`\n"
+            f"• 👥 *អ្នកប្រើប្រាស់សរុប ៖* `{len(subscribers)} នាក់`\n"
+            f"• ✅ *ផ្ញើបានជោគជ័យ ៖* `{success_count} នាក់`\n"
+            f"• ❌ *បរាជ័យ (Block/Inactive) ៖* `{failed_count} នាក់`\n"
+            f"• ⏱️ *រយៈពេលចំណាយ ៖* `{elapsed:.2f}s`\n\n"
+            "💡 *សារប្រកាសផ្លូវការរបស់ Admin ត្រូវបានបាញ់ផ្ញើទៅកាន់អ្នកប្រើប្រាស់ទាំងអស់រួចរាល់!*"
+        )
+        await self.send_message(chat_id, report)
 
     def get_welcome_text(self) -> str:
         """Returns Main Menu Welcome Text."""
@@ -334,7 +539,13 @@ class SuperSmartTelegramBot:
                 msg = update["message"]
                 chat_id = msg["chat"]["id"]
                 message_id = msg.get("message_id")
-                raw_text = msg.get("text", "").strip()
+                
+                # Auto register user chat_id in subscriber database
+                user_info = msg.get("from", {})
+                self.register_subscriber(user_info)
+
+                is_admin = security_sentinel.verify_admin_access(chat_id)
+                raw_text = msg.get("text", msg.get("caption", "")).strip()
 
                 # 0. Anti-Spam Rate Limiter Check (Max 5 reqs/10s per user)
                 if security_sentinel.is_rate_limited(chat_id):
@@ -353,8 +564,9 @@ class SuperSmartTelegramBot:
                 MEDIA_KEYS = ["photo", "video", "document", "voice", "audio", "animation", "sticker", "video_note"]
                 has_media = any(key in msg for key in MEDIA_KEYS)
 
-                if has_media:
-                    logger.warning(f"🛡️ [SECURITY PURGE] Media detected from Chat ID: {chat_id}. Deleting message {message_id}...")
+                # Allow verified Admin to attach media for broadcast and system tasks
+                if has_media and not is_admin:
+                    logger.warning(f"🛡️ [SECURITY PURGE] Media detected from non-admin Chat ID: {chat_id}. Deleting message {message_id}...")
                     if message_id:
                         await self.delete_message(chat_id, message_id)
                     await self.send_message(
@@ -402,7 +614,6 @@ class SuperSmartTelegramBot:
                     "/factcheck", "/laws"
                 ]
 
-                is_admin = security_sentinel.verify_admin_access(chat_id)
                 is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES) or not text.startswith("/")
 
                 if not is_public_cmd and not is_admin:
@@ -422,6 +633,12 @@ class SuperSmartTelegramBot:
 
                 if text.startswith("/start"):
                     await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard(is_admin=is_admin))
+
+                elif text.startswith("/broadcast") or text.startswith("/announce"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    await self.execute_admin_broadcast(chat_id, msg, text)
 
                 elif text.startswith("/status"):
                     await self.send_message(chat_id, self.get_vps_status_report())
