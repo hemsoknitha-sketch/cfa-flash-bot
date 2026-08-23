@@ -81,6 +81,44 @@ def super_smart_khmer_formatter(text: str) -> str:
 
     return "\n".join(formatted_lines)
 
+def format_professional_khmer_paragraphs(body_text: str) -> str:
+    """
+    Formats Khmer news text into beautiful, professional paragraphs.
+    1. Splits body text at sentence endings ('។' and '៕') into separate paragraphs.
+    2. Separates paragraphs with double line breaks (\n\n) so each paragraph has elegant spacing.
+    3. Preserves formal honorifics and Chuon Nath dictionary spelling.
+    """
+    if not body_text:
+        return ""
+    
+    clean_text = super_smart_khmer_formatter(body_text)
+    paragraphs = []
+    lines = clean_text.split("\n")
+    
+    for line in lines:
+        line_str = line.strip()
+        if not line_str:
+            continue
+        
+        sentences = re.split(r'([។៕])\s+(?=[\u1780-\u17ffA-Z0-9«])', line_str)
+        reconstructed = ""
+        for i in range(0, len(sentences)-1, 2):
+            sent_text = sentences[i].strip()
+            punct = sentences[i+1]
+            if sent_text:
+                reconstructed += f"{sent_text}{punct}\n\n"
+        if len(sentences) % 2 != 0 and sentences[-1].strip():
+            reconstructed += sentences[-1].strip() + "\n\n"
+            
+        if reconstructed:
+            paragraphs.append(reconstructed.strip())
+        else:
+            paragraphs.append(line_str)
+            
+    final_body = "\n\n".join(paragraphs)
+    final_body = re.sub(r'\n{3,}', '\n\n', final_body)
+    return final_body.strip()
+
 # Alias for backward compatibility
 clean_khmer_spaces = super_smart_khmer_formatter
 

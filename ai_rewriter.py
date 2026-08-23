@@ -595,13 +595,13 @@ class SuperBrainAIRewriter:
         )
 
     def _build_telegram_markdown(self, status: str, headline: str, body: str, impact: str, score: float, source: str, is_leak: bool) -> str:
-        from translator import clean_khmer_spaces
+        from translator import clean_khmer_spaces, format_professional_khmer_paragraphs
         from khmer_auditor import khmer_auditor
 
-        leak_banner = "\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
+        leak_banner = "\n\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
 
         headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()).replace("*", "").replace("_", "").strip()
-        body_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(body)).replace("*", "").replace("_", "").strip()
+        body_clean = khmer_auditor.audit_khmer_text(format_professional_khmer_paragraphs(body)).replace("*", "").replace("_", "").strip()
         
         footer_signature = (
             f"\n\n🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
