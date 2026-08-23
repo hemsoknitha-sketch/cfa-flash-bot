@@ -1204,6 +1204,7 @@ class SuperSmartTelegramBot:
         
         processed_update_ids = set()
         session = await self.get_session()
+        conflict_count = 0
         
         while True:
             try:
@@ -1211,6 +1212,7 @@ class SuperSmartTelegramBot:
                 async with session.get(url, timeout=aiohttp.ClientTimeout(total=35)) as resp:
                     if resp.status == 200:
                         res = await resp.json()
+                        conflict_count = 0  # Reset conflict counter on clean response
                         if res.get("ok"):
                             for update in res.get("result", []):
                                 up_id = update.get("update_id")
@@ -1222,8 +1224,15 @@ class SuperSmartTelegramBot:
                                             processed_update_ids.clear()
                                         await self.handle_update(update)
                     elif resp.status == 409:
-                        logger.warning("⚠️ Telegram 409 Conflict: Waiting 5s for old session connection to close...")
-                        await asyncio.sleep(5)
+                        conflict_count += 1
+                        if conflict_count % 5 == 1:
+                            logger.info(f"⚡ [AUTO-RESOLVING 409 CONFLICT #{conflict_count}] Auto-flushing Telegram webhook/session lock...")
+                            try:
+                                await self.flush_old_updates()
+                            except Exception as fe:
+                                logger.error(f"Auto-flush failed: {fe}")
+                        sleep_time = min(15, 3 + conflict_count * 2)
+                        await asyncio.sleep(sleep_time)
                     else:
                         logger.warning(f"Telegram API getUpdates returned status: {resp.status}")
                         await asyncio.sleep(2)
