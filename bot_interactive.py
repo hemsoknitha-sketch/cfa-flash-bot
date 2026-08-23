@@ -335,7 +335,10 @@ class SuperSmartTelegramBot:
                 import re
                 urls = re.findall(r'https?://[^\s]+', raw_text)
                 if urls:
-                    fb_domain_pattern = re.compile(r'https?://(?:www\.|m\.|web\.|mobile\.)?(?:facebook\.com|fb\.watch|fb\.com|fb\.me)', re.IGNORECASE)
+                    fb_domain_pattern = re.compile(
+                        r'https?://(?:[a-zA-Z0-9\-\.]+\.)?(?:facebook\.com|fb\.watch|fb\.com|fb\.me|l\.facebook\.com)',
+                        re.IGNORECASE
+                    )
                     non_fb_urls = [u for u in urls if not fb_domain_pattern.search(u)]
                     if non_fb_urls:
                         logger.warning(f"🛡️ [SECURITY PURGE] Unauthorized non-Facebook URL detected ({non_fb_urls}). Deleting message {message_id}...")
@@ -574,7 +577,8 @@ class SuperSmartTelegramBot:
 
                 else:
                     # 3. Free-form AI Questions & Facebook URLs Handler
-                    if "facebook.com" in text or "fb.watch" in text or "fb.me" in text:
+                    from facebook_url_extractor import fb_url_extractor, extract_facebook_url_content
+                    if fb_url_extractor.is_facebook_url(text):
                         await self.send_message(
                             chat_id,
                             f"🔍 *ប្រព័ន្ធ AI Super Brain កំពុងទាញយកខ្លឹមសារ និងធ្វើ AI Fact-Check សម្រាប់ Facebook URL ៖*\n`{text}`..."

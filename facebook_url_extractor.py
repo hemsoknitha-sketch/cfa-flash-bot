@@ -21,7 +21,10 @@ class FacebookURLExtractorEngine:
     Extracts content, text, captions & metadata from Facebook URLs.
     """
     def __init__(self):
-        self.fb_url_pattern = re.compile(r'https?://(?:www\.|m\.|web\.)?facebook\.com|fb\.watch|fb\.com', re.IGNORECASE)
+        self.fb_url_pattern = re.compile(
+            r'https?://(?:[a-zA-Z0-9\-\.]+\.)?(?:facebook\.com|fb\.watch|fb\.com|fb\.me|l\.facebook\.com)',
+            re.IGNORECASE
+        )
 
     def is_facebook_url(self, text: str) -> bool:
         """Checks if text contains a valid Facebook URL."""
