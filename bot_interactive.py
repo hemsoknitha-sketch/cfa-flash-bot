@@ -622,7 +622,8 @@ class SuperSmartTelegramBot:
                             )
                     else:
                         # Free-form General AI Assistant Query
-                        await self.send_message(chat_id, f"🧠 *ប្រព័ន្ធ AI Super Brain កំពុងដំណើរការវិភាគ និងឆ្លើយតបសំណួរ ៖*\n`{text}`...")
+                        clean_preview = re.sub(r'[\.\,\!\?។\s]+$', '', text).strip()
+                        await self.send_message(chat_id, f"🧠 *ប្រព័ន្ធ AI Super Brain កំពុងដំណើរការវិភាគ និងឆ្លើយតបសំណួរ ៖*\n`{clean_preview}`...")
                         try:
                             from ai_rewriter import SuperBrainAIRewriter
                             from khmer_auditor import khmer_auditor
@@ -630,7 +631,17 @@ class SuperSmartTelegramBot:
                             rewriter = SuperBrainAIRewriter()
                             ans = rewriter.answer_freeform_question(text)
                             clean_ans = khmer_auditor.sanitize_khmer_spelling_and_punctuation(ans)
-                            await self.send_message(chat_id, clean_ans)
+
+                            footnote = (
+                                "\n\n----------------------------------\n"
+                                "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ ៖*\n"
+                                "• *បច្ចេកទេស ៖* `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain`\n"
+                                "• *ផលិតដោយ ៖* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
+                                "• *Telegram ៖* `CFA Flash Feed | @CFAflashBot`\n"
+                                "• *ADMIN ៖* `@Sokpheatonsai`"
+                            )
+                            full_response = clean_ans + footnote
+                            await self.send_message(chat_id, full_response)
                         except Exception as e:
                             logger.error(f"Error in free-form AI response: {e}")
                             await self.send_message(chat_id, "⚠️ *សុំទោស! ប្រព័ន្ធ AI កំពុងមានបម្រែបម្រួលបច្ចេកទេស។ សូមព្យាយាមម្តងទៀត!*")
