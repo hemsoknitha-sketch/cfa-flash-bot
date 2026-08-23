@@ -107,6 +107,44 @@ class TelegramBroadcaster:
             logger.error(f"Failed to publish to Telegram Chat {dest_chat_id}: {e}")
             return False
 
+    async def broadcast_audio_bulletin(self, audio_path: str, caption_text: str = "🎙️ Khmer AI Voice Bulletin — សំឡេងអានព័ត៌មាន", target_chat_id: Optional[str] = None) -> bool:
+        """
+        Broadcasts Khmer AI Voice Bulletin (.mp3) via sendAudio API.
+        """
+        import os
+        dest_chat_id = target_chat_id or self.channel_id
+        if dest_chat_id == "@your_vip_channel_id_or_chat_id" or not dest_chat_id:
+            dest_chat_id = config.TELEGRAM_ADMIN_CHAT_ID
+
+        if not audio_path or not os.path.exists(audio_path):
+            return False
+
+        if self.bot_token == "MOCK_TELEGRAM_BOT_TOKEN":
+            logger.info(f"[TELEGRAM AUDIO SIMULATION] Delivered audio {audio_path} to {dest_chat_id}")
+            return True
+
+        logger.info(f"🎙️ [TELEGRAM AUDIO] Broadcasting Voice Bulletin to {dest_chat_id}...")
+        try:
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                url = f"https://api.telegram.org/bot{self.bot_token}/sendAudio"
+                data = aiohttp.FormData()
+                data.add_field("chat_id", str(dest_chat_id))
+                data.add_field("caption", caption_text[:1000])
+                data.add_field("audio", open(audio_path, "rb"), filename=os.path.basename(audio_path), content_type="audio/mpeg")
+                
+                async with session.post(url, data=data) as resp:
+                    res_json = await resp.json()
+                    if resp.status == 200 and res_json.get("ok"):
+                        logger.info(f"Successfully delivered Khmer Audio Bulletin to Telegram Chat {dest_chat_id}.")
+                        return True
+                    else:
+                        logger.error(f"Telegram Audio Error: {res_json}")
+                        return False
+        except Exception as e:
+            logger.error(f"Failed to send Audio Bulletin: {e}")
+            return False
+
     async def enqueue_direct_messages(self, user_ids: List[int], message_text: str):
         """Enqueue individual DM jobs for users."""
         for uid in user_ids:
