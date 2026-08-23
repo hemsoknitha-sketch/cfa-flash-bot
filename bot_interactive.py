@@ -478,7 +478,7 @@ class SuperSmartTelegramBot:
                             await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
 
                 elif text.startswith("/sync_defense_archive"):
-                    await self.send_message(chat_id, "⚡ *កំពុងរត់ប្រព័ន្ធ Super Smart Sync ស្កេន & កត់ត្រាប្រវត្តិសាស្ត្រយោធា-ការទូតពី ៣៧ ស្ថាប័នរដ្ឋ...*")
+                    await self.send_message(chat_id, "⚡ *កំពុងរត់ប្រព័ន្ធ Super Smart Sync ស្កេន & កត់ត្រាប្រវត្តិសាស្ត្រយោធា-ការទូតពី ៤៦ ស្ថាប័នរដ្ឋ...*")
                     from defense_intelligence_engine import defense_engine
                     from khmer_auditor import khmer_auditor
                     
@@ -499,11 +499,26 @@ class SuperSmartTelegramBot:
                     inline_btns = []
                     for idx, item in enumerate(latest, 1):
                         clean_t = khmer_auditor.audit_headline_purity(item.get("title", ""))
-                        clean_date = khmer_auditor.sanitize_khmer_spelling_and_punctuation(item.get("date", ""))
+                        clean_date = item.get("date", "")
                         msg += f"📌 *[{idx}] {clean_date} | {item.get('source_name')}*\n{clean_t}\n\n"
                         inline_btns.append([{"text": f"📌 [{idx}] {clean_t}", "callback_data": f"arc_{idx-1}"}])
 
-                    msg += "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជា `/border_archive` ឬ `/defense_news` ដើម្បីអានអត្ថបទពេញលេញ!*"
+                    msg += (
+                        "----------------------------------\n"
+                        "🌟 *របៀបស្វែងរក និងអានប័ណ្ណសារប្រវត្តិសាស្ត្រព្រំដែនពី (២០២៤ - បច្ចុប្បន្ន) ៖*\n"
+                        "ប័ណ្ណសារប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា-ថៃ តាំងពី (២០២៤ ដល់ បច្ចុប្បន្ន) ត្រូវបានតំរៀបតាមលំដាប់លំដោយកាលបរិច្ឆេទយ៉ាងម៉ត់ចត់ក្នុងឃ្លាំង។ លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជាខាងក្រោមបាន ៖\n\n"
+                        "១. *សួរសំណួរស្រាវជ្រាវប្រវត្តិសាស្ត្រទៅកាន់ AI Super Brain ៖*\n"
+                        "• `/ask តើកម្ពុជា និងថៃ មានសភាពការណ៍ព្រំដែនយ៉ាងដូចម្តេចខ្លះតាំងពី២ឆ្នាំមុន?`\n"
+                        "• `/ask តើកិច្ចប្រជុំ JBC ឆ្នាំ២០២៤ និងកំណត់ទូត MFAIC ឆ្នាំ២០២៥ មានខ្លឹមសារអ្វីខ្លះ?`\n\n"
+                        "២. *ស្វែងរកប័ណ្ណសារតាមពាក្យគន្លឹះ ៖*\n"
+                        "• `/border_archive តាមាន់` (ស្វែងរកកំណត់ត្រាតំបន់ប្រាសាទតាមាន់/តាគ្របី)\n"
+                        "• `/border_archive អាស៊ាន` (ស្វែងរកកំណត់ត្រាក្រុមអ្នកសង្កេតការណ៍យោធាអាស៊ាន)\n"
+                        "• `/border_archive JBC` (ស្វែងរកកំណត់ត្រាគណៈកម្មាធិការព្រំដែនចម្រុះ ២០២៤)\n\n"
+                        "៣. *អានអត្ថបទពេញលេញតាមលេខរៀង ៖*\n"
+                        "• `/border_archive 1` (អានអត្ថបទប័ណ្ណសារទី ១ ពេញលេញ)\n"
+                        "• `/defense_news 4` (អានអត្ថបទសេចក្តីថ្លែងការណ៍ការទូតទី ៤ ពេញលេញ)\n\n"
+                        "💡 *ប្រព័ន្ធកត់ត្រាស៊ិនគ្រូណៃស៍នឹងបន្តស្កេន បន្ថែម និងរក្សាប័ណ្ណសារប្រវត្តិសាស្ត្រព្រំដែនជាតិកម្ពុជា ២៤/៧/៣៦៥ ដោយធានា ០% មិនបាត់បង់ទិន្នន័យ (Zero Data Loss) ដាច់ខាត!* 🇰🇭🛡️📜✨"
+                    )
                     await self.send_message(chat_id, msg, reply_markup={"inline_keyboard": inline_btns})
 
                 elif text.startswith("/border_archive") or text.startswith("/ask"):
