@@ -40,6 +40,11 @@ class TelegramBroadcaster:
             import os
 
             async with aiohttp.ClientSession() as session:
+                from telegram_engagement_engine import engagement_engine
+                post_id = f"news_{abs(hash(message_text[:80])) % 100000}"
+                inline_kb = engagement_engine.build_engagement_inline_keyboard(post_id)
+                reply_markup_json = json.dumps({"inline_keyboard": inline_kb})
+
                 if image_path and os.path.exists(image_path):
                     # Photo Post via sendPhoto API (Caption capped at 1000 chars to satisfy Telegram API limits)
                     photo_url = f"https://api.telegram.org/bot{self.bot_token}/sendPhoto"
@@ -59,6 +64,7 @@ class TelegramBroadcaster:
                             caption_text = truncated.rsplit(" ", 1)[0] + "៕"
                     photo_data.add_field("caption", caption_text)
                     photo_data.add_field("parse_mode", "Markdown")
+                    photo_data.add_field("reply_markup", reply_markup_json)
                     photo_data.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
                     
                     async with session.post(photo_url, data=photo_data) as photo_resp:
@@ -71,6 +77,7 @@ class TelegramBroadcaster:
                             photo_data_plain = aiohttp.FormData()
                             photo_data_plain.add_field("chat_id", str(dest_chat_id))
                             photo_data_plain.add_field("caption", caption_text.replace("*", "").replace("_", "").replace("`", ""))
+                            photo_data_plain.add_field("reply_markup", reply_markup_json)
                             photo_data_plain.add_field("photo", open(image_path, "rb"), filename=os.path.basename(image_path))
                             async with session.post(photo_url, data=photo_data_plain) as plain_resp:
                                 plain_json = await plain_resp.json()
@@ -83,7 +90,8 @@ class TelegramBroadcaster:
                 payload = {
                     "chat_id": str(dest_chat_id),
                     "text": message_text,
-                    "parse_mode": "Markdown"
+                    "parse_mode": "Markdown",
+                    "reply_markup": {"inline_keyboard": inline_kb}
                 }
                 async with session.post(url, json=payload) as resp:
                     res_json = await resp.json()

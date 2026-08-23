@@ -140,6 +140,21 @@ class SuperSmartTelegramBot:
                 await resp.json()
         except Exception as e:
             logger.error(f"Error answering callback query: {e}")
+
+    async def edit_message_reply_markup(self, chat_id: int, message_id: int, reply_markup: dict):
+        """Updates Telegram message reply_markup inline keyboard dynamically."""
+        payload = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "reply_markup": reply_markup
+        }
+        try:
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/editMessageReplyMarkup", json=payload, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                return await resp.json()
+        except Exception as e:
+            logger.error(f"Error editing reply markup for message {message_id}: {e}")
+            return None
     async def send_photo(self, chat_id: int, photo: str, caption: str = "", reply_markup: dict = None):
         """Sends photo via Telegram sendPhoto API (supports file_id, URL or file path)."""
         payload = {
@@ -611,7 +626,7 @@ class SuperSmartTelegramBot:
                 PUBLIC_COMMAND_PREFIXES = [
                     "/start", "/help", "/latest", "/defense_news",
                     "/border_archive", "/sync_defense_archive", "/ask", "/ping",
-                    "/factcheck", "/laws"
+                    "/factcheck", "/laws", "/comment"
                 ]
 
                 is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES) or not text.startswith("/")
@@ -839,6 +854,24 @@ class SuperSmartTelegramBot:
                     latency_ms = int((time.time() - start_time) * 1000)
                     await self.send_message(chat_id, f"⚡ *PONG!* Super Fast Response Time: `{latency_ms} ms` 🚀")
 
+                elif text.startswith("/comment"):
+                    parts = text.replace("/comment", "").strip().split(" ", 1)
+                    if len(parts) >= 2:
+                        post_id, cmt_body = parts[0].strip(), parts[1].strip()
+                        user_info = msg.get("from", {})
+                        uname = user_info.get("first_name", "អ្នកប្រើប្រាស់")
+                        from telegram_engagement_engine import engagement_engine
+                        res = engagement_engine.add_comment(chat_id, uname, post_id, cmt_body)
+                        await self.send_message(
+                            chat_id,
+                            f"✅ *មតិរបស់អ្នកត្រូវ​បានបញ្ជូនចូលមតិពិភាក្សាអត្ថបទដោយជោគជ័យ!* (មតិសរុប ៖ `{res['comment_count']}`)"
+                        )
+                    else:
+                        await self.send_message(
+                            chat_id,
+                            "💡 *របៀបបញ្ចេញមតិ ៖* `/comment <ID_អត្ថបទ> <មតិរបស់អ្នក>`"
+                        )
+
                 elif text.startswith("/help"):
                     await self.send_message(chat_id, self.get_help_text())
 
@@ -936,12 +969,76 @@ class SuperSmartTelegramBot:
                     "cmd_factcheck", "cmd_laws", "cmd_ping", "cmd_help"
                 ]
 
-                is_public_cb = data in PUBLIC_CALLBACKS or data.startswith("def_") or data.startswith("arch_")
+                is_public_cb = data in PUBLIC_CALLBACKS or data.startswith("def_") or data.startswith("arch_") or data.startswith("rx_") or data.startswith("cmt_") or data.startswith("share_") or data.startswith("vw_")
                 if not is_public_cb and not security_sentinel.verify_admin_access(chat_id):
                     await self.send_message(chat_id, "🔒 *មុខងារនេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*")
                     return
 
-                if data == "cmd_latest":
+                # Live Telemetry & Engagement Callbacks
+                if data.startswith("rx_"):
+                    parts = data.split("_", 2)
+                    if len(parts) == 3:
+                        rx_type, post_id = parts[1], parts[2]
+                        user_id = cb["from"]["id"]
+                        from telegram_engagement_engine import engagement_engine
+                        res = engagement_engine.toggle_reaction(user_id, post_id, rx_type)
+                        
+                        rx_labels = {"up": "👍 ពេញចិត្ត", "love": "❤️ ស្រឡាញ់", "fire": "🔥 ក្តៅៗ", "khmer": "🇰🇭 កម្ពុជា"}
+                        label = rx_labels.get(rx_type, "ការពេញចិត្ត")
+                        status_str = "បន្ថែម" if res["toggled_on"] else "ដកចេញ"
+                        toast_text = f"{label} ត្រូវ​បាន{status_str}ដោយជោគជ័យ!"
+                        await self.answer_callback_query(cb_id, text=toast_text)
+                        
+                        msg_id = cb["message"]["message_id"]
+                        new_kb = engagement_engine.build_engagement_inline_keyboard(post_id)
+                        await self.edit_message_reply_markup(chat_id, msg_id, {"inline_keyboard": new_kb})
+
+                elif data.startswith("cmt_list_"):
+                    post_id = data.replace("cmt_list_", "")
+                    from telegram_engagement_engine import engagement_engine
+                    stats = engagement_engine.get_post_stats(post_id)
+                    comments = stats.get("comments", [])
+                    
+                    msg_text = f"💬 *[មតិពិភាក្សាលើអត្ថបទព័ត៌មាន ({len(comments)} Comments)]*\n\n"
+                    if not comments:
+                        msg_text += "មិនទាន់មានមតិពិភាក្សានៅឡើយទេ។ ក្លាយជាអ្នកដំបូងដែលបញ្ចេញមតិ!\n\n"
+                    else:
+                        for c in comments[-5:]:
+                            msg_text += f"👤 *{c.get('user_name')}* (`{c.get('timestamp')}`) ៖\n{c.get('text')}\n\n"
+                    
+                    msg_text += (
+                        "----------------------------------\n"
+                        "💡 *ដើម្បីបញ្ចេញមតិផ្ទាល់ខ្លួន សូមវាយ ៖*\n"
+                        f"`/comment {post_id} <មតិរបស់អ្នក>`"
+                    )
+                    await self.send_message(chat_id, msg_text)
+
+                elif data.startswith("share_post_"):
+                    post_id = data.replace("share_post_", "")
+                    from telegram_engagement_engine import engagement_engine
+                    shares_cnt = engagement_engine.increment_share(post_id)
+                    msg_id = cb["message"]["message_id"]
+                    new_kb = engagement_engine.build_engagement_inline_keyboard(post_id)
+                    await self.edit_message_reply_markup(chat_id, msg_id, {"inline_keyboard": new_kb})
+                    
+                    share_url = f"https://t.me/share/url?url=https://t.me/CFAflashBot?start={post_id}&text=🇰🇭 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយពី CFA Flash Feed"
+                    await self.send_message(
+                        chat_id,
+                        f"📲 *[១-CLICK SHARE & FORWARD]*\n\n"
+                        f"សូមចុចតំណភ្ជាប់ខាងក្រោមដើម្បីចែករំលែកអត្ថបទនេះទៅកាន់ Telegram Group ឬ មិត្តភក្តិ ៖\n"
+                        f"🔗 {share_url}"
+                    )
+
+                elif data.startswith("vw_info_"):
+                    post_id = data.replace("vw_info_", "")
+                    from telegram_engagement_engine import engagement_engine
+                    views_cnt = engagement_engine.increment_view(post_id)
+                    msg_id = cb["message"]["message_id"]
+                    new_kb = engagement_engine.build_engagement_inline_keyboard(post_id)
+                    await self.edit_message_reply_markup(chat_id, msg_id, {"inline_keyboard": new_kb})
+                    await self.answer_callback_query(cb_id, text=f"👁️ អត្ថបទនេះត្រូវបានអានចំនួន {views_cnt} លើក!")
+
+                elif data == "cmd_latest":
                     latest_text = (
                         "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
                         "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
