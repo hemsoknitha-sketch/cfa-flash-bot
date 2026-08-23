@@ -36,22 +36,16 @@ class SuperSmartTelegramBot:
         return self._session
 
     async def set_commands_menu(self):
-        """Register Telegram Bot Menu Button Commands."""
+        """Register Clean Public Commands Menu in Telegram UI."""
         commands = [
-            {"command": "start", "description": "⚡ បើកម៉ឺនុយមេ (Main Menu)"},
+            {"command": "start", "description": "🏛️ បើកផ្ទាំងបញ្ជាមេ (Main Menu)"},
             {"command": "latest", "description": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
             {"command": "defense_news", "description": "🛡️ សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC"},
             {"command": "border_archive", "description": "📂 ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា"},
             {"command": "sync_defense_archive", "description": "📡 ស្កេន & ធ្វើបច្ចុប្បន្នភាព Archive យោធា"},
             {"command": "factcheck", "description": "🔍 Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន (0-100%)"},
-            {"command": "national_desks", "description": "🏛️ បញ្ជីស្ថាប័នរដ្ឋ & ២៥ រាជធានី-ខេត្ត (37 Desks)"},
-            {"command": "sovereignty_vault", "description": "📂 ឃ្លាំងប្រវត្តិសាស្ត្រយោធា ការទូត & ព្រំដែន"},
             {"command": "laws", "description": "⚖️ ផ្ទៀងផ្ទាត់ & ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញ"},
-            {"command": "status", "description": "🟢 ពិនិត្យស្ថានភាព Server 24/7"},
-            {"command": "scan", "description": "🔄 ស្កេនព័ត៌មានទាន់ហេតុការណ៍ភ្លាមៗ"},
-            {"command": "report", "description": "📊 របាយការណ៍ស្កេន 37 Institutional Feeds"},
-            {"command": "clearcache", "description": "🧹 សម្អាតទិន្នន័យ Banner Cache & RAM"},
-            {"command": "backup", "description": "📦 ទាញយក ZIP Backup ប្រព័ន្ធ"},
+            {"command": "ask", "description": "🤖 សួរ AI សារព័ត៌មាន & ច្បាប់ (24/7)"},
             {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
             {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់ & Support"}
         ]
@@ -63,36 +57,44 @@ class SuperSmartTelegramBot:
         except Exception as e:
             logger.error(f"Failed to register bot commands: {e}")
 
-    def _build_inline_keyboard(self):
-        """Super Smart 12-Button Inline Keyboard."""
-        return {
-            "inline_keyboard": [
-                [
-                    {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍", "callback_data": "cmd_latest"},
-                    {"text": "🛡️ ក្រសួងការពារជាតិ & MFAIC", "callback_data": "cmd_defense_news"}
-                ],
-                [
-                    {"text": "🔍 Fact-Check (0-100%)", "callback_data": "cmd_factcheck"},
-                    {"text": "⚖️ ស្រាវជ្រាវច្បាប់ជាតិ", "callback_data": "cmd_laws"}
-                ],
-                [
-                    {"text": "🏛️ ៣៧ ស្ថាប័នរដ្ឋ & ២៥ ខេត្ត", "callback_data": "cmd_national_desks"},
-                    {"text": "📂 ឃ្លាំងអធិបតេយ្យជាតិ", "callback_data": "cmd_sovereignty_vault"}
-                ],
-                [
-                    {"text": "🟢 ស្ថានភាព Server 24/7", "callback_data": "cmd_status"},
-                    {"text": "⚡ ពិនិត្យល្បឿន Ping", "callback_data": "cmd_ping"}
-                ],
-                [
-                    {"text": "📊 របាយការណ៍ Feeds", "callback_data": "cmd_report"},
-                    {"text": "🔄 ស្កេនព័ត៌មានភ្លាមៗ", "callback_data": "cmd_scan"}
-                ],
-                [
-                    {"text": "📦 ZIP Backup ប្រព័ន្ធ", "callback_data": "cmd_backup"},
-                    {"text": "❓ ការណែនាំប្រើប្រាស់", "callback_data": "cmd_help"}
-                ]
+    def _build_inline_keyboard(self, is_admin: bool = False):
+        """
+        Super Smart RBAC Keyboard.
+        Public users get Public Menu. Admin gets Full System Control Menu.
+        """
+        keyboard = [
+            [
+                {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍", "callback_data": "cmd_latest"},
+                {"text": "🛡️ ក្រសួងការពារជាតិ & MFAIC", "callback_data": "cmd_defense_news"}
+            ],
+            [
+                {"text": "🔍 Fact-Check (0-100%)", "callback_data": "cmd_factcheck"},
+                {"text": "⚖️ ស្រាវជ្រាវច្បាប់ជាតិ", "callback_data": "cmd_laws"}
+            ],
+            [
+                {"text": "🇰🇭 ប័ណ្ណសារព្រំដែនជាតិ", "callback_data": "cmd_border_archive"},
+                {"text": "⚡ ពិនិត្យល្បឿន Ping", "callback_data": "cmd_ping"}
+            ],
+            [
+                {"text": "❓ ការណែនាំប្រើប្រាស់", "callback_data": "cmd_help"}
             ]
-        }
+        ]
+
+        if is_admin:
+            keyboard.append([
+                {"text": "🏛️ ៣៧ ស្ថាប័នរដ្ឋ & ២៥ ខេត្ត (Admin)", "callback_data": "cmd_national_desks"},
+                {"text": "📂 ឃ្លាំងអធិបតេយ្យជាតិ (Admin)", "callback_data": "cmd_sovereignty_vault"}
+            ])
+            keyboard.append([
+                {"text": "🟢 ស្ថានភាព Server 24/7 (Admin)", "callback_data": "cmd_status"},
+                {"text": "📊 របាយការណ៍ Feeds (Admin)", "callback_data": "cmd_report"}
+            ])
+            keyboard.append([
+                {"text": "🔄 ស្កេនព័ត៌មានភ្លាមៗ (Admin)", "callback_data": "cmd_scan"},
+                {"text": "📦 ZIP Backup ប្រព័ន្ធ (Admin)", "callback_data": "cmd_backup"}
+            ])
+
+        return {"inline_keyboard": keyboard}
 
     async def send_message(self, chat_id: int, text: str, reply_markup=None):
         """Send message via Telegram API with 100% Khmer Auditor linguistic audit."""
@@ -331,18 +333,19 @@ class SuperSmartTelegramBot:
                 PUBLIC_COMMAND_PREFIXES = [
                     "/start", "/help", "/latest", "/defense_news",
                     "/border_archive", "/sync_defense_archive", "/ask", "/ping",
-                    "/factcheck", "/national_desks", "/sovereignty_vault", "/laws",
-                    "/status", "/report", "/scan", "/clearcache", "/backup"
+                    "/factcheck", "/laws"
                 ]
 
+                is_admin = security_sentinel.verify_admin_access(chat_id)
                 is_public_cmd = any(text.startswith(cmd) for cmd in PUBLIC_COMMAND_PREFIXES) or not text.startswith("/")
 
-                if not is_public_cmd and not security_sentinel.verify_admin_access(chat_id):
+                if not is_public_cmd and not is_admin:
                     await self.send_message(
                         chat_id,
                         "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*\n\n"
                         "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជាសាធារណៈខាងក្រោមបាន ៖*\n"
                         "• /start - បើកម៉ឺនុយមេ\n"
+                        "• /latest - ព័ត៌មានទាន់ហេតុការណ៍\n"
                         "• /factcheck <អត្ថបទ> - Fact-Check ព័ត៌មាន\n"
                         "• /laws <សំណួរ> - ស្រាវជ្រាវច្បាប់ជាតិកម្ពុជា\n"
                         "• /defense_news - សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC\n"
@@ -351,7 +354,7 @@ class SuperSmartTelegramBot:
                     return
 
                 if text.startswith("/start"):
-                    await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard())
+                    await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard(is_admin=is_admin))
 
                 elif text.startswith("/status"):
                     await self.send_message(chat_id, self.get_vps_status_report())
@@ -627,11 +630,11 @@ class SuperSmartTelegramBot:
 
                 PUBLIC_CALLBACKS = [
                     "cmd_latest", "cmd_defense_news", "cmd_border_archive",
-                    "cmd_factcheck", "cmd_laws", "cmd_national_desks", "cmd_sovereignty_vault",
-                    "cmd_status", "cmd_report", "cmd_scan", "cmd_backup", "cmd_ping", "cmd_help", "cmd_admin"
+                    "cmd_factcheck", "cmd_laws", "cmd_ping", "cmd_help"
                 ]
 
-                if data not in PUBLIC_CALLBACKS and not security_sentinel.verify_admin_access(chat_id):
+                is_public_cb = data in PUBLIC_CALLBACKS or data.startswith("def_") or data.startswith("arch_")
+                if not is_public_cb and not security_sentinel.verify_admin_access(chat_id):
                     await self.send_message(chat_id, "🔒 *មុខងារនេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*")
                     return
 
