@@ -143,6 +143,22 @@ class KhmerLanguageAuditor:
         text = re.sub(r'[\u17b4-\u17d3\u17d2]+$', '', text)
         return text.strip()
 
+
+    def classify_news_scope(self, headline: str, body: str, source_name: str = "") -> str:
+        """
+        Classifies news scope as 'NATIONAL' (ព័ត៌មានជាតិកម្ពុជា) or 'INTERNATIONAL' (ព័ត៌មានអន្តរជាតិ).
+        """
+        int_keywords = [
+            "រុស្ស៊ី", "អ៊ុយក្រែន", "មូស្គូ", "គៀវ", "អ៊ីរ៉ង់", "តេអេរ៉ង់", "សហរដ្ឋអាមេរិក", "អាមេរិក", 
+            "វ៉ាស៊ីនតោន", "អ៊ីស្រាអែល", "ហ្គាហ្សា", "ស៊ីរី", "តួកគី", "បារាំង", "ម៉ាក្រុង", "ចិន", 
+            "ប៉េកាំង", "ជប៉ុន", "តូក្យូ", "កូរ៉េ", "សេអ៊ូល", "អាស៊ាន", "UN", "អង្គការសហប្រជាជាតិ", 
+            "រ៉យទ័រ", "reuters", "nytimes", "voa", "rfi", "ap news", "afp", "chhouk bor", "ឈូក បូរ"
+        ]
+        text_to_check = f"{headline} {body} {source_name}".lower()
+        if any(k.lower() in text_to_check for k in int_keywords):
+            return "INTERNATIONAL"
+        return "NATIONAL"
+
     def audit_headline_purity(self, headline: str) -> str:
         """Deduplicates repetitive titles (e.g. 'A - A' -> 'A') and purges raw prefixes."""
         if not headline:
