@@ -394,3 +394,32 @@ flowchart TD
 ៧. 🕒 **ប្រព័ន្ធរលកម៉ោង Super Smart Timezone Engine (GMT+7 & GMT អន្តរជាតិ) ៖**
    - ព័ត៌មានជាតិកម្ពុជា ៖ `📅 កាលបរិច្ឆេទ ៖ ថ្ងៃចន្ទ ទី២៤ ខែសីហា ឆ្នាំ២០២៦ | ម៉ោង ២:២៥ រសៀល (ម៉ោងនៅភ្នំពេញ GMT+7)`
    - ព័ត៌មានអន្តរជាតិ ៖ `📅 កាលបរិច្ឆេទ ៖ ថ្ងៃចន្ទ ទី២៤ ខែសីហា ឆ្នាំ២០២៦ | ម៉ោង ១០:២៥ ព្រឹក (ទីក្រុងមូស្គូ GMT+3) | ម៉ោង ២:២៥ រសៀល (ម៉ោងនៅភ្នំពេញ GMT+7)`
+
+----------------------------------------------------------------------------------------------------
+៤០. 🔒 ស្ថាបត្យកម្មលុបបំបាត់ការរត់ស្ទួន និងការឆ្លើយតបស្ទួនដាច់ខាត (SUPER SMART ZERO-DUPLICATION MANDATORY ARCHITECTURE)
+----------------------------------------------------------------------------------------------------
+កាលបរិច្ឆេទអនុវត្ត ៖ ថ្ងៃទី ២៤ ខែ សីហា ឆ្នាំ ២០២៦
+ប្រព័ន្ធ CFA Flash Feed ត្រូវបានបំពាក់នូវស្ថាបត្យកម្មទប់ស្កាត់ការរត់ស្ទួន និងការបាញ់សារ/ឆ្លើយតបស្ទួន ៤ កម្រិតស្ទួនគ្នា (4-Layer Zero-Duplication Architecture) ទាំងនៅលើ PC/Local និងលើ Google Cloud VPS ៖
+
+១. 🔒 **Linux OS Kernel Single-Instance Lock Engine (`main_loop.py` & `/tmp/cfa_flash_bot_daemon.lock`) ៖**
+   - ប្រើប្រាស់ `fcntl.flock` ជាមួយ `a+` file mode កម្រិត Linux OS Kernel ធានាថា ២ Daemon Processes មិនអាចរត់តំណាលគ្នាក្នុងពេលតែមួយលើ VPS ដាច់ខាត!
+   - ប្រសិនបើមានដំណើរការទី ២ ព្យាយាមបើករត់ជា Manual តាម Terminal ឬ Background នោះប្រព័ន្ធនឹងចាប់យក `BlockingIOError` ហើយបំផ្លាញ/បញ្ចប់ Process ទី ២ ចោលភ្លាមៗដោយស្វ័យប្រវត្តិ (`sys.exit(0)`)។
+
+២. ⚡ **Atomic Thread & Async Safe Deduplication Lock (`vector_store.py`) ៖**
+   - បំពាក់ `threading.Lock()` លើ `VectorDeduplicator` ព្រមទាំងអនុវត្តមុខងារ `atomic_check_and_add(news_text, news_id)`។
+   - ធ្វើការ Check Exact SHA-256 Hash, Normalized Text Hash (លុបចោល Punctuation, Symbols, Zero-width Space `\u200b`), Headline Hash (100 តួអក្សរដំបូង) និង Vector/TF-IDF Cosine Similarity (>0.80) ព្រមទាំង Lock ចូលក្នុង Memory និង Flush ចុះ Disk `seen_hashes.json` ក្នុង Step អូម៉ូសែនតែមួយ (Atomic Step)។
+   - ការពារដាច់ខាតកុំឱ្យ RSS Feeds ស្កេនជួបព័ត៌មានដូចគ្នាក្នុងពេលតែមួយ (Parallel Race Condition) អាចឆ្លងផុត AI Engine ២ ដងបាន។
+
+៣. 📡 **Telegram 1-Hour Broadcast Deduplication Cache (`telegram_broadcaster.py`) ៖**
+   - បំពាក់ `_recently_broadcasted_hashes` កម្រិត Chat ID ៖ ព័ត៌មានដែលមាន Content Hash ដដែល នឹងមិនត្រូវអនុញ្ញាតឱ្យបាញ់ចូល VIP Channel ឬ Admin Chat ស្ទួនជាលើកទី ២ ក្នុងរង្វង់ ១ ម៉ោង (៣៦០០ វិនាទី) ដាច់ខាត។
+
+៤. 🤖 **Bot Listener Update ID & Inline Callback Debouncing (`bot_interactive.py`) ៖**
+   - រក្សាទុក `_processed_update_ids` នៅលើ Bot Instance ផ្ទាល់ ជាមួយ LRU Cache 2,000 Update IDs ទប់ស្កាត់ការ Re-delivery សារពី Telegram Server។
+   - បំពាក់ `_callback_debounce_map` (1.5s Debounce Window) ទប់ស្កាត់ការចុចប៊ូតុង Inline Menu ស្ទួនៗគ្នាលឿនពេកពីអ្នកប្រើប្រាស់ (Rapid Taps)។
+
+⚠️ **វិធានកត់ចំណាំដាច់ខាតសម្រាប់កំណែប្រែលើកក្រោយ (MANDATORY DEVELOPER RULES) ៖**
+   • **វិធានទី ១ ៖** មុននឹងប្តូរ ឬកែប្រែកូដ Pipeline / Main Loops / Bot Listeners ត្រូវតែរក្សាទុក និងមិនត្រូវលុបចោល `acquire_single_instance_lock()` ជាដាច់ខាត។
+   • **វិធានទី ២ ៖** មិនត្រូវបំបែក `is_duplicate()` និង `add_item()` ឱ្យនៅដាច់ពីគ្នាទេ គឺត្រូវប្រើ `atomic_check_and_add()` ជានិច្ច ដើម្បីទប់ស្កាត់ Race Condition។
+   • **វិធានទី ៣ ៖** រាល់ពេលបន្ថែមប្រភពស្កេនព័ត៌មានថ្មី ត្រូវប្រាកដថាការរក្សាទុក `seen_hashes.json` ត្រូវតែ Flush ចូល Disk ភ្លាមៗ ការពារការបាត់បង់ Memory ពេល Restart VPS។
+   • **វិធានទី ៤ ៖** លើ VPS ត្រូវប្រាកដថាចាត់ចែងរត់តែ 1 Systemd Service (`cfa-flash-feed.service`) តែមួយគត់ និងពិនិត្យ `ps aux | grep python` ជាប្រចាំ។
+====================================================================================================
