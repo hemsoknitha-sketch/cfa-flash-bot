@@ -180,52 +180,37 @@ class KhmerLanguageAuditor:
         return clean_headline
 
     def audit_prose_structure(self, headline: str, body: str) -> Tuple[str, str]:
-        """Ensures elegant Khmer literary 3 paragraphs with clean dateline and closing <ctrl42>."""
+        """
+        Master Journalistic Prose Formatter V8.0:
+        - Purges all raw RSS leftover text ('អានបន្ដ', 'អានបន្ថែម', 'Read More', '...', '…', '។  ។').
+        - Formats single long paragraphs into 2-4 clean, elegant, readable Khmer paragraphs.
+        - ZERO fake contradictory generic template paragraph injection.
+        """
+        from translator import format_professional_khmer_paragraphs
+        
         clean_headline = self.audit_headline_purity(headline)
 
         clean_body = self.strip_thai_and_foreign_scripts(body)
         clean_body = self.sanitize_khmer_spelling_and_punctuation(clean_body)
 
-        # De-duplicate location prefixes (e.g. 'រាជធានីភ្នំពេញ៖ ហុងកុង៖' -> 'ហុងកុង៖' or 'ខេត្តក្រចេះ៖ រចេះ៖' -> 'ខេត្តក្រចេះ៖')
+        # Purge RSS leftover read more strings & duplicate full stops
+        clean_body = re.sub(r'(?:អានបន្ដ|អានបន្ថែម|Read More|អានបន្ត)\s*[\.។\s]*', '', clean_body, flags=re.IGNORECASE)
+        clean_body = re.sub(r'[\.…\s]{3,}', '', clean_body)
+        clean_body = re.sub(r'([។<ctrl42>])\s*([។<ctrl42>])', r'\1', clean_body)
+
+        # De-duplicate location prefixes
         clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', clean_body)
-        clean_body = re.sub(r'^(ខេត្ត[^\s៖]+៖)\s*[^\s៖]{1,5}៖\s*', r'\1 ', clean_body)
         clean_body = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', clean_body)
 
-        # Split into paragraphs
-        paragraphs = [p.strip() for p in clean_body.split('\n') if p.strip()]
-        
-        if not paragraphs:
-            return clean_headline, clean_body
+        # Format into clean professional paragraphs
+        clean_body = format_professional_khmer_paragraphs(clean_body)
 
-        # Enforce 3-Paragraph Literary Structure if only 1 single paragraph exists
-        if len(paragraphs) == 1:
-            p1 = paragraphs[0]
-            p2 = "យោងតាមប្រភពព័ត៌មានផ្លូវការពី រដ្ឋបាលរាជធានី-ខេត្ត និងក្រសួងមហាផ្ទៃ បានបញ្ជាក់ឱ្យដឹងថា ព្រឹត្តិការណ៍នេះគឺជាជំហានដ៏សំខាន់ក្នុងការលើកកម្ពស់តម្លាភាព គណនេយ្យភាពសង្គម និងការទប់ស្កាត់រាល់បាតុភាពអសកម្ម។"
-            p3 = "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ និងមាត្រា ៥២ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរពច្បាប់ នីតិរដ្ឋ និងប្រជាធិបតេយ្យសេរីពហុបក្ស នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាព និងសុខសន្តិភាពជានិរន្តរ៍ជូនជាតិ និងប្រជាជនទាំងមូល៕"
-            paragraphs = [p1, p2, p3]
+        # Ensure final ending is <ctrl42>
+        clean_body = clean_body.strip()
+        if clean_body and not clean_body.endswith('<ctrl42>'):
+            clean_body = re.sub(r'[។\s]+$', '', clean_body) + '<ctrl42>'
 
-        formatted_paragraphs = []
-        for i, p in enumerate(paragraphs):
-            # Clean duplicate location prefix on paragraph 1
-            if i == 0:
-                p = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', p)
-                p = re.sub(r'([^\s៖]+៖)\s*\1', r'\1', p)
-
-            # Ensure paragraph ends with proper Khmer punctuation
-            if not p.endswith('។') and not p.endswith('៕'):
-                p += '។'
-            
-            # If it's the last paragraph, change final '។' to '៕'
-            if i == len(paragraphs) - 1:
-                p = re.sub(r'[។\s]+$', '', p)
-                if not p.endswith('៕'):
-                    p += '៕'
-                p = re.sub(r'៕+', '៕', p)
-            
-            formatted_paragraphs.append(p)
-
-        purified_body = '\n\n'.join(formatted_paragraphs)
-        return clean_headline, purified_body
+        return clean_headline, clean_body
 
     def format_khmer_dateline(self, timestamp: Optional[float] = None, scope: str = "NATIONAL", location: str = "") -> str:
         """
@@ -319,16 +304,26 @@ class KhmerLanguageAuditor:
         combined = f"{source_lower} {url_lower}"
 
         source_map = [
-            ("mod.gov.kh", "ក្រសួងការពារជាតិ"),
-            ("mfaic.gov.kh", "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិ"),
+            ("ministry of national defence", "ក្រសួងការពារជាតិកម្ពុជា"),
+            ("mod.gov.kh", "ក្រសួងការពារជាតិកម្ពុជា"),
+            ("national defence", "ក្រសួងការពារជាតិកម្ពុជា"),
+            ("ministry of foreign affairs", "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិកម្ពុជា"),
+            ("mfaic.gov.kh", "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិកម្ពុជា"),
+            ("mfaic", "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិកម្ពុជា"),
+            ("agence kampuchea presse", "ទីភ្នាក់ងារសារព័ត៌មានកម្ពុជា (AKP)"),
             ("akp.gov.kh", "ទីភ្នាក់ងារសារព័ត៌មានកម្ពុជា (AKP)"),
+            ("anti-corruption unit", "អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU)"),
             ("acu.gov.kh", "អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU)"),
-            ("information.gov.kh", "ក្រសួងព័ត៌មាន"),
+            ("ministry of information", "ក្រសួងព័ត៌មានកម្ពុជា"),
+            ("information.gov.kh", "ក្រសួងព័ត៌មានកម្ពុជា"),
+            ("council of ministers", "ទីស្តីការគណៈរដ្ឋមន្ត្រី"),
             ("pressocm.gov.kh", "ទីស្តីការគណៈរដ្ឋមន្ត្រី"),
-            ("interior.gov.kh", "ក្រសួងមហាផ្ទៃ"),
-            ("moj.gov.kh", "ក្រសួងយុត្តិធម៌"),
+            ("ministry of interior", "ក្រសួងមហាផ្ទៃកម្ពុជា"),
+            ("interior.gov.kh", "ក្រសួងមហាផ្ទៃកម្ពុជា"),
+            ("ministry of justice", "ក្រសួងយុត្តិធម៌កម្ពុជា"),
+            ("moj.gov.kh", "ក្រសួងយុត្តិធម៌កម្ពុជា"),
             ("mef.gov.kh", "ក្រសួងសេដ្ឋកិច្ច និងហិរញ្ញវត្ថុ"),
-            ("moe.gov.kh", "ក្រសួងបរិស្ថាន"),
+            ("moe.gov.kh", "ក្រសួងបរិស្ថានកម្ពុជា"),
             ("nec.gov.kh", "គណៈកម្មាធិការជាតិរៀបចំការបោះឆ្នោត (គ.ជ.ប)"),
             ("nac.org.kh", "រដ្ឋសភាជាតិកម្ពុជា"),
             ("phnompenh.gov.kh", "រដ្ឋបាលរាជធានីភ្នំពេញ"),
@@ -343,13 +338,6 @@ class KhmerLanguageAuditor:
             ("freshnewsasia.com", "សារព័ត៌មាន Fresh News"),
             ("kohsantepheapdaily", "សារព័ត៌មាន កោះសន្តិភាព"),
             ("kampucheathmey", "សារព័ត៌មាន កម្ពុជាថ្មី"),
-            ("cchrcambodia.org", "មជ្ឈមណ្ឌលសិទ្ធិមនុស្សកម្ពុជា (CCHR)"),
-            ("licadho-cambodia.org", "អង្គការសិទ្ធិមនុស្ស លីកាដូ (LICADHO)"),
-            ("adhoc-cambodia.org", "សមាគមសិទ្ធិមនុស្ស អាដហុក (ADHOC)"),
-            ("rfi.fr", "វិទ្យុបារាំងអន្តរជាតិ (RFI Khmer)"),
-            ("voanews.com", "វិទ្យុសម្លេងសហរដ្ឋអាមេរិក (VOA Khmer)"),
-            ("reuters.com", "ភ្នាក់ងារសារព័ត៌មាន រ៉យទ័រ (Reuters World)"),
-            ("nytimes.com", "សារព័ត៌មាន New York Times"),
         ]
 
         for key, verified_title in source_map:
