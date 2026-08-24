@@ -1040,12 +1040,32 @@ class SuperSmartTelegramBot:
                     await self.edit_message_reply_markup(chat_id, msg_id, {"inline_keyboard": new_kb})
                     await self.answer_callback_query(cb_id, text=f"👁️ អត្ថបទនេះត្រូវបានអានចំនួន {views_cnt} លើក!")
 
-                elif data == "cmd_latest":
-                    latest_text = (
-                        "*កម្ពុជាពង្រឹងកិច្ចសហប្រតិបត្តិការអន្តរជាតិក្នុងការបង្រ្កាបបទល្មើសអនឡាញឆបោក និងពង្រឹងនីតិរដ្ឋ*\n\n"
-                        "រាជធានីភ្នំពេញ៖ អាជ្ញាធរមានសមត្ថកិច្ចនៃព្រះរាជាណាចក្រកម្ពុជា បាននិងកំពុងពង្រឹងកិច្ចសហប្រតិបត្តិការយ៉ាងជិតស្និទ្ធជាមួយស្ថាប័នអនុវត្តច្បាប់អន្តរជាតិ ដើម្បីបើកប្រតិបត្តិការរួមគ្នាក្នុងទ្រង់ទ្រាយធំ ឈានទៅបោសសម្អាត និងវែកមុខសញ្ញាឧក្រិដ្ឋជនឆបោកតាមប្រព័ន្ធអនឡាញ (Online Scam) ដែលកំពុងប្រតិបត្តិការឆ្លងដែន។\n\n"
-                        "ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ៕"
-                    )
+                elif data == "cmd_latest" or data == "/latest":
+                    from defense_intelligence_engine import defense_engine
+                    from khmer_auditor import khmer_auditor
+                    
+                    latest_items = defense_engine.get_latest_defense_news(5)
+                    if latest_items:
+                        rec = latest_items[0]
+                        clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
+                        clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
+                        dateline_str = khmer_auditor.format_khmer_dateline()
+                        verified_src = khmer_auditor.resolve_verified_source_name(rec.get("source_name", ""))
+                        
+                        latest_text = (
+                            f"*{clean_title}*\n\n"
+                            f"{dateline_str}\n"
+                            f"🏛️ *ប្រភពដកស្រង់ ៖ {verified_src}*\n\n"
+                            f"{clean_body}"
+                        )
+                    else:
+                        dateline_str = khmer_auditor.format_khmer_dateline()
+                        latest_text = (
+                            f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
+                            f"{dateline_str}\n"
+                            f"🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\n"
+                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៤៦ ស្ថាប័ន ២៤/៧។"
+                        )
                     await self.send_message(chat_id, latest_text)
 
                 elif data == "cmd_defense_news":
