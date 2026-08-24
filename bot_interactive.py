@@ -842,12 +842,14 @@ class SuperSmartTelegramBot:
                     from defense_intelligence_engine import defense_engine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(10)
+                    latest_items = defense_engine.get_latest_defense_news(15)
                     valid_rec = None
                     for rec in latest_items:
                         h = rec.get("title", "")
                         b = rec.get("content", "")
                         src = rec.get("source_name", "")
+                        if "បទល្មើសអនឡាញឆបោក" in h or "Online Scam" in h or "អានបន្ដ" in b:
+                            continue
                         is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
                         if is_valid and len(clean_b) > 80:
                             scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
@@ -1115,12 +1117,14 @@ class SuperSmartTelegramBot:
                     from defense_intelligence_engine import defense_engine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(10)
+                    latest_items = defense_engine.get_latest_defense_news(15)
                     valid_rec = None
                     for rec in latest_items:
                         h = rec.get("title", "")
                         b = rec.get("content", "")
                         src = rec.get("source_name", "")
+                        if "បទល្មើសអនឡាញឆបោក" in h or "Online Scam" in h or "អានបន្ដ" in b:
+                            continue
                         is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
                         if is_valid and len(clean_b) > 80:
                             scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
