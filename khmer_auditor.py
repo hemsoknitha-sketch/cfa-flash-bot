@@ -345,6 +345,11 @@ class KhmerLanguageAuditor:
     def audit_source_attribution(self, body: str, source_name: str) -> str:
         """Verifies explicit source attribution without internal AI terms or raw fallback strings."""
         clean_source = self.resolve_verified_source_name(source_name)
+        
+        # Do not force-inject attribution phrases for international news or generic defaults
+        if "អន្តរជាតិ" in clean_source or "ប្រភពព័ត៌មានផ្លូវការនៃព្រះរាជាណាចក្រកម្ពុជា" in clean_source:
+            return body
+
         attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {clean_source}"
 
         if "យោងតាមប្រភព" not in body and clean_source not in body:
@@ -381,13 +386,19 @@ class KhmerLanguageAuditor:
         # 3. Dateline Generation
         dateline_str = self.format_khmer_dateline(timestamp)
 
-        # 4. Prose & Punctuation Audit
+        # 4. Truncation Audit Penalty: Reject incomplete/truncated items ending in "…" or "..."
+        raw_combined = f"{headline} {body}".strip()
+        if any(raw_combined.endswith(x) for x in ["…", "...", "ចូលរួមក្នុង", " ក្នុង", " និង"]) or "លោក …" in raw_combined or "លោក..." in raw_combined:
+            logger.warning(f"🚫 [KHMER AUDITOR REJECTED] Truncated / Cut-off news item detected! Rejecting post.")
+            return False, 30.0, headline, body, verified_source, dateline_str
+
+        # 5. Prose & Punctuation Audit
         clean_headline, clean_body = self.audit_prose_structure(headline, body)
 
-        # 5. Source Attribution Audit
+        # 6. Source Attribution Audit
         clean_body = self.audit_source_attribution(clean_body, verified_source)
 
-        # 6. Fact Grounding & Repetition Audit
+        # 7. Fact Grounding & Repetition Audit
         is_grounded, grounding_score, clean_headline, clean_body = self.audit_grounding_and_repetition(clean_headline, clean_body)
 
         # 7. Final Quality Score Assessment (Threshold >= 75.0%)
