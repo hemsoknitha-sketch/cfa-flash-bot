@@ -839,40 +839,46 @@ class SuperSmartTelegramBot:
                         await self.send_message(chat_id, msg)
 
                 elif text.startswith("/latest"):
-                    from defense_intelligence_engine import defense_engine
+                    await self.send_message(chat_id, "📡 *ប្រព័ន្ធកំពុងស្កេន និងទាញយកព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយបំផុត...*")
+                    from scraper import IngestionEngine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(15)
+                    ingestion = IngestionEngine()
+                    live_items = await ingestion.fetch_from_rss_async()
+                    
                     valid_rec = None
-                    for rec in latest_items:
-                        h = rec.get("title", "")
-                        b = rec.get("content", "")
-                        src = rec.get("source_name", "")
-                        if "បទល្មើសអនឡាញឆបោក" in h or "Online Scam" in h or "អានបន្ដ" in b:
-                            continue
-                        is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
-                        if is_valid and len(clean_b) > 80:
-                            scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
-                            dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
-                            valid_rec = (clean_h, clean_b, verified_src, dateline_str)
-                            break
+                    if live_items:
+                        for item in live_items:
+                            h = item.title
+                            b = item.content
+                            src = item.source
+                            is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                            if is_valid and len(clean_b) > 60:
+                                scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                                dateline_str = khmer_auditor.format_khmer_dateline(item.timestamp, scope=scope, location=clean_h)
+                                valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                                break
+                    
+                    if not valid_rec:
+                        from defense_intelligence_engine import defense_engine
+                        latest_items = defense_engine.get_latest_defense_news(10)
+                        for rec in latest_items:
+                            h = rec.get("title", "")
+                            b = rec.get("content", "")
+                            src = rec.get("source_name", "")
+                            is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                            if is_valid and len(clean_b) > 60:
+                                scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                                dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
+                                valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                                break
                     
                     if valid_rec:
                         th, tb, ts, td = valid_rec
-                        latest_text = (
-                            f"*{th}*\n\n"
-                            f"{td}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n"
-                            f"{tb}"
-                        )
+                        latest_text = f"*{th}*\n\n{td}\n🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n{tb}"
                     else:
                         dateline_str = khmer_auditor.format_khmer_dateline(scope="NATIONAL")
-                        latest_text = (
-                            f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
-                            f"{dateline_str}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\n"
-                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
-                        )
+                        latest_text = f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n{dateline_str}\n🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\nប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
                     await self.send_message(chat_id, latest_text)
 
                 elif text.startswith("/scan"):
@@ -1114,40 +1120,46 @@ class SuperSmartTelegramBot:
                     await self.answer_callback_query(cb_id, text=f"👁️ អត្ថបទនេះត្រូវបានអានចំនួន {views_cnt} លើក!")
 
                 elif data == "cmd_latest" or data == "/latest":
-                    from defense_intelligence_engine import defense_engine
+                    await self.send_message(chat_id, "📡 *ប្រព័ន្ធកំពុងស្កេន និងទាញយកព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយបំផុត...*")
+                    from scraper import IngestionEngine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(15)
+                    ingestion = IngestionEngine()
+                    live_items = await ingestion.fetch_from_rss_async()
+                    
                     valid_rec = None
-                    for rec in latest_items:
-                        h = rec.get("title", "")
-                        b = rec.get("content", "")
-                        src = rec.get("source_name", "")
-                        if "បទល្មើសអនឡាញឆបោក" in h or "Online Scam" in h or "អានបន្ដ" in b:
-                            continue
-                        is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
-                        if is_valid and len(clean_b) > 80:
-                            scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
-                            dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
-                            valid_rec = (clean_h, clean_b, verified_src, dateline_str)
-                            break
+                    if live_items:
+                        for item in live_items:
+                            h = item.title
+                            b = item.content
+                            src = item.source
+                            is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                            if is_valid and len(clean_b) > 60:
+                                scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                                dateline_str = khmer_auditor.format_khmer_dateline(item.timestamp, scope=scope, location=clean_h)
+                                valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                                break
+                    
+                    if not valid_rec:
+                        from defense_intelligence_engine import defense_engine
+                        latest_items = defense_engine.get_latest_defense_news(10)
+                        for rec in latest_items:
+                            h = rec.get("title", "")
+                            b = rec.get("content", "")
+                            src = rec.get("source_name", "")
+                            is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                            if is_valid and len(clean_b) > 60:
+                                scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                                dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
+                                valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                                break
                     
                     if valid_rec:
                         th, tb, ts, td = valid_rec
-                        latest_text = (
-                            f"*{th}*\n\n"
-                            f"{td}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n"
-                            f"{tb}"
-                        )
+                        latest_text = f"*{th}*\n\n{td}\n🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n{tb}"
                     else:
                         dateline_str = khmer_auditor.format_khmer_dateline(scope="NATIONAL")
-                        latest_text = (
-                            f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
-                            f"{dateline_str}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\n"
-                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
-                        )
+                        latest_text = f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n{dateline_str}\n🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\nប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
                     await self.send_message(chat_id, latest_text)
 
                 elif data == "cmd_defense_news":
