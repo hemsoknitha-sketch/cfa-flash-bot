@@ -93,11 +93,15 @@ class KhmerLegalEngine:
         return unique_matched[:limit]
 
     def generate_legal_compliance_citation(self, title: str, content: str) -> str:
-        """Generates legal compliance citation footnote for Khmer news articles."""
-        relevant = self.search_relevant_laws(f"{title} {content}", limit=2)
-        if not relevant:
+        """Generates legal compliance citation footnote ONLY for explicit legal/constitutional news articles."""
+        combined = f"{title} {content}".lower()
+        legal_keywords = ["ច្បាប់", "រដ្ឋធម្មនុញ្ញ", "មាត្រា", "តុលាការ", "ព្រះរាជក្រម", "ក្រមព្រហ្មទណ្ឌ", "ក្រមរដ្ឋប្បវេណី", "នីតិរដ្ឋ", "ក្រសួងយុត្តិធម៌", "ACU", "អំពើពុករលួយ"]
+        
+        # Do NOT inject legal citations for routine general news, defense ceremonies, or market news
+        if not any(kw in combined for kw in legal_keywords):
             return ""
 
+        relevant = self.search_relevant_laws(combined, limit=2)
         citation = "\n\n⚖️ *មូលដ្ឋានច្បាប់ និងនីតិរដ្ឋនៃព្រះរាជាណាចក្រកម្ពុជា ៖*\n"
         for item in relevant:
             citation += f"• *{item.get('code_name')} ({item.get('article')}) ៖* {item.get('title')} — «{item.get('summary')}»\n"
