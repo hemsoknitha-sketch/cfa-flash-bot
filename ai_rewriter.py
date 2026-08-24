@@ -614,3 +614,7 @@ class SuperBrainAIRewriter:
         """
         from banner_engine import banner_engine
         return await banner_engine.generate_banner_image(headline, category_title, badge_label, badge_color)
+
+# Singleton module instance for high-speed import across bot & orchestrator
+ai_rewriter = SuperBrainAIRewriter()
+
