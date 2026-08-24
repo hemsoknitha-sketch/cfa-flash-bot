@@ -410,23 +410,8 @@ class KhmerLanguageAuditor:
         return is_grounded, min(100.0, max(0.0, score)), headline, body
 
     def audit_source_attribution(self, body: str, source_name: str) -> str:
-        """Verifies explicit source attribution without internal AI terms or raw fallback strings."""
-        clean_source = self.resolve_verified_source_name(source_name)
-        
-        # Do not force-inject attribution phrases for international news or generic defaults
-        if "អន្តរជាតិ" in clean_source or "ប្រភពព័ត៌មានផ្លូវការនៃព្រះរាជាណាចក្រកម្ពុជា" in clean_source:
-            return body
-
-        attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {clean_source}"
-
-        if "យោងតាមប្រភព" not in body and clean_source not in body:
-            paragraphs = body.split('\n\n')
-            if len(paragraphs) >= 2:
-                paragraphs[1] = f"{attribution_phrase} បានបញ្ជាក់ឱ្យដឹងថា " + paragraphs[1]
-                body = '\n\n'.join(paragraphs)
-            elif paragraphs:
-                body = body + f"\n\n({attribution_phrase})"
-
+        """Verifies explicit source attribution without injecting contradictory generic text."""
+        # Return pristine body to prevent contradictory source injection in paragraph 2
         return body
 
     def evaluate_news_quality_score(

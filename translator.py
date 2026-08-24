@@ -64,6 +64,9 @@ def super_smart_khmer_formatter(text: str) -> str:
             curr = re.sub(rf'({h})\s*({khmer_char})', r'\1 \2', curr)
 
         # Fix compound words that should not have spaces
+        curr = re.sub(r'សម្តេច\s+តេជោ', 'សម្តេចតេជោ', curr)
+        curr = re.sub(r'សម្តេច\s+ធិបតី', 'សម្តេចធិបតី', curr)
+        curr = re.sub(r'ព្រះបាទសម្តេច\s+ព្រះបរមនាថ', 'ព្រះបាទសម្តេចព្រះបរមនាថ', curr)
         curr = re.sub(r'ប្រធាន\s+បទ', 'ប្រធានបទ', curr)
         curr = re.sub(r'អភិបាល\s+កិច្ច', 'អភិបាលកិច្ច', curr)
         curr = re.sub(r'ប្រធាន\s+សក្តិ', 'ប្រធានសក្តិ', curr)
