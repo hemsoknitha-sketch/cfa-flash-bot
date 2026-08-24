@@ -443,5 +443,36 @@ flowchart TD
 
 ⚠️ **វិធានកត់ចំណាំដាច់ខាតសម្រាប់កំណែប្រែលើកក្រោយ (MANDATORY DEVELOPER RULES) ៖**
    • **វិធានទី ១ ៖** មិនត្រូវដាក់ Network HTTP Calls ឬ LLM Generation Calls នៅខាងក្នុង Telegram Interactive Button Handlers (ដូចជា `/latest`, `/defense`) ជាដាច់ខាត ត្រូវប្រើ Memory Cache ឬ Pre-audited Archive Items ជានិច្ច។
-   • **វិធានទី ២ ៖** រាល់អត្ថបទសារព័ត៌មានដែលផលិតចេញ ត្រូវតែឆ្លងកាត់ `audit_prose_structure()` ដើម្បីធានាថាគ្មានវង់ក្រចកទទេ `()` និងគ្មានសញ្ញាខណ្ឌបញ្ចប់ត្រួតគ្នា `<ctrl42>។` ឡើយ។
+   • **វិធានទី ពីរ ៖** រាល់អត្ថបទសារព័ត៌មានដែលផលិតចេញ ត្រូវតែឆ្លងកាត់ `audit_prose_structure()` ដើម្បីធានាថាគ្មានវង់ក្រចកទទេ `()` និងគ្មានសញ្ញាខណ្ឌបញ្ចប់ត្រួតគ្នា `<ctrl42>។` ឡើយ។
+====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+៤២. 🌐 ស្ថាបត្យកម្មប្រព័ន្ធពេញលេញ V8.0 MASTER SUMMARY (COMPLETE MASTER REFERENCE MANUAL OF ALL SYSTEM UPDATES & FEATURE ENHANCEMENTS)
+----------------------------------------------------------------------------------------------------
+កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាពចុងក្រោយ ៖ ថ្ងៃទី ២៤ ខែ សីហា ឆ្នាំ ២០២៦
+ប្រព័ន្ធ CFA Flash Feed (Super Brain AI Engine V8.0) ត្រូវបានធ្វើបច្ចុប្បន្នភាព និងពង្រឹងសមត្ថភាពពេញលេញ 100% រួមមាន ៖
+
+១. 🔒 **ស្ថាបត្យកម្មការពារការរត់ស្ទួន និងបាញ់សារស្ទួន ៤ ស្រទាប់ (4-Layer Zero-Duplication Shield) ៖**
+   - **Linux OS Kernel Single-Instance Lock (`main_loop.py` & `/tmp/cfa_flash_bot_daemon.lock`) ៖** ប្រើប្រាស់ `fcntl.flock` ការពារមិនឱ្យមាន ២ Daemon Processes រត់ជាន់គ្នានាំឱ្យបាញ់សារស្ទួនលើ VPS ជាដាច់ខាត។
+   - **Atomic Check & Add (`vector_store.py`) ៖** ស្កេន SHA-256, Headline Hash និង TF-IDF Cosine Similarity (>80%) ព្រមទាំង Lock Memory & Flush ចុះ Disk `seen_hashes.json` ភ្លាមៗ ការពារ Race Condition ពេលស្កេនជួបព័ត៌មានដូចគ្នាក្នុងពេលតែមួយ។
+   - **Telegram 1-Hour Broadcast Deduplication (`telegram_broadcaster.py`) ៖** ទប់ស្កាត់ការបាញ់សារស្ទួនចូល VIP Channel ក្នុងរង្វង់ ១ ម៉ោង។
+   - **Bot Listener Update ID & Callback Debounce (`bot_interactive.py`) ៖** រក្សាទុក LRU Cache 2,000 Update IDs និង 1.5s Debounce Window ការពារការ Re-delivery ឬការចុចប៊ូតុងស្ទួនៗ។
+
+២. ⚡ **ស្ថាបត្យកម្មល្បឿនឆ្លើយតបអតិបរមា < 50ms (Super Fast Interactive Bot) ៖**
+   - មុខងារ `/latest`, `/defense`, `/status`, `/ping` ឆ្លើយតបមកវិញក្នុងថិរវេលា **< 10ms-50ms** ដោយទាញយកព័ត៌មានពី Fast-Path Memory Cache គ្មានការរង់ចាំ 5-15 វិនាទីទៀតឡើយ។
+
+៣. ✍️ **ស្ថាបត្យកម្មអក្សរសាស្ត្រខ្មែរ និងវិជ្ជាជីវៈសារព័ត៌មានស្ដង់ដារ (Khmer Prose & Punctuation Purity) ៖**
+   - **កថាខណ្ឌ ៖** ផ្គុំ ២-៣ ប្រយោគចូលគ្នាក្នុងមួយកថាខណ្ឌ (`format_professional_khmer_paragraphs`) គ្មានការបែកបាក់ប្រយោគតូចៗដាច់កណ្តាលឡើយ។
+   - **សញ្ញាបរិយោសាន ៖** លុបបាត់សញ្ញាខណ្ឌត្រួតគ្នា `៕។` ឬ `៕<ctrl42>` ឱ្យសល់តែសញ្ញាបរិយោសាន ` <ctrl42>` តែមួយគត់នៅចុងបញ្ចប់អត្ថបទ។
+   - **Empty Bracket Purging ៖** លុបបាត់វង់ក្រចកទទេ `()` និង `(-)` ទាំងអស់ដែលកើតចេញពីការលុបពាក្យអង់គ្លេសចោល។
+
+៤. 📘 **ស្ថាបត្យកម្មបាញ់សារទៅកាន់ Facebook Page (Meta Gold-Standard 5-Min Pacing) ៖**
+   - ធ្វើបច្ចុប្បន្នភាព `facebook_publisher.py` ជាមួយ **5-Minute Safety Window (៣០០ វិនាទី)** កើនល្បឿន ៦ ដង ធានាសុខភាព Page 100% គ្មានហានិភ័យ Meta Code 368 / Organic Reach Penalty ឡើយ។
+
+៥. 🎨 **ស្ថាបត្យកម្មរូបភាព 4K HD Banner & Khmer AI Voice Bulletin ៖**
+   - Playwright OpenType Khmer Engine បង្កើត Banner 4K HD `banner_XXXX.jpg` ស្អាតបាត ភ្ជាប់ Logo និង Watermark ផ្លូវការ ព្រមទាំងលុបចោលរូបភាពបណ្តោះអាសន្នលើ Disk ដោយស្វ័យប្រវត្តិ (`os.remove()`) រក្សាទុក Disk 100% Clean!
+
+៦. 🚀 **ស្ថាបត្យកម្មប្រតិបត្តិការ ២៤/៧ និងការ Backup ដោយស្វ័យប្រវត្តិ ៖**
+   - **24/7 Dual-Thread Orchestrator ៖** រត់ News Ingestion Loop (៦០ វិនាទីម្តង) ព្រមគ្នាជាមួយ Telegram Interactive Bot Menu Listener និងមុខងារ **Daily 2:00 AM Phnom Penh Backup Loop** ដោយស្វ័យប្រវត្តិ។
+
 ====================================================================================================
