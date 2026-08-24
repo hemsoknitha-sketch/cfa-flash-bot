@@ -211,19 +211,193 @@ class KhmerLanguageAuditor:
         purified_body = '\n\n'.join(formatted_paragraphs)
         return clean_headline, purified_body
 
+    def format_khmer_dateline(self, timestamp: Optional[float] = None) -> str:
+        """
+        Generates formal Khmer human-readable calendar dateline.
+        Example: 📅 កាលបរិច្ឆេទ ៖ ថ្ងៃចន្ទ ទី២៤ ខែសីហា ឆ្នាំ២០២៦ | ម៉ោង ១០:៤៣ ព្រឹក
+        """
+        if timestamp is None or timestamp <= 0:
+            timestamp = time.time()
+
+        t_struct = time.localtime(timestamp)
+        
+        khmer_digits = {'0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤', '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩'}
+        def to_khmer_num(val: int, zfill: int = 0) -> str:
+            s = str(val).zfill(zfill)
+            return ''.join(khmer_digits.get(c, c) for c in s)
+
+        days = ["ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍", "អាទិត្យ"]
+        months = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"]
+
+        day_name = days[t_struct.tm_wday]
+        day_num = to_khmer_num(t_struct.tm_mday)
+        month_name = months[t_struct.tm_mon - 1]
+        year_num = to_khmer_num(t_struct.tm_year)
+
+        hour = t_struct.tm_hour
+        minute_str = to_khmer_num(t_struct.tm_min, zfill=2)
+        ampm = "ព្រឹក" if hour < 12 else "ល្ងាច"
+        hour12 = hour if 1 <= hour <= 12 else (hour - 12 if hour > 12 else 12)
+        hour_str = to_khmer_num(hour12)
+
+        return f"📅 កាលបរិច្ឆេទ ៖ ថ្ងៃ{day_name} ទី{day_num} ខែ{month_name} ឆ្នាំ{year_num} | ម៉ោង {hour_str}:{minute_str} {ampm}"
+
+    def resolve_verified_source_name(self, source_name: str, url: Optional[str] = None) -> str:
+        """
+        Maps raw feed sources or URLs to formal verified Khmer institutional titles.
+        Eliminates vague terms like 'ប្រភពព័ត៌មានផ្លូវការ', 'Facebook', or internal AI strings.
+        """
+        source_lower = (source_name or "").lower()
+        url_lower = (url or "").lower()
+        combined = f"{source_lower} {url_lower}"
+
+        source_map = [
+            ("mod.gov.kh", "ក្រសួងការពារជាតិ"),
+            ("mfaic.gov.kh", "ក្រសួងការបរទេស និងសហប្រតិបត្តិការអន្តរជាតិ"),
+            ("akp.gov.kh", "ទីភ្នាក់ងារសារព័ត៌មានកម្ពុជា (AKP)"),
+            ("acu.gov.kh", "អង្គភាពប្រឆាំងអំពើពុករលួយ (ACU)"),
+            ("information.gov.kh", "ក្រសួងព័ត៌មាន"),
+            ("pressocm.gov.kh", "ទីស្តីការគណៈរដ្ឋមន្ត្រី"),
+            ("interior.gov.kh", "ក្រសួងមហាផ្ទៃ"),
+            ("moj.gov.kh", "ក្រសួងយុត្តិធម៌"),
+            ("mef.gov.kh", "ក្រសួងសេដ្ឋកិច្ច និងហិរញ្ញវត្ថុ"),
+            ("moe.gov.kh", "ក្រសួងបរិស្ថាន"),
+            ("nec.gov.kh", "គណៈកម្មាធិការជាតិរៀបចំការបោះឆ្នោត (គ.ជ.ប)"),
+            ("nac.org.kh", "រដ្ឋសភាជាតិកម្ពុជា"),
+            ("phnompenh.gov.kh", "រដ្ឋបាលរាជធានីភ្នំពេញ"),
+            ("siemreap.gov.kh", "រដ្ឋបាលខេត្តសៀមរាប"),
+            ("preahsihanouk.gov.kh", "រដ្ឋបាលខេត្តព្រះសីហនុ"),
+            ("battambang.gov.kh", "រដ្ឋបាលខេត្តបាត់ដំបង"),
+            ("kampongcham.gov.kh", "រដ្ឋបាលខេត្តកំពង់ចាម"),
+            ("kandal.gov.kh", "រដ្ឋបាលខេត្តកណ្តាល"),
+            ("khmertimeskh.com", "សារព័ត៌មាន Khmer Times"),
+            ("phnompenhpost.com", "សារព័ត៌មាន ភ្នំពេញ ប៉ុស្តិ៍"),
+            ("thmeythmey.com", "សារព័ត៌មាន ថ្មីៗ (ThmeyThmey)"),
+            ("freshnewsasia.com", "សារព័ត៌មាន Fresh News"),
+            ("kohsantepheapdaily", "សារព័ត៌មាន កោះសន្តិភាព"),
+            ("kampucheathmey", "សារព័ត៌មាន កម្ពុជាថ្មី"),
+            ("cchrcambodia.org", "មជ្ឈមណ្ឌលសិទ្ធិមនុស្សកម្ពុជា (CCHR)"),
+            ("licadho-cambodia.org", "អង្គការសិទ្ធិមនុស្ស លីកាដូ (LICADHO)"),
+            ("adhoc-cambodia.org", "សមាគមសិទ្ធិមនុស្ស អាដហុក (ADHOC)"),
+            ("rfi.fr", "វិទ្យុបារាំងអន្តរជាតិ (RFI Khmer)"),
+            ("voanews.com", "វិទ្យុសម្លេងសហរដ្ឋអាមេរិក (VOA Khmer)"),
+            ("reuters.com", "ភ្នាក់ងារសារព័ត៌មាន រ៉យទ័រ (Reuters World)"),
+            ("nytimes.com", "សារព័ត៌មាន New York Times"),
+        ]
+
+        for key, verified_title in source_map:
+            if key in combined:
+                return verified_title
+
+        # Clean raw source_name if it has Khmer text
+        if source_name and any('\u1780' <= c <= '\u17ff' for c in source_name):
+            clean_s = re.sub(r'\(.*?\)', '', source_name).strip()
+            clean_s = re.sub(r'^(?:សារព័ត៌មាន\s*)?', 'សារព័ត៌មាន ', clean_s)
+            return clean_s
+
+        return "ប្រភពព័ត៌មានផ្លូវការនៃព្រះរាជាណាចក្រកម្ពុជា"
+
+    def audit_grounding_and_repetition(self, headline: str, body: str) -> Tuple[bool, float, str, str]:
+        """
+        Evaluates factual grounding density and purges generic repetitive boilerplate sentences.
+        Returns: (is_grounded: bool, grounding_score: float, purified_headline: str, purified_body: str)
+        """
+        if not headline or not body:
+            return False, 0.0, headline, body
+
+        score = 0.0
+        
+        # 1. Headline length and structure check (Max 25 pts)
+        if len(headline.strip()) >= 15:
+            score += 25.0
+        
+        # 2. Body length and depth check (Max 25 pts)
+        body_words = len(body.strip())
+        if body_words >= 150:
+            score += 25.0
+        elif body_words >= 80:
+            score += 15.0
+
+        # 3. Grounding Signals (Entities, Institutions, Numeric/Legal data) (Max 35 pts)
+        grounding_keywords = [
+            "ក្រសួង", "រាជធានី", "ខេត្ត", "ភ្នំពេញ", "មាត្រា", "ច្បាប់", "តុលាការ", "សម្តេច", 
+            "ឯកឧត្តម", "រដ្ឋបាល", "នគរបាល", "កម្លាំង", "សេចក្តីថ្លែងការណ៍", "កិច្ចព្រមព្រៀង",
+            " percent", "%", "ដុល្លារ", "រៀល", "ឆ្នាំ", "ខែ", "ថ្ងៃ"
+        ]
+        found_signals = sum(1 for k in grounding_keywords if k in body)
+        grounding_pts = min(35.0, found_signals * 7.0)
+        score += grounding_pts
+
+        # 4. Anti-Repetition Penalty: Check paragraph sentence overlap
+        paragraphs = [p.strip() for p in body.split('\n\n') if p.strip()]
+        if len(paragraphs) >= 2:
+            p1_set = set(re.findall(r'[\u1780-\u17ff]{4,}', paragraphs[0]))
+            p2_set = set(re.findall(r'[\u1780-\u17ff]{4,}', paragraphs[1]))
+            if p1_set and p2_set:
+                overlap = len(p1_set.intersection(p2_set)) / max(1, len(p1_set))
+                if overlap > 0.70:
+                    logger.warning(f"⚠️ [KHMER AUDITOR] Repetitive paragraph boilerplate detected (Overlap: {overlap*100:.1f}%). Applying penalty.")
+                    score -= 20.0
+
+        is_grounded = (score >= 60.0)
+        return is_grounded, min(100.0, max(0.0, score)), headline, body
+
     def audit_source_attribution(self, body: str, source_name: str) -> str:
         """Verifies explicit source attribution without internal AI terms or raw fallback strings."""
-        if not source_name or "Facebook Page / User Source" in source_name or any(k in source_name for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
-            source_name = "ប្រភពព័ត៌មានផ្លូវការ"
+        clean_source = self.resolve_verified_source_name(source_name)
+        attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {clean_source}"
 
-        attribution_phrase = f"យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}"
-        if "យោងតាមប្រភព" not in body and source_name not in body:
+        if "យោងតាមប្រភព" not in body and clean_source not in body:
             paragraphs = body.split('\n\n')
             if len(paragraphs) >= 2:
                 paragraphs[1] = f"{attribution_phrase} បានបញ្ជាក់ឱ្យដឹងថា " + paragraphs[1]
                 body = '\n\n'.join(paragraphs)
+            elif paragraphs:
+                body = body + f"\n\n({attribution_phrase})"
 
         return body
+
+    def evaluate_news_quality_score(
+        self,
+        headline: str,
+        body: str,
+        source_name: str = "ប្រភពព័ត៌មានផ្លូវការ",
+        url: Optional[str] = None,
+        timestamp: Optional[float] = None,
+        max_freshness_hours: float = 24.0
+    ) -> Tuple[bool, float, str, str, str, str]:
+        """
+        Master Zero-Error Quality Gatekeeper V7.0:
+        Calculates Quality Score (0-100%). Rejects items scoring below 75.0%.
+        Returns: (is_valid, quality_score, purified_headline, purified_body, verified_source_name, dateline_str)
+        """
+        # 1. Freshness Check
+        if not self.audit_news_freshness(timestamp, max_freshness_hours):
+            return False, 0.0, headline, body, source_name, ""
+
+        # 2. Verified Source Resolution
+        verified_source = self.resolve_verified_source_name(source_name, url)
+
+        # 3. Dateline Generation
+        dateline_str = self.format_khmer_dateline(timestamp)
+
+        # 4. Prose & Punctuation Audit
+        clean_headline, clean_body = self.audit_prose_structure(headline, body)
+
+        # 5. Source Attribution Audit
+        clean_body = self.audit_source_attribution(clean_body, verified_source)
+
+        # 6. Fact Grounding & Repetition Audit
+        is_grounded, grounding_score, clean_headline, clean_body = self.audit_grounding_and_repetition(clean_headline, clean_body)
+
+        # 7. Final Quality Score Assessment (Threshold >= 75.0%)
+        final_quality_score = min(100.0, max(0.0, grounding_score + (15.0 if verified_source != "ប្រភពព័ត៌មានផ្លូវការនៃព្រះរាជាណាចក្រកម្ពុជា" else 5.0)))
+        is_valid = (final_quality_score >= 75.0)
+
+        if not is_valid:
+            logger.warning(f"🚫 [KHMER AUDITOR REJECTED] News Quality Score {final_quality_score:.1f}% is below 75.0% threshold (Grounding: {grounding_score:.1f}%). Skipping low quality post.")
+
+        return is_valid, final_quality_score, clean_headline, clean_body, verified_source, dateline_str
 
     def audit_full_news_item(
         self,
@@ -234,28 +408,21 @@ class KhmerLanguageAuditor:
         max_freshness_hours: float = 24.0
     ) -> Tuple[bool, str, str, str]:
         """
-        Master Zero-Error Quality Gatekeeper:
-        Audits freshness, title purity, prose structure, HTML cleanliness, foreign word leaks, and source attribution.
+        Backwards-compatible wrapper for Master Quality Gatekeeper.
         Returns: (is_valid, purified_headline, purified_body, purified_source_name)
         """
-        # 1. Freshness Audit
-        if not self.audit_news_freshness(timestamp, max_freshness_hours):
-            return False, headline, body, source_name
-
-        # 2. Headline Purity & Prose Structure Audit
-        clean_headline, clean_body = self.audit_prose_structure(headline, body)
-
-        # 3. Source Attribution Audit
-        clean_source = source_name
-        if not clean_source or "Facebook Page / User Source" in clean_source or any(k in clean_source for k in ["ប្រព័ន្ធខួរក្បាល", "AI", "Super Brain", "កម្ពុជាពង្រឹង", " (", "http"]):
-            clean_source = "ប្រភពព័ត៌មានផ្លូវការ"
-
-        clean_body = self.audit_source_attribution(clean_body, clean_source)
-
-        return True, clean_headline, clean_body, clean_source
+        is_valid, score, clean_h, clean_b, verified_src, _ = self.evaluate_news_quality_score(
+            headline=headline,
+            body=body,
+            source_name=source_name,
+            timestamp=timestamp,
+            max_freshness_hours=max_freshness_hours
+        )
+        return is_valid, clean_h, clean_b, verified_src
 
     def audit_khmer_text(self, text: str) -> str:
         """Utility for auditing raw Khmer text strings."""
         return self.sanitize_khmer_spelling_and_punctuation(text)
 
 khmer_auditor = KhmerLanguageAuditor()
+

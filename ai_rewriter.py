@@ -607,6 +607,11 @@ class SuperBrainAIRewriter:
         headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()).replace("*", "").replace("_", "").strip()
         body_clean = khmer_auditor.audit_khmer_text(format_professional_khmer_paragraphs(body)).replace("*", "").replace("_", "").strip()
         
+        # Dateline & Verified Source Header
+        dateline_str = khmer_auditor.format_khmer_dateline()
+        verified_source = khmer_auditor.resolve_verified_source_name(source)
+        source_header = f"{dateline_str}\n🏛️ *ប្រភពដកស្រង់ ៖ {verified_source}*\n\n"
+        
         # Super Smart AI Legal Citation Cross-Referencing
         legal_citation = legal_engine.generate_legal_compliance_citation(headline_clean, body_clean)
 
@@ -619,7 +624,7 @@ class SuperBrainAIRewriter:
         )
 
         # Telegram Photo Caption Limit Safety Guard (1024 chars max)
-        max_body_len = 980 - len(headline_clean) - len(legal_citation) - len(leak_banner) - len(footer_signature)
+        max_body_len = 980 - len(headline_clean) - len(source_header) - len(legal_citation) - len(leak_banner) - len(footer_signature)
         if len(body_clean) > max_body_len and max_body_len > 100:
             truncated = body_clean[:max_body_len]
             # Smart Sentence-Boundary Truncation: Find last Khmer sentence ending ('។' or '៕')
@@ -631,7 +636,7 @@ class SuperBrainAIRewriter:
             else:
                 body_clean = truncated.rsplit(" ", 1)[0] + "៕"
 
-        return f"*{headline_clean}*\n\n{body_clean}{legal_citation}{leak_banner}{footer_signature}"
+        return f"*{headline_clean}*\n\n{source_header}{body_clean}{legal_citation}{leak_banner}{footer_signature}"
 
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red") -> str:
         """

@@ -39,7 +39,7 @@ class FlashNewsSuperBrainPipeline:
 # Global pipeline instance
 pipeline_engine = FlashNewsSuperBrainPipeline()
 
-async def process_news(news_text: str, news_id: str):
+async def process_news(news_text: str, news_id: str, source_name: str = "ប្រភពព័ត៌មានផ្លូវការ", url: str = "", timestamp: float = 0.0):
     """
     Unified 5-Step Async Production Pipeline:
     1. ត្រង Breaking News (XLM-RoBERTa Zero-Shot NLP)
@@ -70,11 +70,23 @@ async def process_news(news_text: str, news_id: str):
     logger.info(f"Step 2: Qdrant Vector Check -> Unique News Verified & Locked (Similarity: {similarity*100:.1f}% < 80%).")
 
     # 3. សង្ខេបអត្ថបទ (Local Qwen 2.5 3B / Gemini AI) & 4. បកប្រែខ្មែរ (Meta NLLB-200)
+    from khmer_auditor import khmer_auditor
+    is_valid, quality_score, clean_h, clean_b, verified_src, dateline_str = khmer_auditor.evaluate_news_quality_score(
+        headline=news_text[:100],
+        body=news_text,
+        source_name=source_name,
+        url=url,
+        timestamp=timestamp
+    )
+    if not is_valid:
+        logger.warning(f"🚫 [QUALITY GATEKEEPER REJECTED] News ID: {news_id} Quality Score: {quality_score:.1f}% (< 75% threshold). Skipping post.")
+        return
+
     processed_article = pipeline_engine.ai_rewriter.process_news(
         raw_id=news_id,
-        title=news_text[:100],
-        content=news_text,
-        source="Super Brain System",
+        title=clean_h,
+        content=clean_b,
+        source=verified_src,
         source_tier=1,
         is_unverified=False
     )
@@ -309,11 +321,6 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
 
 async def process_batch_news():
     """Fetch and process incoming news items from RSS feeds in batch."""
-    # Cold boot / Empty cache protection: Seed baseline first if empty to avoid blasting old news on Google Cloud update/restart
-    if not pipeline_engine.dedup_store.seen_hashes:
-        logger.info("🛡️ [CLEAN BOOT / EMPTY CACHE DETECTED] Initializing baseline RSS news hashes to prevent re-sending old news on update/restart...")
-        await pipeline_engine.dedup_store.seed_baseline_from_rss_async(pipeline_engine.ingestion)
-
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
     news_items = await pipeline_engine.ingestion.fetch_from_rss_async()
     if not news_items:
@@ -323,7 +330,7 @@ async def process_batch_news():
     logger.info(f"Retrieved {len(news_items)} live news items to process.")
     for item in news_items:
         full_text = f"{item.title} - {item.content}"
-        await process_news(news_text=full_text, news_id=item.id)
+        await process_news(news_text=full_text, news_id=item.id, source_name=item.source, url=item.url, timestamp=item.timestamp)
         await asyncio.sleep(3)  # Pacing delay to prevent Gemini 429 Rate Limits
 
 async def main():
