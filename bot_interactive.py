@@ -1186,21 +1186,9 @@ class SuperSmartTelegramBot:
                     if not hasattr(self, "_shown_latest_hashes"):
                         self._shown_latest_hashes = set()
 
-                    ingestion = IngestionEngine()
-                    live_items = await ingestion.fetch_from_rss_async()
-                    
+                    # Fast path: load pre-audited archive items first (<5ms response)
                     candidate_pool = []
-                    if live_items:
-                        for item in live_items:
-                            candidate_pool.append({
-                                "title": item.title,
-                                "content": item.content,
-                                "source": item.source,
-                                "timestamp": item.timestamp
-                            })
-
-                    # Fallback to defense engine items if live items sparse
-                    arch_items = defense_engine.get_latest_defense_news(20)
+                    arch_items = defense_engine.get_latest_defense_news(30)
                     for rec in arch_items:
                         candidate_pool.append({
                             "title": rec.get("title", ""),
@@ -1208,6 +1196,19 @@ class SuperSmartTelegramBot:
                             "source": rec.get("source_name", ""),
                             "timestamp": rec.get("timestamp")
                         })
+
+                    # If candidate pool sparse, fetch live RSS items
+                    if len(candidate_pool) < 5:
+                        ingestion = IngestionEngine()
+                        live_items = await ingestion.fetch_from_rss_async()
+                        if live_items:
+                            for item in live_items:
+                                candidate_pool.append({
+                                    "title": item.title,
+                                    "content": item.content,
+                                    "source": item.source,
+                                    "timestamp": item.timestamp
+                                })
 
                     valid_rec = None
                     for cand in candidate_pool:
@@ -1221,16 +1222,10 @@ class SuperSmartTelegramBot:
                         if item_hash in self._shown_latest_hashes and len(candidate_pool) > len(self._shown_latest_hashes):
                             continue
 
-                        # Quality Audit
+                        # Quality Audit & Prose Formatting (<1ms)
                         is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h_raw, b_raw, src_raw)
                         if is_valid and len(clean_b) > 50:
-                            # Pass through AI Neural Rewriter for Professional 100/100 Journalism Formatting
-                            rewritten_rec = ai_rewriter.rewrite_article(clean_h, clean_b, verified_src)
-                            if rewritten_rec and rewritten_rec.get("body"):
-                                final_h = rewritten_rec.get("headline", clean_h)
-                                final_b = rewritten_rec.get("body", clean_b)
-                            else:
-                                final_h, final_b = khmer_auditor.audit_prose_structure(clean_h, clean_b)
+                            final_h, final_b = khmer_auditor.audit_prose_structure(clean_h, clean_b)
 
                             scope = khmer_auditor.classify_news_scope(final_h, final_b, verified_src)
                             dateline_str = khmer_auditor.format_khmer_dateline(ts_raw, scope=scope, location=final_h)

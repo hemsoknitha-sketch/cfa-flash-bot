@@ -209,10 +209,17 @@ class KhmerLanguageAuditor:
         # Format into clean professional paragraphs
         clean_body = format_professional_khmer_paragraphs(clean_body)
 
-        # Ensure final ending is ៕
+        # Purge empty brackets () or (-) left over from English acronym stripping
+        clean_body = re.sub(r'\([\s\-]*\)', '', clean_body)
+        clean_body = re.sub(r'\[[\s\-]*\]', '', clean_body)
+        clean_body = re.sub(r'[ \t]{2,}', ' ', clean_body)
+
+        # Ensure final ending is clean single ៕
         clean_body = clean_body.strip()
+        clean_body = re.sub(r'[\.។\s]*[៕\.]+[.\s]*$', '', clean_body).strip()
+        clean_body = re.sub(r'([។៕])\s*([។៕])', r'\1', clean_body).strip()
         if clean_body and not clean_body.endswith('៕'):
-            clean_body = re.sub(r'[។\s]+$', '', clean_body) + '៕'
+            clean_body += ' ៕'
 
         return clean_headline, clean_body
 
