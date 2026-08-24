@@ -86,40 +86,48 @@ def super_smart_khmer_formatter(text: str) -> str:
 
 def format_professional_khmer_paragraphs(body_text: str) -> str:
     """
-    Formats Khmer news text into beautiful, professional paragraphs.
-    1. Splits body text at sentence endings ('។' and '៕') into separate paragraphs.
-    2. Separates paragraphs with double line breaks (\n\n) so each paragraph has elegant spacing.
-    3. Preserves formal honorifics and Chuon Nath dictionary spelling.
+    Formats Khmer news text into clean, professional paragraphs (2-3 sentences per paragraph).
+    Avoids breaking sentences awkwardly into single-sentence lines.
     """
     if not body_text:
         return ""
     
     clean_text = super_smart_khmer_formatter(body_text)
-    paragraphs = []
-    lines = clean_text.split("\n")
     
-    for line in lines:
-        line_str = line.strip()
-        if not line_str:
+    # Split by explicit double line breaks first
+    raw_blocks = [b.strip() for b in clean_text.split("\n\n") if b.strip()]
+    formatted_paragraphs = []
+
+    for block in raw_blocks:
+        # Split block into sentences cleanly
+        raw_sentences = re.split(r'([។៕])\s*', block)
+        sentences = []
+        for i in range(0, len(raw_sentences) - 1, 2):
+            s_text = raw_sentences[i].strip()
+            punct = raw_sentences[i+1]
+            if s_text:
+                sentences.append(f"{s_text}{punct}")
+        if len(raw_sentences) % 2 != 0 and raw_sentences[-1].strip():
+            sentences.append(raw_sentences[-1].strip())
+
+        if not sentences:
             continue
-        
-        sentences = re.split(r'([។៕])\s+(?=[\u1780-\u17ffA-Z0-9«])', line_str)
-        reconstructed = ""
-        for i in range(0, len(sentences)-1, 2):
-            sent_text = sentences[i].strip()
-            punct = sentences[i+1]
-            if sent_text:
-                reconstructed += f"{sent_text}{punct}\n\n"
-        if len(sentences) % 2 != 0 and sentences[-1].strip():
-            reconstructed += sentences[-1].strip() + "\n\n"
-            
-        if reconstructed:
-            paragraphs.append(reconstructed.strip())
-        else:
-            paragraphs.append(line_str)
-            
-    final_body = "\n\n".join(paragraphs)
+
+        # Group 2-3 sentences into a paragraph
+        curr_para = []
+        for sent in sentences:
+            curr_para.append(sent)
+            if len(curr_para) >= 2:
+                formatted_paragraphs.append(" ".join(curr_para))
+                curr_para = []
+        if curr_para:
+            formatted_paragraphs.append(" ".join(curr_para))
+
+    final_body = "\n\n".join(formatted_paragraphs)
     final_body = re.sub(r'\n{3,}', '\n\n', final_body)
+    
+    # Clean up double punctuation
+    final_body = re.sub(r'([។៕])\s*([។៕])', r'\1', final_body)
     return final_body.strip()
 
 # Alias for backward compatibility
