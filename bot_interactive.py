@@ -29,6 +29,9 @@ class SuperSmartTelegramBot:
         self.api_url = f"https://api.telegram.org/bot{self.token}"
         self.offset = 0
         self._session = None
+        self._processed_update_ids: set = set()
+        self._callback_debounce_map: Dict[str, float] = {}
+        self._shown_latest_hashes: set = set()
 
     async def get_session(self):
         """Reuses persistent HTTP TCP Keep-Alive session for < 50ms responses."""
@@ -550,8 +553,17 @@ class SuperSmartTelegramBot:
             await self.send_message(chat_id, f"⚠️ *ការស្កេនបានបញ្ចប់ ៖ {e}*")
 
     async def handle_update(self, update: dict):
-        """Processes single update payload from Telegram API cleanly with 100% crash protection."""
+        """Processes single update payload from Telegram API cleanly with 100% crash protection & deduplication lock."""
         try:
+            up_id = update.get("update_id")
+            if up_id:
+                if up_id in self._processed_update_ids:
+                    logger.debug(f"⏩ [SKIPPED DUPLICATE UPDATE] Update ID {up_id} already processed.")
+                    return
+                self._processed_update_ids.add(up_id)
+                if len(self._processed_update_ids) > 2000:
+                    self._processed_update_ids.clear()
+
             from security_sentinel import security_sentinel
             start_time = time.time()
             
@@ -1077,6 +1089,18 @@ class SuperSmartTelegramBot:
                 # Immediately acknowledge Telegram UI spinner
                 await self.answer_callback_query(cb_id)
 
+                # Callback Debounce Protection (< 1.5s window per user/chat button tap)
+                cb_key = f"{chat_id}_{data}"
+                now_ts = time.time()
+                if cb_key in self._callback_debounce_map and (now_ts - self._callback_debounce_map[cb_key] < 1.5):
+                    logger.debug(f"⏩ [DEBOUNCED CALLBACK] Chat ID {chat_id} tapped {data} within 1.5s window.")
+                    return
+                self._callback_debounce_map[cb_key] = now_ts
+                if len(self._callback_debounce_map) > 500:
+                    expired_keys = [k for k, v in self._callback_debounce_map.items() if now_ts - v > 10]
+                    for k in expired_keys:
+                        del self._callback_debounce_map[k]
+
                 PUBLIC_CALLBACKS = [
                     "cmd_latest", "cmd_defense_news", "cmd_border_archive",
                     "cmd_factcheck", "cmd_laws", "cmd_ping", "cmd_help"
@@ -1380,7 +1404,6 @@ class SuperSmartTelegramBot:
         await self.set_commands_menu()
         logger.info("⚡ [SUPER FAST BOT LISTENER ACTIVE] Listening for Telegram Menu Commands...")
         
-        processed_update_ids = set()
         session = await self.get_session()
         conflict_count = 0
         
@@ -1396,10 +1419,7 @@ class SuperSmartTelegramBot:
                                 up_id = update.get("update_id")
                                 if up_id:
                                     self.offset = up_id + 1
-                                    if up_id not in processed_update_ids:
-                                        processed_update_ids.add(up_id)
-                                        if len(processed_update_ids) > 1000:
-                                            processed_update_ids.clear()
+                                    if up_id not in self._processed_update_ids:
                                         await self.handle_update(update)
                     elif resp.status == 409:
                         conflict_count += 1

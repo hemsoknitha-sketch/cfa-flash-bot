@@ -59,15 +59,13 @@ async def process_news(news_text: str, news_id: str, source_name: str = "ប្�
         logger.info(f"⏩ [SKIPPED] News is classified as Routine/General News.")
         return
 
-    # 2. រក្សាទិន្នន័យ និង ត្រួតពិនិត្យវ៉ិចទ័រជាន់គ្នា (BAAI/bge-m3 Qdrant Deduplication)
-    is_dup, similarity, matched_id = pipeline_engine.dedup_store.is_duplicate(news_text)
+    # 2. រក្សាទិន្នន័យ និង ត្រួតពិនិត្យវ៉ិចទ័រជាន់គ្នា (BAAI/bge-m3 Qdrant Deduplication - Atomic Lock)
+    is_dup, similarity, matched_id = pipeline_engine.dedup_store.atomic_check_and_add(news_text, news_id)
     if is_dup:
         logger.warning(f"⚠️ [SKIPPED DUPLICATE] News is {similarity*100:.1f}% similar to previous item [{matched_id}].")
         return
 
-    # Instantly lock in dedup store to prevent concurrency race condition duplicate publishing
-    pipeline_engine.dedup_store.add_item(news_id, news_text)
-    logger.info(f"Step 2: Qdrant Vector Check -> Unique News Verified & Locked (Similarity: {similarity*100:.1f}% < 80%).")
+    logger.info(f"Step 2: Qdrant Vector Check -> Unique News Verified & Atomically Locked (Similarity: {similarity*100:.1f}% < 80%).")
 
     # 3. សង្ខេបអត្ថបទ (Local Qwen 2.5 3B / Gemini AI) & 4. បកប្រែខ្មែរ (Meta NLLB-200)
     from khmer_auditor import khmer_auditor

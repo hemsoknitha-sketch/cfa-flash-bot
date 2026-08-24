@@ -1,6 +1,7 @@
 import time
 import math
 import logging
+import threading
 from typing import List, Tuple, Dict
 import numpy as np
 from config import config
@@ -17,6 +18,7 @@ class VectorDeduplicator:
         self.similarity_threshold = similarity_threshold
         self.window_seconds = window_seconds
         self.enable_local_embeddings = enable_local_embeddings
+        self.lock = threading.Lock()
         
         self.qdrant_enabled = False
         self.qdrant_client = None
@@ -151,9 +153,26 @@ class VectorDeduplicator:
             logger.warning(f"Could not initialize Qdrant/SentenceTransformers: {e}. Falling back to TF-IDF Engine.")
             self.qdrant_enabled = False
 
-    def is_duplicate(self, text: str) -> Tuple[bool, float, str]:
+    def atomic_check_and_add(self, text: str, item_id: str) -> Tuple[bool, float, str]:
         """
-        Check if text is duplicate (similarity >= threshold or exact/normalized/headline SHA256 hash match).
+        Thread-safe & Async-safe Atomic Deduplication Check & Lock.
+        Atomically checks if text is duplicate and, if unique, locks and saves item_id/hash instantly.
+        Returns: (is_dup: bool, max_similarity: float, matched_id: str)
+        """
+        with self.lock:
+            is_dup, similarity, matched_id = self._is_duplicate_internal(text)
+            if not is_dup:
+                self._add_item_internal(item_id, text)
+            return is_dup, similarity, matched_id
+
+    def is_duplicate(self, text: str) -> Tuple[bool, float, str]:
+        """Check if text is duplicate under thread lock."""
+        with self.lock:
+            return self._is_duplicate_internal(text)
+
+    def _is_duplicate_internal(self, text: str) -> Tuple[bool, float, str]:
+        """
+        Internal implementation of duplicate check.
         Returns: (is_dup: bool, max_similarity: float, matched_id: str)
         """
         import hashlib
@@ -164,14 +183,14 @@ class VectorDeduplicator:
         if content_hash in self.seen_hashes:
             return True, 1.0, f"hash_{content_hash[:8]}"
 
-        # 2. Normalized full text hash match (stripping punctuation/symbols for zero repeat protection)
+        # 2. Normalized full text hash match (stripping punctuation/symbols/zero-width spaces)
         norm_text = re.sub(r'[^\w\u1780-\u17ff]+', '', text.strip().lower())
         if norm_text:
             norm_hash = hashlib.sha256(norm_text.encode('utf-8')).hexdigest()
             if norm_hash in self.seen_hashes:
                 return True, 1.0, f"norm_{norm_hash[:8]}"
 
-        # 3. Headline normalized hash match (first 80 chars for instant duplicate headline detection)
+        # 3. Headline normalized hash match (first 100 chars for instant duplicate headline detection)
         headline_norm = re.sub(r'[^\w\u1780-\u17ff]+', '', text[:100].strip().lower())
         if len(headline_norm) > 15:
             hl_hash = hashlib.sha256(headline_norm.encode('utf-8')).hexdigest()
@@ -184,6 +203,11 @@ class VectorDeduplicator:
 
     def add_item(self, item_id: str, text: str):
         """Add a processed news item to vector history and persistent content hash cache on disk."""
+        with self.lock:
+            self._add_item_internal(item_id, text)
+
+    def _add_item_internal(self, item_id: str, text: str):
+        """Internal helper to add item hashes to seen_hashes and persist to disk."""
         import hashlib
         import re
         content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()

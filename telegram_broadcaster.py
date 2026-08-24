@@ -19,15 +19,33 @@ class TelegramBroadcaster:
         self.channel_id = channel_id
         self.rate_limit_delay = 1.0 / config.TELEGRAM_MAX_MSG_PER_SEC  # ~0.04s per msg
         self.queue: asyncio.Queue = asyncio.Queue()
+        self._recently_broadcasted_hashes: Dict[str, float] = {}
 
     async def broadcast_to_vip_channel(self, message_text: str, image_path: Optional[str] = None, target_chat_id: Optional[str] = None) -> bool:
         """
         FAST-PATH: Broadcasts message and optional Banner Image directly to VIP Channel or Admin.
-        Supports both sendPhoto (with image) and sendMessage (text only).
+        Supports both sendPhoto (with image) and sendMessage (text only). Includes 1-hour deduplication cache.
         """
+        import hashlib
         dest_chat_id = target_chat_id or self.channel_id
         if dest_chat_id == "@your_vip_channel_id_or_chat_id" or not dest_chat_id:
             dest_chat_id = config.TELEGRAM_ADMIN_CHAT_ID
+
+        # 1-Hour Broadcast Deduplication Protection per Chat ID
+        msg_sig = f"{dest_chat_id}_{hashlib.sha256(message_text[:200].encode('utf-8')).hexdigest()}"
+        now = time.time()
+        if msg_sig in self._recently_broadcasted_hashes:
+            if now - self._recently_broadcasted_hashes[msg_sig] < 3600:
+                logger.warning(f"⚠️ [SKIPPED DUPLICATE BROADCAST] Identical message was already broadcasted to {dest_chat_id} within the last hour.")
+                return True
+
+        self._recently_broadcasted_hashes[msg_sig] = now
+        # Clean expired broadcast hashes (keep last 500)
+        if len(self._recently_broadcasted_hashes) > 500:
+            expired = [k for k, v in self._recently_broadcasted_hashes.items() if now - v > 3600]
+            for k in expired:
+                del self._recently_broadcasted_hashes[k]
+
         logger.info(f"[TELEGRAM FAST-PATH] Broadcasting Flash News to {dest_chat_id} (Image: {image_path})...")
 
         if self.bot_token == "MOCK_TELEGRAM_BOT_TOKEN":
