@@ -227,16 +227,22 @@ class KhmerLanguageAuditor:
         purified_body = '\n\n'.join(formatted_paragraphs)
         return clean_headline, purified_body
 
-    def format_khmer_dateline(self, timestamp: Optional[float] = None) -> str:
+    def format_khmer_dateline(self, timestamp: Optional[float] = None, scope: str = "NATIONAL", location: str = "") -> str:
         """
-        Generates formal Khmer human-readable calendar dateline.
-        Example: 📅 កាលបរិច្ឆេទ ៖ ថ្ងៃចន្ទ ទី២៤ ខែសីហា ឆ្នាំ២០២៦ | ម៉ោង ១០:៤៣ ព្រឹក
+        Generates formal Khmer human-readable calendar dateline with Super Smart Timezone support.
+        Cambodian National News -> Phnom Penh Time (GMT+7).
+        International News -> Event City Local Time + Phnom Penh Time (GMT+7).
         """
+        import datetime
+        from datetime import timezone, timedelta
+
         if timestamp is None or timestamp <= 0:
             timestamp = time.time()
 
-        t_struct = time.localtime(timestamp)
-        
+        # UTC+7 Phnom Penh Time Zone
+        phnom_penh_tz = timezone(timedelta(hours=7))
+        dt_pp = datetime.datetime.fromtimestamp(timestamp, tz=phnom_penh_tz)
+
         khmer_digits = {'0': '០', '1': '១', '2': '២', '3': '៣', '4': '៤', '5': '៥', '6': '៦', '7': '៧', '8': '៨', '9': '៩'}
         def to_khmer_num(val: int, zfill: int = 0) -> str:
             s = str(val).zfill(zfill)
@@ -245,13 +251,13 @@ class KhmerLanguageAuditor:
         days = ["ចន្ទ", "អង្គារ", "ពុធ", "ព្រហស្បតិ៍", "សុក្រ", "សៅរ៍", "អាទិត្យ"]
         months = ["មករា", "កុម្ភៈ", "មីនា", "មេសា", "ឧសភា", "មិថុនា", "កក្កដា", "សីហា", "កញ្ញា", "តុលា", "វិច្ឆិកា", "ធ្នូ"]
 
-        day_name = days[t_struct.tm_wday]
-        day_num = to_khmer_num(t_struct.tm_mday)
-        month_name = months[t_struct.tm_mon - 1]
-        year_num = to_khmer_num(t_struct.tm_year)
+        day_name = days[dt_pp.weekday()]
+        day_num = to_khmer_num(dt_pp.day)
+        month_name = months[dt_pp.month - 1]
+        year_num = to_khmer_num(dt_pp.year)
 
-        hour = t_struct.tm_hour
-        minute_str = to_khmer_num(t_struct.tm_min, zfill=2)
+        hour = dt_pp.hour
+        minute_str = to_khmer_num(dt_pp.minute, zfill=2)
         if 5 <= hour < 12:
             ampm = "ព្រឹក"
         elif hour == 12:
@@ -266,7 +272,42 @@ class KhmerLanguageAuditor:
         hour12 = hour if 1 <= hour <= 12 else (hour - 12 if hour > 12 else 12)
         hour_str = to_khmer_num(hour12)
 
-        return f"📅 កាលបរិច្ឆេទ ៖ ថ្ងៃ{day_name} ទី{day_num} ខែ{month_name} ឆ្នាំ{year_num} | ម៉ោង {hour_str}:{minute_str} {ampm}"
+        pp_time_str = f"ម៉ោង {hour_str}:{minute_str} {ampm} (ម៉ោងនៅភ្នំពេញ GMT+7)"
+
+        if scope == "INTERNATIONAL":
+            city_tz_offset = 7
+            city_name = ""
+            loc_lower = (location + " ").lower()
+            if any(k in loc_lower for k in ["មូស្គូ", "moscow", "រុស្ស៊ី"]):
+                city_tz_offset = 3
+                city_name = "ទីក្រុងមូស្គូ GMT+3"
+            elif any(k in loc_lower for k in ["វ៉ាស៊ីនតោន", "washington", "អាមេរិក"]):
+                city_tz_offset = -4
+                city_name = "ទីក្រុងវ៉ាស៊ីនតោន GMT-4"
+            elif any(k in loc_lower for k in ["ឡុងដ៍", "london"]):
+                city_tz_offset = 1
+                city_name = "ទីក្រុងឡុងដ៍ GMT+1"
+            elif any(k in loc_lower for k in ["ប៉ារីស", "paris"]):
+                city_tz_offset = 2
+                city_name = "ទីក្រុងប៉ារីស GMT+2"
+            elif any(k in loc_lower for k in ["បេកាំង", "beijing", "ចិន"]):
+                city_tz_offset = 8
+                city_name = "ទីក្រុងប៉េកាំង GMT+8"
+            elif any(k in loc_lower for k in ["តូក្យូ", "tokyo"]):
+                city_tz_offset = 9
+                city_name = "ទីក្រុងតូក្យូ GMT+9"
+
+            if city_name:
+                int_tz = timezone(timedelta(hours=city_tz_offset))
+                dt_int = datetime.datetime.fromtimestamp(timestamp, tz=int_tz)
+                h_int = dt_int.hour
+                m_int_str = to_khmer_num(dt_int.minute, zfill=2)
+                ampm_int = "ព្រឹក" if 5 <= h_int < 12 else ("ថ្ងៃត្រង់" if h_int == 12 else ("រសៀល" if 13 <= h_int < 17 else ("ល្ងាច" if 17 <= h_int < 21 else "យប់")))
+                h12_int = h_int if 1 <= h_int <= 12 else (h_int - 12 if h_int > 12 else 12)
+                int_time_str = f"ម៉ោង {to_khmer_num(h12_int)}:{m_int_str} {ampm_int} ({city_name})"
+                return f"📅 កាលបរិច្ឆេទ ៖ ថ្ងៃ{day_name} ទី{day_num} ខែ{month_name} ឆ្នាំ{year_num} | {int_time_str} | {pp_time_str}"
+
+        return f"📅 កាលបរិច្ឆេទ ៖ ថ្ងៃ{day_name} ទី{day_num} ខែ{month_name} ឆ្នាំ{year_num} | {pp_time_str}"
 
     def resolve_verified_source_name(self, source_name: str, url: Optional[str] = None) -> str:
         """

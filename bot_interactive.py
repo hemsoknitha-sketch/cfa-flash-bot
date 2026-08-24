@@ -842,27 +842,34 @@ class SuperSmartTelegramBot:
                     from defense_intelligence_engine import defense_engine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(5)
-                    if latest_items:
-                        rec = latest_items[0]
-                        clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
-                        clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
-                        dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"))
-                        verified_src = khmer_auditor.resolve_verified_source_name(rec.get("source_name", ""))
-                        
+                    latest_items = defense_engine.get_latest_defense_news(10)
+                    valid_rec = None
+                    for rec in latest_items:
+                        h = rec.get("title", "")
+                        b = rec.get("content", "")
+                        src = rec.get("source_name", "")
+                        is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                        if is_valid and len(clean_b) > 80:
+                            scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                            dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
+                            valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                            break
+                    
+                    if valid_rec:
+                        th, tb, ts, td = valid_rec
                         latest_text = (
-                            f"*{clean_title}*\n\n"
-                            f"{dateline_str}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ {verified_src}*\n\n"
-                            f"{clean_body}"
+                            f"*{th}*\n\n"
+                            f"{td}\n"
+                            f"🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n"
+                            f"{tb}"
                         )
                     else:
-                        dateline_str = khmer_auditor.format_khmer_dateline()
+                        dateline_str = khmer_auditor.format_khmer_dateline(scope="NATIONAL")
                         latest_text = (
                             f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
                             f"{dateline_str}\n"
                             f"🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\n"
-                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៤៦ ស្ថាប័ន ២៤/៧។"
+                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
                         )
                     await self.send_message(chat_id, latest_text)
 
@@ -1108,27 +1115,34 @@ class SuperSmartTelegramBot:
                     from defense_intelligence_engine import defense_engine
                     from khmer_auditor import khmer_auditor
                     
-                    latest_items = defense_engine.get_latest_defense_news(5)
-                    if latest_items:
-                        rec = latest_items[0]
-                        clean_title = khmer_auditor.audit_headline_purity(rec.get("title", ""))
-                        clean_body = khmer_auditor.sanitize_khmer_spelling_and_punctuation(rec.get("content", ""))
-                        dateline_str = khmer_auditor.format_khmer_dateline()
-                        verified_src = khmer_auditor.resolve_verified_source_name(rec.get("source_name", ""))
-                        
+                    latest_items = defense_engine.get_latest_defense_news(10)
+                    valid_rec = None
+                    for rec in latest_items:
+                        h = rec.get("title", "")
+                        b = rec.get("content", "")
+                        src = rec.get("source_name", "")
+                        is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(h, b, src)
+                        if is_valid and len(clean_b) > 80:
+                            scope = khmer_auditor.classify_news_scope(clean_h, clean_b, verified_src)
+                            dateline_str = khmer_auditor.format_khmer_dateline(rec.get("timestamp"), scope=scope, location=clean_h)
+                            valid_rec = (clean_h, clean_b, verified_src, dateline_str)
+                            break
+                    
+                    if valid_rec:
+                        th, tb, ts, td = valid_rec
                         latest_text = (
-                            f"*{clean_title}*\n\n"
-                            f"{dateline_str}\n"
-                            f"🏛️ *ប្រភពដកស្រង់ ៖ {verified_src}*\n\n"
-                            f"{clean_body}"
+                            f"*{th}*\n\n"
+                            f"{td}\n"
+                            f"🏛️ *ប្រភពដកស្រង់ ៖ {ts}*\n\n"
+                            f"{tb}"
                         )
                     else:
-                        dateline_str = khmer_auditor.format_khmer_dateline()
+                        dateline_str = khmer_auditor.format_khmer_dateline(scope="NATIONAL")
                         latest_text = (
                             f"📰 *ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
                             f"{dateline_str}\n"
                             f"🏛️ *ប្រភពដកស្រង់ ៖ ក្រសួងព័ត៌មាន និងស្ថាប័នរដ្ឋផ្លូវការ*\n\n"
-                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៤៦ ស្ថាប័ន ២៤/៧។"
+                            f"ប្រព័ន្ធស្កេន AI Super Brain កំពុងបន្តស្កេនប្រភពព័ត៌មានផ្លូវការទាំង ៧៩ ស្ថាប័ន ២៤/៧។"
                         )
                     await self.send_message(chat_id, latest_text)
 
