@@ -41,15 +41,17 @@ def acquire_single_instance_lock():
         try:
             import fcntl
             lock_file_path = "/tmp/cfa_flash_bot_daemon.lock"
-            fp = open(lock_file_path, "w")
-            fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fp = open(lock_file_path, "a+")
+            fcntl.flock(fp.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fp.seek(0)
+            fp.truncate(0)
             fp.write(str(os.getpid()))
             fp.flush()
             _global_lock_fp = fp
             logger.info(f"🔒 [SINGLE INSTANCE LOCK ACQUIRED - LINUX] PID: {os.getpid()}")
             return _global_lock_fp
-        except (ImportError, IOError, OSError):
-            logger.error("🚨 [SINGLE INSTANCE LOCK ERROR] Another instance of CFA Flash Feed is already running on this server! Terminating duplicate instance to prevent double-posting.")
+        except (ImportError, IOError, OSError) as lock_err:
+            logger.error(f"🚨 [SINGLE INSTANCE LOCK ERROR] Another instance of CFA Flash Feed is already running on this server! ({lock_err}). Terminating duplicate instance to prevent double-posting.")
             sys.exit(0)
 
 def start_interactive_bot_thread():
