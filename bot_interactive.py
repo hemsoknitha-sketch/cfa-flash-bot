@@ -1421,6 +1421,8 @@ class SuperSmartTelegramBot:
                 await asyncio.sleep(2)
 
 if __name__ == "__main__":
+    from main_loop import acquire_single_instance_lock
+    acquire_single_instance_lock()
     bot = SuperSmartTelegramBot()
     try:
         asyncio.run(bot.poll_updates_loop())

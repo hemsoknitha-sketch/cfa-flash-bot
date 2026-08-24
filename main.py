@@ -336,6 +336,8 @@ async def process_batch_news():
         await asyncio.sleep(3)  # Pacing delay to prevent Gemini 429 Rate Limits
 
 async def main():
+    from main_loop import acquire_single_instance_lock
+    acquire_single_instance_lock()
     logger.info("⚡ [STARTING SUPER BRAIN AI SYSTEM] Initializing 24/7 Dual-Thread Orchestrator...")
     
     # 1. Spawn Interactive Telegram Bot Listener in Background Thread

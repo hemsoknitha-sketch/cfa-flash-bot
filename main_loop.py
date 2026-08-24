@@ -13,20 +13,42 @@ logging.basicConfig(
 )
 logger = logging.getLogger("24/7_Daemon")
 
+_global_lock_fp = None
+
 def acquire_single_instance_lock():
-    """Enforces strict single-instance execution across the entire VPS server."""
-    try:
-        import fcntl
-        lock_file_path = "/tmp/cfa_flash_bot_daemon.lock"
-        fp = open(lock_file_path, "w")
-        fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
-        fp.write(str(os.getpid()))
-        fp.flush()
-        logger.info(f"🔒 [SINGLE INSTANCE LOCK ACQUIRED] PID: {os.getpid()}")
-        return fp
-    except (ImportError, IOError, OSError):
-        # On Windows or if lock is already held by another process
-        if os.name != 'nt':
+    """Enforces strict single-instance execution across both Linux (fcntl) and Windows (msvcrt)."""
+    global _global_lock_fp
+    if _global_lock_fp is not None:
+        return _global_lock_fp
+
+    if os.name == 'nt':
+        try:
+            import msvcrt
+            lock_file_path = os.path.join(os.environ.get("TEMP", "C:\\Temp"), "cfa_flash_bot_daemon.lock")
+            fp = open(lock_file_path, "a+")
+            fp.seek(0)
+            msvcrt.locking(fp.fileno(), msvcrt.LK_NBLCK, 1)
+            fp.truncate(0)
+            fp.write(str(os.getpid()))
+            fp.flush()
+            _global_lock_fp = fp
+            logger.info(f"🔒 [SINGLE INSTANCE LOCK ACQUIRED - WINDOWS] PID: {os.getpid()}")
+            return _global_lock_fp
+        except (IOError, OSError):
+            logger.error("🚨 [SINGLE INSTANCE LOCK ERROR] Another instance of CFA Flash Feed is already running on this machine! Terminating duplicate instance to prevent double-posting.")
+            sys.exit(0)
+    else:
+        try:
+            import fcntl
+            lock_file_path = "/tmp/cfa_flash_bot_daemon.lock"
+            fp = open(lock_file_path, "w")
+            fcntl.flock(fp, fcntl.LOCK_EX | fcntl.LOCK_NB)
+            fp.write(str(os.getpid()))
+            fp.flush()
+            _global_lock_fp = fp
+            logger.info(f"🔒 [SINGLE INSTANCE LOCK ACQUIRED - LINUX] PID: {os.getpid()}")
+            return _global_lock_fp
+        except (ImportError, IOError, OSError):
             logger.error("🚨 [SINGLE INSTANCE LOCK ERROR] Another instance of CFA Flash Feed is already running on this server! Terminating duplicate instance to prevent double-posting.")
             sys.exit(0)
 
