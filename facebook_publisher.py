@@ -21,7 +21,7 @@ class FacebookPublisher:
         self.access_token = access_token
         self.graph_url = f"https://graph.facebook.com/v19.0/{self.page_id}"
         self.last_post_time = 0
-        self.min_post_interval = 1800  # 30 mins safety window
+        self.min_post_interval = 180  # 3 mins fast pacing safety window
         self.queue = asyncio.Queue()
         self.worker_task = None
 
