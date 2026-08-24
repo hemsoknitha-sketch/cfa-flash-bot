@@ -172,6 +172,8 @@ async def process_news(news_text: str, news_id: str, source_name: str = "ប្�
         if tg_success or fb_success:
             # Index in Qdrant Vector DB
             pipeline_engine.dedup_store.add_item(news_id, news_text)
+            from hourly_digest_engine import hourly_digest_engine
+            hourly_digest_engine.record_publication()
 
             # Auto-Archive into Defense & Diplomatic Intelligence Engine
             try:
@@ -349,6 +351,8 @@ async def main():
     while True:
         try:
             await process_batch_news()
+            from hourly_digest_engine import hourly_digest_engine
+            await hourly_digest_engine.check_and_trigger_hourly_digest()
         except Exception as e:
             logger.error(f"Error in 24/7 news cycle: {e}")
         

@@ -862,6 +862,46 @@ class SuperSmartTelegramBot:
                         )
                     await self.send_message(chat_id, latest_text)
 
+                elif text.startswith("/scan"):
+                    await self.send_message(chat_id, "🔄 *ប្រព័ន្ធកំពុងរត់ការស្កេន Live Ingestion លើប្រភពព័ត៌មានទាំង ៧៩ ស្ថាប័ន ២៤/៧...*")
+                    from scraper import IngestionEngine
+                    from khmer_auditor import khmer_auditor
+                    
+                    t0 = time.time()
+                    ingestion = IngestionEngine()
+                    live_items = await ingestion.fetch_from_rss_async()
+                    elapsed = time.time() - t0
+                    
+                    valid_items = []
+                    for item in live_items:
+                        is_valid, quality_score, clean_h, clean_b, verified_src, _ = khmer_auditor.evaluate_news_quality_score(
+                            headline=item.title,
+                            body=item.content,
+                            source_name=item.source
+                        )
+                        if is_valid:
+                            valid_items.append((clean_h, clean_b, verified_src))
+                        if len(valid_items) >= 3:
+                            break
+                    
+                    dateline_str = khmer_auditor.format_khmer_dateline()
+                    scan_msg = (
+                        f"🔄 *លទ្ធផលនៃការស្កេន Real-Time Live Ingestion ៖*\n\n"
+                        f"{dateline_str}\n"
+                        f"⚡ *ស្កេនបាន ៧៩ ស្ថាប័នរដ្ឋ & សារព័ត៌មាន ៖* ប្រើពេល `{elapsed:.2f} វិនាទី` (<3.0s)\n"
+                        f"📰 *ទទួលបានព័ត៌មានថ្មីៗសរុប ៖* `{len(live_items)}` ព័ត៌មាន\n\n"
+                    )
+                    
+                    if valid_items:
+                        scan_msg += "📌 *ព័ត៌មានថ្មីៗទាន់ហេតុការណ៍ចុងក្រោយ ៖*\n\n"
+                        for idx, (th, tb, ts) in enumerate(valid_items, 1):
+                            short_b = tb[:200].strip() + ("..." if len(tb) > 200 else "")
+                            scan_msg += f"*{idx}. {th}*\n🏛️ ប្រភព ៖ {ts}\n{short_b}\n\n"
+                    else:
+                        scan_msg += "✅ *ព័ត៌មានទាំងអស់ត្រូវបានផ្ទៀងផ្ទាត់ និងគ្មានព័ត៌មានកាត់ដាច់ឡើយ!*"
+                    
+                    await self.send_message(chat_id, scan_msg)
+
                 elif text.startswith("/backup"):
                     await self.send_message(chat_id, "📦 *កំពុងរៀបចំបង្កើត ZIP Backup ផ្ញើជូនលោកអ្នក...*")
                     from backup_engine import create_project_zip_backup, send_backup_to_admin

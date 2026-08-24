@@ -252,7 +252,17 @@ class KhmerLanguageAuditor:
 
         hour = t_struct.tm_hour
         minute_str = to_khmer_num(t_struct.tm_min, zfill=2)
-        ampm = "ព្រឹក" if hour < 12 else "ល្ងាច"
+        if 5 <= hour < 12:
+            ampm = "ព្រឹក"
+        elif hour == 12:
+            ampm = "ថ្ងៃត្រង់"
+        elif 13 <= hour < 17:
+            ampm = "រសៀល"
+        elif 17 <= hour < 21:
+            ampm = "ល្ងាច"
+        else:
+            ampm = "យប់"
+
         hour12 = hour if 1 <= hour <= 12 else (hour - 12 if hour > 12 else 12)
         hour_str = to_khmer_num(hour12)
 

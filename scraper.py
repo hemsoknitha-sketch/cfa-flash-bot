@@ -57,8 +57,8 @@ class IngestionEngine:
         start_t = time.time()
         tasks = []
         for feed_info in self.national_feeds:
-            # Wrap each feed fetch in asyncio.to_thread with 5.0s timeout
-            task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=5.0)
+            # Wrap each feed fetch in asyncio.to_thread with 3.0s timeout guard for sub-3s response
+            task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=3.0)
             tasks.append(task)
         
         results = await asyncio.gather(*tasks, return_exceptions=True)
