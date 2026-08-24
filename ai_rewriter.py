@@ -195,6 +195,26 @@ class SuperBrainAIRewriter:
     def process_news(self, raw_id: str, title: str, content: str, source: str, source_tier: int = 1, is_unverified: bool = False) -> ProcessedNewsArticle:
         return self.rewrite_news(raw_id, title, content, source, source_tier, is_unverified)
 
+    def rewrite_article(self, headline: str, body: str, source: str = "ក្រសួងព័ត៌មានកម្ពុជា") -> dict:
+        """
+        High-level helper for bot commands & menus to rewrite raw article text into 3-4 professional Khmer paragraphs.
+        Returns dict with keys: {'headline': str, 'body': str}
+        """
+        try:
+            processed = self.rewrite_news(raw_id="req-latest", title=headline, content=body, source=source)
+            if processed:
+                return {
+                    "headline": processed.khmer_headline,
+                    "body": processed.khmer_body
+                }
+        except Exception as e:
+            logger.error(f"Error in rewrite_article: {e}")
+        
+        # Rule-based fallback
+        from khmer_auditor import khmer_auditor
+        clean_h, clean_b = khmer_auditor.audit_prose_structure(headline, body)
+        return {"headline": clean_h, "body": clean_b}
+
     def _clean_and_parse_json(self, raw_text: str) -> dict:
         text = raw_text.strip()
         if text.startswith("```"):
