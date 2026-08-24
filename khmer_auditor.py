@@ -16,7 +16,7 @@ class KhmerLanguageAuditor:
     3. Khmer Typo Auditor: Fixes Khmer spelling errors (e.g. 'នប៉ុស្តិ៍' -> 'ប៉ុស្តិ៍').
     4. Headline Purity Audit: Deduplicates repetitive titles (e.g. 'A - A' -> 'A') & strips raw prefixes.
     5. HTML & Entity Purifier: Purges 100% of leaked HTML tags (<p>, <div>) & unescapes HTML entities (&nbsp;).
-    6. Prose & Punctuation Audit: Enforces clean 3 Khmer paragraphs (វគ្គ/ឃ្លា), inline '។', and final closing '<ctrl42>'.
+    6. Prose & Punctuation Audit: Enforces clean 3 Khmer paragraphs (វគ្គ/ឃ្លា), inline '។', and final closing '៕'.
     7. Source Attribution Audit: Enforces clean official source names without internal AI technical terms.
     8. Honorific Spacing Audit: Ensures formal spaces between titles (ឯកឧត្តម, សម្តេច, លោកជំទាវ) and names.
     """
@@ -196,7 +196,7 @@ class KhmerLanguageAuditor:
         # Purge RSS leftover read more strings & duplicate full stops
         clean_body = re.sub(r'(?:អានបន្ដ|អានបន្ថែម|Read More|អានបន្ត)\s*[\.។\s]*', '', clean_body, flags=re.IGNORECASE)
         clean_body = re.sub(r'[\.…\s]{3,}', '', clean_body)
-        clean_body = re.sub(r'([។<ctrl42>])\s*([។<ctrl42>])', r'\1', clean_body)
+        clean_body = re.sub(r'([។៕])\s*([។៕])', r'\1', clean_body)
 
         # De-duplicate location prefixes
         clean_body = re.sub(r'^(?:រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)\s*(រាជធានីភ្នំពេញ៖|ខេត្ត[^\s៖]+៖|ក្រុង[^\s៖]+៖|ទីក្រុង[^\s៖]+៖|ប្រទេស[^\s៖]+៖)', r'\1', clean_body)
@@ -205,10 +205,10 @@ class KhmerLanguageAuditor:
         # Format into clean professional paragraphs
         clean_body = format_professional_khmer_paragraphs(clean_body)
 
-        # Ensure final ending is <ctrl42>
+        # Ensure final ending is ៕
         clean_body = clean_body.strip()
-        if clean_body and not clean_body.endswith('<ctrl42>'):
-            clean_body = re.sub(r'[។\s]+$', '', clean_body) + '<ctrl42>'
+        if clean_body and not clean_body.endswith('៕'):
+            clean_body = re.sub(r'[។\s]+$', '', clean_body) + '៕'
 
         return clean_headline, clean_body
 
