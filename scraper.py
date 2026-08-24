@@ -86,20 +86,5 @@ class IngestionEngine:
             return news_items
 
     def generate_mock_breaking_news(self) -> List[RawNewsItem]:
-        """Generate Cambodia-specific breaking news items."""
-        return [
-            RawNewsItem(
-                title="Cambodia Strengthens International Joint Operations to Crackdown Online Scams and Enforce Rule of Law",
-                content="Cambodian law enforcement agencies in partnership with international police forces launch a major operation suppressing online scam networks, safeguarding human rights, social justice, and national security.",
-                source="Phnom Penh National News Terminal",
-                source_tier=1,
-                is_unverified=False
-            ),
-            RawNewsItem(
-                title="Cambodia Foreign Ministry Reaffirms Multi-Party Democracy and International Law Principles",
-                content="The Ministry of Foreign Affairs of Cambodia issues an official diplomatic statement affirming commitment to liberal multi-party democracy, rule of law, and peaceful international cooperation.",
-                source="Cambodian Foreign Desk",
-                source_tier=1,
-                is_unverified=False
-            )
-        ]
+        """Returns empty list. No mock breaking news generated."""
+        return []

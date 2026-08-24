@@ -31,11 +31,11 @@ class DefenseIntelligenceEngine:
                 with open(self.archive_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
                     if isinstance(data, list):
+                        bad_kw = ["កម្ពុជាពង្រឹង", "ឆបោក", "scam", "Scam", "បទល្មើសអនឡាញ", "អានបន្ដ"]
                         existing_data = [
                             d for d in data 
-                            if "បទល្មើសអនឡាញឆបោក" not in d.get("title", "") 
-                            and "Online Scam" not in d.get("title", "")
-                            and "អានបន្ដ" not in d.get("content", "")
+                            if not any(k in d.get("title", "") for k in bad_kw)
+                            and not any(k in d.get("content", "") for k in bad_kw)
                         ]
             except Exception as e:
                 logger.error(f"Error loading defense archives: {e}")
