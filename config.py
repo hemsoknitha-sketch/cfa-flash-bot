@@ -37,7 +37,7 @@ class Config:
     USE_LOCAL_OLLAMA: bool = os.getenv("USE_LOCAL_OLLAMA", "False").lower() in ("true", "1", "t")
 
     # Hugging Face Fine-Tuned Model settings (hemsinath/cfa-flash-bot)
-    HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", "")
+    HF_API_TOKEN: str = os.getenv("HF_API_TOKEN", os.getenv("HF_ACCESS_TOKEN", ""))
     HF_MODEL_ID: str = os.getenv("HF_MODEL_ID", "hemsinath/cfa-flash-bot")
 
     # Feature Flags

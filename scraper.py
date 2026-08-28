@@ -31,6 +31,11 @@ class IngestionEngine:
         source_name = feed_info["name"]
         tier = feed_info.get("tier", 1)
         items = []
+        
+        # Skip raw Facebook HTML page URLs in RSS feedparser
+        if "facebook.com" in url.lower() and not url.lower().endswith(".xml") and "rss" not in url.lower():
+            return []
+
         try:
             logger.info(f"⚡ Scanning Feed [{source_name}]: {url}")
             feed = feedparser.parse(url, request_headers={"User-Agent": "CFA-Flash-Bot/4.2"})
@@ -52,13 +57,13 @@ class IngestionEngine:
         return items
 
     async def fetch_from_rss_async(self) -> List[RawNewsItem]:
-        """Fetch all 16 national & global institutional feeds concurrently in parallel (<3s total)."""
+        """Fetch all national & global institutional feeds concurrently in parallel (<10s total)."""
         import asyncio
         start_t = time.time()
         tasks = []
         for feed_info in self.national_feeds:
-            # Wrap each feed fetch in asyncio.to_thread with 3.0s timeout guard for sub-3s response
-            task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=3.0)
+            # Wrap each feed fetch in asyncio.to_thread with 10.0s timeout guard
+            task = asyncio.wait_for(asyncio.to_thread(self._fetch_single_feed, feed_info), timeout=10.0)
             tasks.append(task)
         
         results = await asyncio.gather(*tasks, return_exceptions=True)

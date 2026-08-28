@@ -54,26 +54,58 @@ class BannerEngine:
         clean = " ".join(clean.replace("\r", " ").replace("\n", " ").split())
         return clean.strip()
 
-    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", use_playwright: bool = True) -> str:
+    async def fetch_ai_cartoon_drawing_b64(self, visual_prompt: str, aspect_ratio: str = "1:1") -> str:
         """
-        Generates Ultra-Crisp 4K HD Banner Image (1200x630 JPEG, Quality=100) with 100% Center Alignment,
-        Dynamic Large Fonts, AI Verification Watermark Badges, and Zero Margin Overflow.
+        Fetches a 4K Digital Drawing Cartoon / Editorial Art image Base64 via Serverless AI API (0% Server RAM usage).
+        Supports aspect ratios: '1:1' (1200x1200px) or '16:9' (1200x630px).
+        Returns Base64 string if successful, or empty string on timeout/fallback.
         """
-        logger.info(f"🎨 [BANNER ENGINE] Generating Banner for: '{headline[:60]}...'")
+        if not visual_prompt:
+            return ""
+        try:
+            import urllib.parse
+            import aiohttp
+            width, height = (1200, 1200) if aspect_ratio == "1:1" else (1200, 630)
+            clean_p = urllib.parse.quote(f"digital drawing cartoon editorial art style, {visual_prompt}, 4k resolution, cinematic illustration")
+            api_url = f"https://image.pollinations.ai/prompt/{clean_p}?width={width}&height={height}&seed=42&nologo=true"
+            logger.info(f"🎨 [AI CARTOON ENGINE] Requesting Serverless Digital Cartoon Art ({aspect_ratio}) for: '{visual_prompt[:40]}...'")
+            async with aiohttp.ClientSession() as session:
+                async with session.get(api_url, timeout=aiohttp.ClientTimeout(total=3.5)) as resp:
+                    if resp.status == 200:
+                        img_bytes = await resp.read()
+                        if len(img_bytes) > 5000:
+                            b64_data = base64.b64encode(img_bytes).decode("utf-8")
+                            logger.info("✨ [AI CARTOON ENGINE READY] Digital Drawing Cartoon background retrieved successfully!")
+                            return b64_data
+        except Exception as e:
+            logger.warning(f"🎨 [AI CARTOON ENGINE NOTICE] Serverless Cartoon Generator fallback ({e}). Using standard gradient background.")
+        return ""
+
+    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", use_playwright: bool = True, visual_prompt: str = "", aspect_ratio: str = "1:1") -> str:
+        """
+        Generates Ultra-Crisp 4K HD Banner Image (1200x1200px for 1:1 or 1200x630px for 16:9, Quality=100) with AI Digital Cartoon Backdrop,
+        100% Center Alignment, Dynamic Large Fonts, AI Verification Watermark Badges, and Zero Margin Overflow.
+        """
+        logger.info(f"🎨 [BANNER ENGINE] Generating 4K Banner (AR: {aspect_ratio}) for: '{headline[:60]}...'")
         image_filename = f"banner_{abs(hash(headline)) % 10000}.jpg"
         clean_headline = self._sanitize_headline(headline)
+
+        # Attempt to fetch AI Digital Drawing Cartoon background
+        if not visual_prompt:
+            visual_prompt = clean_headline[:80]
+        cartoon_b64 = await self.fetch_ai_cartoon_drawing_b64(visual_prompt, aspect_ratio=aspect_ratio)
 
         # Method 1: High-Definition Playwright OpenType Khmer Engine (Primary Default when available)
         if use_playwright and async_playwright is not None:
             try:
-                return await self._generate_banner_playwright(clean_headline, category_title, badge_label, badge_color, image_filename)
+                return await self._generate_banner_playwright(clean_headline, category_title, badge_label, badge_color, image_filename, cartoon_b64=cartoon_b64, aspect_ratio=aspect_ratio)
             except Exception as e:
                 logger.warning(f"Playwright HTML rendering fallback ({e}). Switching to PIL fallback engine.")
 
         # Method 2: Synchronized PIL/Pillow Fallback Engine with Embedded Khmer TTF Fonts
         return await asyncio.to_thread(self._generate_banner_pil, clean_headline, category_title, image_filename)
 
-    async def _generate_banner_playwright(self, clean_headline: str, category_title: str, badge_label: str, badge_color: str, image_filename: str) -> str:
+    async def _generate_banner_playwright(self, clean_headline: str, category_title: str, badge_label: str, badge_color: str, image_filename: str, cartoon_b64: str = "", aspect_ratio: str = "1:1") -> str:
         logo_b64 = self._get_logo_b64()
         battambang_b64 = self._get_font_b64("Battambang-Regular.ttf")
         moul_b64 = self._get_font_b64("Moul-Regular.ttf")
@@ -127,6 +159,10 @@ class BannerEngine:
             line_height = 1.3
             line_clamp = 4
 
+        bg_style = f"linear-gradient(180deg, rgba(11, 19, 43, 0.65) 0%, rgba(15, 23, 42, 0.92) 100%), url('data:image/jpeg;base64,{cartoon_b64}') center/cover no-repeat" if cartoon_b64 else "linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #3a506b 100%)"
+
+        canvas_height = 1200 if aspect_ratio == "1:1" else 630
+
         html_content = f"""<!DOCTYPE html>
 <html>
 <head>
@@ -137,8 +173,8 @@ body {{
     margin: 0;
     padding: 0;
     width: 1200px;
-    height: 630px;
-    background: linear-gradient(135deg, #0b132b 0%, #1c2541 60%, #3a506b 100%);
+    height: {canvas_height}px;
+    background: {bg_style};
     font-family: 'Battambang', 'Khmer OS Battambang', sans-serif;
     color: #f8fafc;
     box-sizing: border-box;
@@ -261,7 +297,7 @@ body {{
 
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True, args=['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'])
-            page = await browser.new_page(viewport={"width": 1200, "height": 630})
+            page = await browser.new_page(viewport={"width": 1200, "height": canvas_height})
             await page.set_content(html_content, wait_until="domcontentloaded")
             await page.screenshot(path=image_filename, type="jpeg", quality=100)
             await browser.close()

@@ -23,9 +23,8 @@ class HuggingFacePolymathAI:
         token: Optional[str] = None
     ):
         self.model_id = os.getenv("HF_MODEL_ID", model_id)
-        self.token = token or os.getenv("HF_API_TOKEN", "")
+        self.token = token or os.getenv("HF_API_TOKEN", "") or os.getenv("HF_ACCESS_TOKEN", "")
         self.urls = [
-            f"https://api-inference.huggingface.co/models/{self.model_id}",
             f"https://router.huggingface.co/hf-inference/models/{self.model_id}",
             f"https://router.huggingface.co/models/{self.model_id}"
         ]
