@@ -330,18 +330,19 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
                 pass
 
 async def process_batch_news():
-    """Fetch and process incoming news items from RSS feeds in batch."""
+    """Fetch and process incoming news items from RSS feeds in controlled batches."""
     logger.info("📡 [RSS INGESTION] Scanning live news feeds...")
     news_items = await pipeline_engine.ingestion.fetch_from_rss_async()
     if not news_items:
         logger.info("No new live RSS news items found in this 60s cycle. Waiting for next scan...")
         return
 
-    logger.info(f"Retrieved {len(news_items)} live news items to process.")
-    for item in news_items:
+    logger.info(f"Retrieved {len(news_items)} live news items. Processing top 5 newest items...")
+    # Process top 5 newest items per 60s cycle to preserve API quota and prevent Telegram flooding
+    for item in news_items[:5]:
         full_text = f"{item.title} - {item.content}"
         await process_news(news_text=full_text, news_id=item.id, source_name=item.source, url=item.url, timestamp=item.timestamp)
-        await asyncio.sleep(3)  # Pacing delay to prevent Gemini 429 Rate Limits
+        await asyncio.sleep(5)  # 5s Pacing delay to guarantee zero 429 rate limit errors
 
 async def main():
     from main_loop import acquire_single_instance_lock

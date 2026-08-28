@@ -80,8 +80,8 @@ class KhmerLanguageAuditor:
             (r'\bnày\b', 'នេះ'),
         ]
 
-    def audit_news_freshness(self, timestamp: Optional[float] = None, max_hours: float = 24.0) -> bool:
-        """Validates news freshness. Rejects any news item published more than 24 hours ago."""
+    def audit_news_freshness(self, timestamp: Optional[float] = None, max_hours: float = 4.0) -> bool:
+        """Validates news freshness. Rejects any news item published more than 4 hours ago."""
         if timestamp is None or timestamp <= 0:
             return True
         
@@ -422,7 +422,7 @@ class KhmerLanguageAuditor:
         source_name: str = "ប្រភពព័ត៌មានផ្លូវការ",
         url: Optional[str] = None,
         timestamp: Optional[float] = None,
-        max_freshness_hours: float = 24.0
+        max_freshness_hours: float = 4.0
     ) -> Tuple[bool, float, str, str, str, str]:
         """
         Master Zero-Error Quality Gatekeeper V8.0 GOLD STANDARD:
