@@ -1,5 +1,5 @@
 """
-Khmer AI Voice Bulletin Engine V7.0 (gTTS / Google Speech Fallback Engine).
+Khmer AI Voice Bulletin Engine V8.0 GOLD STANDARD (gTTS / Google Speech Fallback Engine).
 Converts Khmer news text into high-definition 30-60s audio bulletins for Telegram & Facebook.
 100% Free, Zero RAM overhead (<1MB RAM), Instant Generation (<2s).
 """
@@ -14,7 +14,7 @@ logger = logging.getLogger(__name__)
 
 class KhmerVoiceBulletinEngine:
     """
-    Dedicated Khmer AI Voice Bulletin Engine V7.0.
+    Dedicated Khmer AI Voice Bulletin Engine V8.0 GOLD STANDARD.
     Generates high-quality Khmer voice bulletins (.mp3) for breaking news.
     """
     def __init__(self):

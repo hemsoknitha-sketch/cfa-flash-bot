@@ -1,5 +1,5 @@
 """
-Meta Threads Auto-Publisher Engine V7.0.
+Meta Threads Auto-Publisher Engine V8.0 GOLD STANDARD.
 Publishes breaking news text and HD banner images to Meta Threads using Graph API.
 100% Free, Zero RAM overhead (<1MB RAM), Async Execution.
 """
@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 class MetaThreadsPublisher:
     """
-    Dedicated Meta Threads Graph API Publisher Engine V7.0.
+    Dedicated Meta Threads Graph API Publisher Engine V8.0 GOLD STANDARD.
     """
     def __init__(self):
         self.threads_user_id = getattr(config, "THREADS_USER_ID", None)

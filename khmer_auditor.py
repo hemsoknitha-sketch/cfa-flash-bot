@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class KhmerLanguageAuditor:
     """
-    Master Khmer Script Purifier, Zero-Error Journalistic Auditor & Freshness Gatekeeper V6.0.
+    Master Khmer Script Purifier, Zero-Error Journalistic Auditor & Freshness Gatekeeper V8.0 GOLD STANDARD.
     Guarantees 100% formal Khmer linguistic purity & institutional quality:
     1. Freshness Audit: Rejects news older than 24 hours (86,400s).
     2. Foreign Word Leak Filter: Purges Vietnamese words (nhằm, của, và) & foreign Latin script leaks.
@@ -137,7 +137,7 @@ class KhmerLanguageAuditor:
 
     def protect_khmer_grapheme_clusters(self, text: str) -> str:
         """
-        Khmer Unicode Grapheme Cluster Protection V7.0.
+        Khmer Unicode Grapheme Cluster Protection V8.0 GOLD STANDARD.
         Ensures dependent vowels (\u17b4-\u17d3) and subscript coeng sign (\u17d2) 
         NEVER dangle at string ends or line breaks. Strips dotted circle (\u25cc).
         """
@@ -423,7 +423,7 @@ class KhmerLanguageAuditor:
         max_freshness_hours: float = 24.0
     ) -> Tuple[bool, float, str, str, str, str]:
         """
-        Master Zero-Error Quality Gatekeeper V7.0:
+        Master Zero-Error Quality Gatekeeper V8.0 GOLD STANDARD:
         Calculates Quality Score (0-100%). Rejects items scoring below 75.0%.
         Returns: (is_valid, quality_score, purified_headline, purified_body, verified_source_name, dateline_str)
         """

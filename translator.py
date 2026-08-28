@@ -26,7 +26,7 @@ def apply_chuon_nath_orthography(text: str) -> str:
 
 def super_smart_khmer_formatter(text: str) -> str:
     """
-    Super Smart Khmer Professional Literary & Journalistic Text Formatter V5.0.
+    Super Smart Khmer Professional Literary & Journalistic Text Formatter V8.0 GOLD STANDARD.
     - Preserves all paragraph breaks (\n\n).
     - Enforces Chuon Nath Official Dictionary Orthography (វចនានុក្រម ជួន ណាត).
     - Preserves & enforces formal Honorific & Title spacing (ឯកឧត្តម, សម្តេច, លោកជំទាវ, នាយឧត្តមសេនីយ៍, សាស្ត្រាចារ្យ, etc.).

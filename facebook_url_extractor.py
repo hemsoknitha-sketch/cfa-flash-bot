@@ -1,5 +1,5 @@
 """
-Enterprise Deep Facebook URL Extractor Engine V6.0.
+Enterprise Deep Facebook URL Extractor Engine V8.0 GOLD STANDARD.
 Features:
 1. Accepts any Facebook Post / Video / Reel / Article URL.
 2. Uses official Facebook Crawler User-Agent (facebookexternalhit/1.1) to bypass login walls 100%.

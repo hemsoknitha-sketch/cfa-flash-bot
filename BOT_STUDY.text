@@ -244,7 +244,7 @@ flowchart TD
         - `/sync_defense_archive` ៖ ស្កេន និងធ្វើបច្ចុប្បន្នភាពទិន្នន័យយោធា & ការទូតចូលក្នុង Archive ស្វ័យប្រវត្តិ។
 
 ----------------------------------------------------------------------------------------------------
-២៦. 🛡️ MASTER KHMER LANGUAGE AUDITOR V6.0 (`khmer_auditor.py`)
+២៦. 🛡️ MASTER KHMER LANGUAGE AUDITOR V8.0 GOLD STANDARD (`khmer_auditor.py`)
 ----------------------------------------------------------------------------------------------------
 - **Foreign Vietnamese Word Purger ៖** ស្កេន និងជម្រះពាក្យភាសាវៀតណាម (`nhằm` -> `ដើម្បី`, `của` -> `របស់`, `và` -> `និង`, `tại` -> `នៅ`) និងពាក្យបរទេសជ្រែកចូលប្រយោគខ្មែរ ១០០% តាមរៀប Regex Word Boundary Masking។
 - **Chuon Nath Typo Auditor ៖** កែតម្រូវអក្ខរាវិរុទ្ធខ្មែរខុស (`កម្លាំងនប៉ុស្តិ៍` -> `កម្លាំងប៉ុស្តិ៍`, `លោក ជំទាវ` -> `លោកជំទាវ`, `ឧត្តមសេនីយ៍ ទោ` -> `ឧត្តមសេនីយ៍ទោ`) តាមវចនានុក្រមសម្តេចព្រះសង្ឃរាជ ជួន ណាត ដោយស្វ័យប្រវត្តិ។
@@ -293,7 +293,7 @@ flowchart TD
 - **Auto Subscriber Registration ៖** ប្រព័ន្ធរត់កត់ត្រា និងធ្វើបច្ចុប្បន្នភាពបញ្ជី Chat ID និងឈ្មោះអ្នកប្រើប្រាស់ (Subscribers Database) ដោយស្វ័យប្រវត្តិនៅរាល់ពេលដែលអ្នកប្រើប្រាស់ទាក់ទងមកកាន់ Bot!
 
 ----------------------------------------------------------------------------------------------------
-៣៤. 📊 TELEGRAM LIVE TELEMETRY & INTERACTIVE ENGAGEMENT ENGINE V7.0 (`telegram_engagement_engine.py` & `telegram_broadcaster.py`)
+៣៤. 📊 TELEGRAM LIVE TELEMETRY & INTERACTIVE ENGAGEMENT ENGINE V8.0 GOLD STANDARD (`telegram_engagement_engine.py` & `telegram_broadcaster.py`)
 ----------------------------------------------------------------------------------------------------
 - **Live Interactive Engagement Keyboard Bar ៖** ភ្ជាប់ប៊ូតុងអន្តរកម្មស្វ័យប្រវត្តិកែច្នៃក្រោមរាល់អត្ថបទព័ត៌មាន Telegram ទាំងអស់ ៖
     `[ 👍 0 ]  [ ❤️ 0 ]  [ 🔥 0 ]  [ 🇰🇭 0 ]`

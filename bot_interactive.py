@@ -18,7 +18,7 @@ logger = logging.getLogger("TelegramBotInteractive")
 
 class SuperSmartTelegramBot:
     """
-    Super Smart & Super Fast Interactive Telegram Bot Menu Engine V5.0.
+    Super Smart & Super Fast Interactive Telegram Bot Menu Engine V8.0 GOLD STANDARD.
     Handles all commands and inline callbacks with 100% crash protection & instant response times.
     """
     def __init__(self, token: str = None):
@@ -438,7 +438,7 @@ class SuperSmartTelegramBot:
             logger.error(f"Error sending admin audit notification: {e}")
 
     def get_vps_status_report(self) -> str:
-        """Generates real-time Super Smart & Beautiful VPS Server Telemetry Report V7.0."""
+        """Generates real-time Super Smart & Beautiful VPS Server Telemetry Report V8.0 GOLD STANDARD."""
         import platform
         try:
             import psutil

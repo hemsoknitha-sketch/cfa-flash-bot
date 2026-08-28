@@ -1,5 +1,5 @@
 """
-Cambodia Facebook Social Debate & Viral Trend Detector V6.0.
+Cambodia Facebook Social Debate & Viral Trend Detector V8.0 GOLD STANDARD.
 Features:
 1. Detects hot viral topics, public debates, breaking accidents, scam busts, and social trends across Cambodia.
 2. Evaluates Social Viral Index Score (0-100%).

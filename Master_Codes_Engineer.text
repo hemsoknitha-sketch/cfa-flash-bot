@@ -108,7 +108,7 @@
   - Quality Output: 100 Maximum Quality JPEG (Chroma 4:4:4) ធានារូបភាពច្បាស់ 4K Ultra HD!
 
 ====================================================================================================
-៧. 🛡️ ដំណាក់កាលទី ៥ ៖ MASTER KHMER LANGUAGE AUDITOR V6.0 (`khmer_auditor.py`)
+៧. 🛡️ ដំណាក់កាលទី ៥ ៖ MASTER KHMER LANGUAGE AUDITOR V8.0 GOLD STANDARD (`khmer_auditor.py`)
 ====================================================================================================
 ៧.១. 24-Hour Freshness Gatekeeper (`audit_news_freshness`) ៖
   - ត្រួតពិនិត្យ និងច្រោះចោលព័ត៌មានចាស់ៗដាច់ខាត ប្រសិនបើកាលបរិច្ឆេទព័ត៌មានមានអាយុកាលលើសពី ២៤ ម៉ោង (៨៦,៤០០ វិនាទី)។
@@ -226,7 +226,7 @@
 [x] 3. Dynamic Dateline Engine (25 Cambodian Provinces + Global Capitals) Active
 [x] 4. Atomic Deduplication Lock (SHA-256 + TF-IDF Cosine Similarity >80%) Active
 [x] 5. Dedicated 4K HD Graphic Banner Engine (Playwright OpenType + 1:1 Square 4K AI Cartoon Backdrop) Active
-[x] 6. Master Khmer Language Auditor V6.0 (24h Freshness, Chuon Nath Spellchecker) Active
+[x] 6. Master Khmer Language Auditor V8.0 GOLD STANDARD (24h Freshness, Chuon Nath Spellchecker) Active
 [x] 7. Master Cambodian Legal Vault (249+ Articles & Free-Form Legal Counsel Bot) Active
 [x] 8. Dual Auto-Publishing (Facebook 5-Min Pacing & Telegram VIP Channel) Active
 [x] 9. Interactive Fast-Path Telegram Bot (<50ms Response & Live Telemetry Bar) Active

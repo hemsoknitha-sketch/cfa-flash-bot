@@ -1,5 +1,5 @@
 """
-Khmer National News API & Telemetry Web Server V1.0
+Khmer National News API & Telemetry Web Server V8.0 GOLD STANDARD
 Lightweight async HTTP API exposing Khmer national news, defense archives, and hardware telemetry.
 Runs on port 8080.
 """

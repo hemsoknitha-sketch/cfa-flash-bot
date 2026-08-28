@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class SecuritySentinel:
     """
-    Super Smart 7-Layer Military-Grade Enterprise Security Suite V6.0.
+    Super Smart 7-Layer Military-Grade Enterprise Security Suite V8.0 GOLD STANDARD.
     Layer 1: Per-User Anti-Spam Sliding Window Rate Limiter & Cooldown Lock
     Layer 2: AI Anti-Prompt Injection & Jailbreak Purger
     Layer 3: Input Sanitization Engine (Anti-XSS, HTML Purger & Anti-SQL Injection)
