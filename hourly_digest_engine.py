@@ -53,7 +53,8 @@ class HourlyDigestEngine:
         from defense_intelligence_engine import defense_engine
         from khmer_auditor import khmer_auditor
         from ai_rewriter import SuperBrainAIRewriter
-        from telegram_broadcaster import telegram_broadcaster
+        from telegram_broadcaster import TelegramBroadcaster
+        broadcaster = TelegramBroadcaster()
 
         rewriter = SuperBrainAIRewriter()
         items = defense_engine.get_latest_defense_news(6)
@@ -99,18 +100,13 @@ class HourlyDigestEngine:
             f"• ADMIN: *@Sokpheatonsai*"
         )
 
-        # Broadcast via Telegram
-        await telegram_broadcaster.broadcast_text_message(digest_body)
+        # Broadcast via Telegram VIP Channel
+        await broadcaster.broadcast_to_vip_channel(digest_body)
         
         # Publish via Facebook Page
         try:
-            from facebook_publisher import fb_publisher
-            fb_publisher.publish_news_to_facebook(
-                headline="របាយការណ៍សង្ខេបព័ត៌មានជាតិ និងអន្តរជាតិប្រចាំម៉ោង 24/7",
-                body=digest_body,
-                banner_path="",
-                source_name="CFA Flash Feed AI Super Brain"
-            )
+            from facebook_publisher import facebook_publisher
+            await facebook_publisher.publish_news(caption=digest_body, image_path=None)
         except Exception as e:
             logger.warning(f"Facebook publish failed for hourly digest: {e}")
 

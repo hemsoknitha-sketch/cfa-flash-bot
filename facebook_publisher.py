@@ -115,3 +115,5 @@ class FacebookPublisher:
                     self.last_post_time = time.time()
         except Exception as e:
             logger.error(f"⚠️ [FACEBOOK EXCEPTION] {e}")
+
+facebook_publisher = FacebookPublisher()
