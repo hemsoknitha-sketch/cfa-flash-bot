@@ -605,8 +605,8 @@ class SuperBrainAIRewriter:
         legal_citation = legal_engine.generate_legal_compliance_citation(headline_clean, body_clean)
 
         footer_signature = (
-            f"\n\n🔍 *ព័ត៌មាននេះនាំមកជូនដោយ៖*\n"
-            f"• បច្ចេកទេស: *ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain*\n"
+            f"\n\n🔍 *ព័ត៌មាន 24/7*\n"
+            f"• បច្ចេកទេស: *AI APEX Super Brain*\n"
             f"• ផលិតដោយ៖ *សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA*\n"
             f"• Telegram: *CFA Flash Feed | @CFAflashBot*\n"
             f"• ADMIN: *@Sokpheatonsai*"

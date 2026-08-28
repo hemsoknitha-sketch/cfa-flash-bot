@@ -76,8 +76,8 @@
 - Facebook Rate Governor (`facebook_publisher.py`) ៖ កំណត់ចន្លោះពេលបោះពុម្ពផ្សាយយ៉ាងតិច ១៥ នាទីម្តង (`min_post_interval = 900` វិនាទី) ការពារ Spam Block ពី Meta 100%!
 - Telegram Broadcaster Engine (`telegram_broadcaster.py`) ៖ ផ្ញើសារ `sendPhoto` ត្រឹម ១ សារប៉ុណ្ណោះ ជាមួយស្វ័យការពារ `Plain Text Retry Fallback` (ធានាថារូបភាព Banner ត្រូវតែផ្ញើចេញភ្ជាប់ជាមួយអត្ថបទព័ត៌មាន ១០០% ជានិច្ច)។
 - Standard Footnote Signature ៖
-    🔍 ព័ត៌មាននេះនាំមកជូនដោយ៖
-    • បច្ចេកទេស: ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain
+    🔍 ព័ត៌មាន 24/7
+    • បច្ចេកទេស: AI APEX Super Brain
     • ផលិតដោយ៖ សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA
     • Telegram: CFA Flash Feed | @CFAflashBot
     • ADMIN: @Sokpheatonsai

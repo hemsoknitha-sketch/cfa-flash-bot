@@ -398,8 +398,8 @@ class SuperSmartTelegramBot:
             "  └ បង្ហាញសៀវភៅណែនាំ និងរបៀបប្រើប្រាស់ប្រព័ន្ធព័ត៌មានទាំងមូល។\n\n"
             "💡 *ជំនួយបន្ថែម ៖* លោកអ្នកអាចផ្ញើសារសួរសំណួរ (Text) ដោយសេរី ឬផ្ញើ URL Facebook (Reels/Videos) ចូលក្នុង Telegram Bot នេះដោយផ្ទាល់ ឥតបាច់ប្រើ slash (`/`) ឡើយ!\n\n"
             "----------------------------------\n"
-            "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ ៖*\n"
-            "• *បច្ចេកទេស ៖* `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain`\n"
+            "🔍 *ព័ត៌មាន 24/7*\n"
+            "• *បច្ចេកទេស :* `AI APEX Super Brain`\n"
             "• *ផលិតដោយ ៖* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
             "• *Telegram ៖* `CFA Flash Feed | @CFAflashBot`\n"
             "• *ADMIN ៖* `@Sokpheatonsai`"
@@ -1064,8 +1064,8 @@ class SuperSmartTelegramBot:
 
                             footnote = (
                                 "\n\n----------------------------------\n"
-                                "🔍 *ព័ត៌មាននេះនាំមកជូនដោយ ៖*\n"
-                                "• *បច្ចេកទេស ៖* `ប្រព័ន្ធខួរក្បាលឆ្លាតវៃ APEX Super Brain`\n"
+                                "🔍 *ព័ត៌មាន 24/7*\n"
+                                "• *បច្ចេកទេស :* `AI APEX Super Brain`\n"
                                 "• *ផលិតដោយ ៖* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
                                 "• *Telegram ៖* `CFA Flash Feed | @CFAflashBot`\n"
                                 "• *ADMIN ៖* `@Sokpheatonsai`"
