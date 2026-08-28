@@ -41,26 +41,50 @@ class SuperSmartTelegramBot:
         return self._session
 
     async def set_commands_menu(self):
-        """Register Clean Public Commands Menu in Telegram UI."""
-        commands = [
-            {"command": "start", "description": "🏛️ បើកផ្ទាំងបញ្ជាមេ (Main Menu)"},
-            {"command": "latest", "description": "📰 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
+        """
+        Registers separate Telegram Bot Command Menus for Public Users vs Bot Admin using setMyCommands API scopes.
+        """
+        public_commands = [
+            {"command": "start", "description": "🏠 បើកម៉ឺនុយមេ (Main Menu)"},
+            {"command": "latest", "description": "📡 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
+            {"command": "laws", "description": "⚖️ ស្រាវជ្រាវច្បាប់ជាតិ & រដ្ឋធម្មនុញ្ញ"},
             {"command": "defense_news", "description": "🛡️ សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC"},
-            {"command": "border_archive", "description": "📂 ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រព្រំដែនកម្ពុជា"},
-            {"command": "sync_defense_archive", "description": "📡 ស្កេន & ធ្វើបច្ចុប្បន្នភាព Archive យោធា"},
-            {"command": "factcheck", "description": "🔍 Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន (0-100%)"},
-            {"command": "laws", "description": "⚖️ ផ្ទៀងផ្ទាត់ & ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញ"},
-            {"command": "ask", "description": "🤖 សួរ AI សារព័ត៌មាន & ច្បាប់ (24/7)"},
-            {"command": "ping", "description": "⚡ ពិនិត្យល្បឿន Response Time"},
-            {"command": "help", "description": "❓ ការណែនាំប្រើប្រាស់ & Support"}
+            {"command": "border_archive", "description": "📜 ប័ណ្ណសារប្រវត្តិសាស្ត្រព្រំដែនជាតិ"},
+            {"command": "factcheck", "description": "🔍 Fact-Check ផ្ទៀងផ្ទាត់ភាពជឿជាក់ (0-100%)"},
+            {"command": "help", "description": "❓ ការណែនាំប្រព័ន្ធ & របៀបប្រើប្រាស់"}
         ]
+
+        admin_commands = [
+            {"command": "start", "description": "🏠 បើកម៉ឺនុយមេ Admin (Admin Main Menu)"},
+            {"command": "users", "description": "👥 គ្រប់គ្រងអ្នកប្រើប្រាស់ (User Dashboard)"},
+            {"command": "users_stats", "description": "📊 ស្ថិតិអ្នកប្រើប្រាស់សរុប (User Stats)"},
+            {"command": "user_info", "description": "👤 ព័ត៌មានលម្អិតអ្នកប្រើប្រាស់ (User Profile)"},
+            {"command": "ban_user", "description": "🚫 បិទសិទ្ធិអ្នកប្រើប្រាស់ (Ban Account)"},
+            {"command": "unban_user", "description": "✅ ដោះបម្រាមអ្នកប្រើប្រាស់ (Unban Account)"},
+            {"command": "set_role", "description": "👑 កំណត់សិទ្ធិអ្នកប្រើប្រាស់ (Set Role)"},
+            {"command": "status", "description": "💻 ស្ថានភាពម៉ាស៊ីន VPS 24/7 (VPS Telemetry)"},
+            {"command": "broadcast", "description": "📢 ផ្ញើសារប្រកាសអាសន្ន (Admin Broadcast)"},
+            {"command": "sync_defense_archive", "description": "⚡ ស៊ិនគ្រូណៃស៍ប័ណ្ណសារយោធា (Sync Defense)"},
+            {"command": "scan", "description": "🔍 រត់ប្រព័ន្ធស្កេន Feeds ភ្លាមៗ (Instant Scan)"},
+            {"command": "clearcache", "description": "🧹 សម្អាត Banner Cache & RAM"}
+        ]
+
         try:
             session = await self.get_session()
-            async with session.post(f"{self.api_url}/setMyCommands", json={"commands": commands}) as resp:
+            # 1. Register Public Commands Menu (Default Scope for All Users)
+            async with session.post(f"{self.api_url}/setMyCommands", json={"commands": public_commands, "scope": {"type": "default"}}) as resp:
                 res = await resp.json()
-                logger.info(f"Telegram Commands Menu Registered: {res.get('ok')}")
+                logger.info(f"Public Users Telegram Commands Menu Registered: {res.get('ok')}")
+
+            # 2. Register Bot Admin Commands Menu (Chat Scope for Admin Only)
+            from security_sentinel import security_sentinel
+            admin_id = security_sentinel.admin_chat_id
+            if admin_id and admin_id != "your_telegram_admin_chat_id_here":
+                async with session.post(f"{self.api_url}/setMyCommands", json={"commands": admin_commands, "scope": {"type": "chat", "chat_id": int(admin_id)}}) as resp_adm:
+                    res_adm = await resp_adm.json()
+                    logger.info(f"Bot Admin Telegram Commands Menu Registered: {res_adm.get('ok')}")
         except Exception as e:
-            logger.error(f"Failed to register bot commands: {e}")
+            logger.error(f"Failed to register bot command menus: {e}")
 
     def _build_inline_keyboard(self, is_admin: bool = False):
         """
@@ -86,6 +110,10 @@ class SuperSmartTelegramBot:
         ]
 
         if is_admin:
+            keyboard.append([
+                {"text": "👥 គ្រប់គ្រងអ្នកប្រើប្រាស់ (Admin)", "callback_data": "cmd_users_list"},
+                {"text": "📊 ស្ថិតិអ្នកប្រើប្រាស់ (Admin)", "callback_data": "cmd_users_stats"}
+            ])
             keyboard.append([
                 {"text": "🏛️ ៣៧ ស្ថាប័នរដ្ឋ & ២៥ ខេត្ត (Admin)", "callback_data": "cmd_national_desks"},
                 {"text": "📂 ឃ្លាំងអធិបតេយ្យជាតិ (Admin)", "callback_data": "cmd_sovereignty_vault"}
