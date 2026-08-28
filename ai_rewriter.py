@@ -594,6 +594,7 @@ class SuperBrainAIRewriter:
         leak_banner = "\n\n🚨 *បដាព្រមាន៖ ព័ត៌មាននេះមិនទាន់មានការបញ្ជាក់ផ្លូវការនៅឡើយទេ សូមផ្ទៀងផ្ទាត់មុនធ្វើការសម្រេចចិត្ត។*\n" if is_leak else ""
 
         headline_clean = khmer_auditor.audit_khmer_text(clean_khmer_spaces(headline).replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").strip()).replace("*", "").replace("_", "").strip()
+        headline_clean = re.sub(r'[\.\,\…\s]+$', '', headline_clean).strip()
         body_clean = khmer_auditor.audit_khmer_text(format_professional_khmer_paragraphs(body)).replace("*", "").replace("_", "").strip()
         
         # Dateline & Verified Source Header
