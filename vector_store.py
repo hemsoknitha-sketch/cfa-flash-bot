@@ -32,31 +32,44 @@ class VectorDeduplicator:
         self.history: List[Dict] = []
         base_dir = os.path.dirname(os.path.abspath(__file__))
         self.cache_file = os.path.join(base_dir, "seen_hashes.json")
-        self.seen_hashes: set = self._load_seen_hashes()
+        self.seen_hashes: Dict[str, float] = self._load_seen_hashes()
 
         if self.enable_local_embeddings:
             self._init_qdrant()
         else:
             logger.info("⚡ [LIGHTWEIGHT MODE] Vector Deduplication running on SHA-256 + TF-IDF Engine (<5MB RAM).")
 
-    def _load_seen_hashes(self) -> set:
+    def _load_seen_hashes(self) -> Dict[str, float]:
+        """Loads seen hashes with 24-hour (86,400s) rolling TTL expiration."""
         import os
         import json
+        import time
+        now = time.time()
+        max_ttl = 86400.0  # 24 hours rolling window
+        valid_hashes = {}
         if os.path.exists(self.cache_file):
             try:
                 with open(self.cache_file, "r", encoding="utf-8") as f:
                     data = json.load(f)
-                    logger.info(f"Loaded {len(data)} cached news hashes from seen_hashes.json.")
-                    return set(data)
+                    if isinstance(data, list):
+                        # Migrate legacy list format -> dict with current timestamp
+                        for h in data:
+                            valid_hashes[h] = now
+                    elif isinstance(data, dict):
+                        for h, ts in data.items():
+                            if (now - ts) < max_ttl:
+                                valid_hashes[h] = ts
+                logger.info(f"Loaded {len(valid_hashes)} active news hashes from seen_hashes.json (Purged expired >24h hashes).")
+                return valid_hashes
             except Exception as e:
                 logger.error(f"Error loading seen_hashes.json: {e}")
-        return set()
+        return {}
 
     def _save_seen_hashes(self):
         import json
         try:
             with open(self.cache_file, "w", encoding="utf-8") as f:
-                json.dump(list(self.seen_hashes), f)
+                json.dump(self.seen_hashes, f)
         except Exception as e:
             logger.error(f"Error saving seen_hashes.json: {e}")
 
@@ -79,39 +92,25 @@ class VectorDeduplicator:
 
     def clear_news_cache(self) -> int:
         """
-        Clears temporary banner files on disk and transient memory buffers while 
-        PROTECTING seen_hashes.json so past published news is NEVER re-sent.
+        Clears temporary banner files on disk, transient memory buffers,
+        and clears seen_hashes cache so fresh live RSS news can flow immediately.
         """
         import gc
         removed_banners = self.purge_temp_banner_files()
         self.history.clear()
+        self.seen_hashes.clear()
+        self._save_seen_hashes()
         gc.collect()
-        total_protected_hashes = len(self.seen_hashes)
-        logger.info(f"🧹 [CACHE PURGED] Removed {removed_banners} temp banner files. RAM recycled. Protected {total_protected_hashes} published news hashes.")
+        logger.info(f"🧹 [CACHE PURGED & UNLOCKED] Removed {removed_banners} temp banner files. Reset seen_hashes cache!")
         return removed_banners
 
     async def seed_baseline_from_rss_async(self, ingestion_engine) -> int:
         """
-        Seeds existing news from active RSS feeds into seen_hashes as baseline.
-        This prevents old feed items from being processed as 'new news' on initial boot,
-        after a /clearcache command, or after restarting/updating on Google Cloud.
+        Baseline seeder function maintained for interface compatibility.
+        Does NOT block current RSS news items from being processed.
         """
-        import hashlib
-        try:
-            items = await ingestion_engine.fetch_from_rss_async()
-            count = 0
-            for item in items:
-                full_text = f"{item.title} - {item.content}"
-                content_hash = hashlib.sha256(full_text.strip().encode('utf-8')).hexdigest()
-                if content_hash not in self.seen_hashes:
-                    self.seen_hashes.add(content_hash)
-                    count += 1
-            self._save_seen_hashes()
-            logger.info(f"🛡️ [BASELINE SEEDED] Seeded {count} current RSS feed items into seen_hashes.json as baseline.")
-            return count
-        except Exception as e:
-            logger.error(f"Error seeding baseline hashes from RSS: {e}")
-            return 0
+        logger.info("🛡️ [BASELINE ENGINE] Live RSS feeds unlocked for active processing.")
+        return 0
 
     def _init_qdrant(self):
         """Initialize Qdrant Vector DB & SentenceTransformer model if explicitly enabled."""
@@ -207,21 +206,23 @@ class VectorDeduplicator:
             self._add_item_internal(item_id, text)
 
     def _add_item_internal(self, item_id: str, text: str):
-        """Internal helper to add item hashes to seen_hashes and persist to disk."""
+        """Internal helper to add item hashes to seen_hashes with timestamp and persist to disk."""
         import hashlib
         import re
+        import time
+        now = time.time()
         content_hash = hashlib.sha256(text.strip().encode('utf-8')).hexdigest()
-        self.seen_hashes.add(content_hash)
+        self.seen_hashes[content_hash] = now
 
         norm_text = re.sub(r'[^\w\u1780-\u17ff]+', '', text.strip().lower())
         if norm_text:
             norm_hash = hashlib.sha256(norm_text.encode('utf-8')).hexdigest()
-            self.seen_hashes.add(norm_hash)
+            self.seen_hashes[norm_hash] = now
 
         headline_norm = re.sub(r'[^\w\u1780-\u17ff]+', '', text[:100].strip().lower())
         if len(headline_norm) > 15:
             hl_hash = hashlib.sha256(headline_norm.encode('utf-8')).hexdigest()
-            self.seen_hashes.add(hl_hash)
+            self.seen_hashes[hl_hash] = now
 
         self._save_seen_hashes()
 
