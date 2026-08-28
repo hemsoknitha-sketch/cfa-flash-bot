@@ -384,14 +384,16 @@ class KhmerLanguageAuditor:
         elif body_words >= 80:
             score += 15.0
 
-        # 3. Grounding Signals (Entities, Institutions, Numeric/Legal data) (Max 35 pts)
+        # 3. Grounding Signals (Entities, Institutions, Numeric/Legal data, Social Topics) (Max 35 pts)
         grounding_keywords = [
             "ក្រសួង", "រាជធានី", "ខេត្ត", "ភ្នំពេញ", "មាត្រា", "ច្បាប់", "តុលាការ", "សម្តេច", 
             "ឯកឧត្តម", "រដ្ឋបាល", "នគរបាល", "កម្លាំង", "សេចក្តីថ្លែងការណ៍", "កិច្ចព្រមព្រៀង",
-            " percent", "%", "ដុល្លារ", "រៀល", "ឆ្នាំ", "ខែ", "ថ្ងៃ"
+            " percent", "%", "ដុល្លារ", "រៀល", "ឆ្នាំ", "ខែ", "ថ្ងៃ", "ព័ត៌មាន", "សមត្ថកិច្ច",
+            "ចរាចរណ៍", "គ្រោះថ្នាក់", "សន្តិសុខ", "បង្ក្រាប", "ចាប់ខ្លួន", "ឆបោក", "ព្រហ្មទណ្ឌ",
+            "ហិង្សា", "ឃាតកម្ម", "ចោរកម្ម", "ពុករលួយ", "ជំរិត", "យុត្តិធម៌", "សង្គម", "ប្រជាពលរដ្ឋ"
         ]
         found_signals = sum(1 for k in grounding_keywords if k in body)
-        grounding_pts = min(35.0, found_signals * 7.0)
+        grounding_pts = min(35.0, max(15.0, found_signals * 5.0))
         score += grounding_pts
 
         # 4. Anti-Repetition Penalty: Check paragraph sentence overlap
@@ -405,7 +407,7 @@ class KhmerLanguageAuditor:
                     logger.warning(f"⚠️ [KHMER AUDITOR] Repetitive paragraph boilerplate detected (Overlap: {overlap*100:.1f}%). Applying penalty.")
                     score -= 20.0
 
-        is_grounded = (score >= 60.0)
+        is_grounded = (score >= 35.0)
         return is_grounded, min(100.0, max(0.0, score)), headline, body
 
     def audit_source_attribution(self, body: str, source_name: str) -> str:
@@ -424,7 +426,7 @@ class KhmerLanguageAuditor:
     ) -> Tuple[bool, float, str, str, str, str]:
         """
         Master Zero-Error Quality Gatekeeper V8.0 GOLD STANDARD:
-        Calculates Quality Score (0-100%). Rejects items scoring below 75.0%.
+        Calculates Quality Score (0-100%). Rejects items scoring below 40.0%.
         Returns: (is_valid, quality_score, purified_headline, purified_body, verified_source_name, dateline_str)
         """
         # 1. Freshness Check
@@ -437,11 +439,9 @@ class KhmerLanguageAuditor:
         # 3. Dateline Generation
         dateline_str = self.format_khmer_dateline(timestamp)
 
-        # 4. Truncation Audit Penalty: Reject incomplete/truncated items ending in "…" or "..."
-        raw_combined = f"{headline} {body}".strip()
-        if any(raw_combined.endswith(x) for x in ["…", "...", "ចូលរួមក្នុង", " ក្នុង", " និង"]) or "លោក …" in raw_combined or "លោក..." in raw_combined:
-            logger.warning(f"🚫 [KHMER AUDITOR REJECTED] Truncated / Cut-off news item detected! Rejecting post.")
-            return False, 30.0, headline, body, verified_source, dateline_str
+        # 4. Truncation Audit & Ellipsis Purger: Clean raw RSS trailing ellipsis so AI Rewriter can complete & expand
+        body = re.sub(r'[\.…\s]{3,}\s*$', '', body).strip()
+        headline = re.sub(r'[\.…\s]{3,}\s*$', '', headline).strip()
 
         # 5. Prose & Punctuation Audit
         clean_headline, clean_body = self.audit_prose_structure(headline, body)
@@ -452,12 +452,12 @@ class KhmerLanguageAuditor:
         # 7. Fact Grounding & Repetition Audit
         is_grounded, grounding_score, clean_headline, clean_body = self.audit_grounding_and_repetition(clean_headline, clean_body)
 
-        # 7. Final Quality Score Assessment (Threshold >= 75.0%)
+        # 8. Final Quality Score Assessment (Threshold >= 40.0%)
         final_quality_score = min(100.0, max(0.0, grounding_score + (15.0 if verified_source != "ប្រភពព័ត៌មានផ្លូវការនៃព្រះរាជាណាចក្រកម្ពុជា" else 5.0)))
-        is_valid = (final_quality_score >= 75.0)
+        is_valid = (final_quality_score >= 40.0)
 
         if not is_valid:
-            logger.warning(f"🚫 [KHMER AUDITOR REJECTED] News Quality Score {final_quality_score:.1f}% is below 75.0% threshold (Grounding: {grounding_score:.1f}%). Skipping low quality post.")
+            logger.warning(f"🚫 [KHMER AUDITOR REJECTED] News Quality Score {final_quality_score:.1f}% is below 40.0% threshold (Grounding: {grounding_score:.1f}%). Skipping low quality post.")
 
         return is_valid, final_quality_score, clean_headline, clean_body, verified_source, dateline_str
 
