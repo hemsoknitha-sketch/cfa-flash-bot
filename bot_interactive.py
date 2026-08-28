@@ -472,12 +472,22 @@ class SuperSmartTelegramBot:
 
             icon = "🌐 [REAL-TIME AUDIT ៖ FACEBOOK URL]" if is_fb else "🧠 [REAL-TIME AUDIT ៖ USER QUESTION]"
 
+            # Safe Telegram payload length management (up to 3200 chars to avoid hitting Telegram 4096 cap)
+            full_ans_display = response_text
+            if len(full_ans_display) > 3200:
+                truncated_ans = full_ans_display[:3100]
+                last_stop = max(truncated_ans.rfind("។"), truncated_ans.rfind("៕"))
+                if last_stop > 500:
+                    full_ans_display = truncated_ans[:last_stop + 1]
+                else:
+                    full_ans_display = truncated_ans + "..."
+
             alert_msg = (
                 f"🔔 *{icon}*\n"
                 f"👤 *អ្នកប្រើប្រាស់ ៖* `{full_name}` ({username})\n"
                 f"🆔 *Chat ID ៖* `{user_id}`\n\n"
                 f"📥 *សំណើ/URL ផ្ញើចូល ៖*\n`{request_text}`\n\n"
-                f"📤 *ចម្លើយ AI Super Brain ៖*\n{response_text[:350]}...\n\n"
+                f"📤 *ចម្លើយ AI Super Brain ៖*\n{full_ans_display}\n\n"
                 f"⏱️ *កាលបរិច្ឆេទ ៖* `{time.strftime('%Y-%m-%d %H:%M:%S')}`"
             )
             await self.send_message(admin_id, alert_msg)
@@ -1164,7 +1174,12 @@ class SuperSmartTelegramBot:
                                 f"{clean_body}\n\n"
                                 f"----------------------------------\n"
                                 f"🏛️ *ប្រភព ៖* `{page_name}` | 🔍 *ភាពជឿជាក់ ៖* `{processed.credibility_score}%`\n"
-                                f"⚡ *វិភាគដោយ ៖* `APEX Super Brain AI System`"
+                                f"⚡ *វិភាគដោយ ៖* `APEX Super Brain AI System`\n\n"
+                                f"🔍 *ព័ត៌មាន 24/7*\n"
+                                f"• *បច្ចេកទេស :* `AI APEX Super Brain`\n"
+                                f"• *ផលិតដោយ ៖* `សម្ពន្ធហ្វេសប៊ុកកម្ពុជា CFA`\n"
+                                f"• *Telegram ៖* `CFA Flash Feed | @CFAflashBot`\n"
+                                f"• *ADMIN ៖* `@Sokpheatonsai`"
                             )
                             await self.send_message(chat_id, reply_text)
 
