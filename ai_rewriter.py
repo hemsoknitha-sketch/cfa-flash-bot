@@ -621,19 +621,6 @@ class SuperBrainAIRewriter:
             f"• ADMIN: *@Sokpheatonsai*"
         )
 
-        # Telegram Photo Caption Limit Safety Guard (1024 chars max)
-        max_body_len = 980 - len(headline_clean) - len(source_header) - len(legal_citation) - len(leak_banner) - len(footer_signature)
-        if len(body_clean) > max_body_len and max_body_len > 100:
-            truncated = body_clean[:max_body_len]
-            # Smart Sentence-Boundary Truncation: Find last Khmer sentence ending ('។' or '៕')
-            last_full_stop = max(truncated.rfind("។"), truncated.rfind("៕"))
-            if last_full_stop > 100:
-                body_clean = truncated[:last_full_stop + 1]
-                if body_clean.endswith("។"):
-                    body_clean = body_clean[:-1] + "៕"
-            else:
-                body_clean = truncated.rsplit(" ", 1)[0] + "៕"
-
         return f"*{headline_clean}*\n\n{source_header}{body_clean}{legal_citation}{leak_banner}{footer_signature}"
 
     async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", visual_prompt: str = "", aspect_ratio: str = "1:1") -> str:
