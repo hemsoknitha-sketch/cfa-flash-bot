@@ -627,13 +627,13 @@ class SuperBrainAIRewriter:
 
         return f"*{headline_clean}*\n\n{source_header}{body_clean}{legal_citation}{leak_banner}{footer_signature}"
 
-    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", visual_prompt: str = "") -> str:
+    async def generate_banner_image(self, headline: str, category_title: str = "ព័ត៌មានទាន់ហេតុការណ៍", badge_label: str = "⚡ VERIFIED FLASH NEWS", badge_color: str = "red", visual_prompt: str = "", aspect_ratio: str = "1:1") -> str:
         """
         High-Impact AI Graphic Banner Rendering Engine.
         Delegates to dedicated BannerEngine for 100% synchronized Playwright HTML5 & PIL Fallback branding with dynamic badges and AI Digital Cartoon drawing backdrop.
         """
         from banner_engine import banner_engine
-        return await banner_engine.generate_banner_image(headline, category_title, badge_label, badge_color, visual_prompt=visual_prompt)
+        return await banner_engine.generate_banner_image(headline, category_title, badge_label, badge_color, visual_prompt=visual_prompt, aspect_ratio=aspect_ratio)
 
 # Singleton module instance for high-speed import across bot & orchestrator
 ai_rewriter = SuperBrainAIRewriter()

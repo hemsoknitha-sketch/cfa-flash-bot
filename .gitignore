@@ -9,6 +9,8 @@ test_*.jpg
 venv/
 seen_hashes.json
 data/news_engagement_db.json
-scratch/
+models/*/
+!models/download_huggingface_model.py
+!models/model_manifest.json
 
 
