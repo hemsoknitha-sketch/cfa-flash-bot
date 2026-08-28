@@ -476,3 +476,31 @@ flowchart TD
    - **24/7 Dual-Thread Orchestrator ៖** រត់ News Ingestion Loop (៦០ វិនាទីម្តង) ព្រមគ្នាជាមួយ Telegram Interactive Bot Menu Listener និងមុខងារ **Daily 2:00 AM Phnom Penh Backup Loop** ដោយស្វ័យប្រវត្តិ។
 
 ====================================================================================================
+
+----------------------------------------------------------------------------------------------------
+៤៣. 💻 ស្ថានភាពម៉ាស៊ីន VPS TELEMETRY & ស្ថាបត្យកម្ម SUPER SMART V8.0 GOLD STANDARD
+----------------------------------------------------------------------------------------------------
+កាលបរិច្ឆេទធ្វើបច្ចុប្បន្នភាពចុងក្រោយ ៖ ថ្ងៃទី ២៨ ខែ សីហា ឆ្នាំ ២០២៦
+
+១. 💻 **ស្ថានភាពម៉ាស៊ីន VPS (Google Cloud VM Telemetry) ៖**
+   • OS System ៖ Linux 6.12.101+deb13-cloud-amd64
+   • CPU Usage ៖ Load: 0.04 (Google Cloud VM 1GB RAM)
+   • RAM Memory ៖ 595 MB / 964 MB (61.8% RAM Usage) + 2GB Swap Memory Protection
+   • Disk Storage ៖ 3.4 GB / 9.6 GB (37.8% Used) - Ready & Expandable to 30 GB Disk Space
+   • Server Status ៖ Active 24/7 365 (Google Cloud VM Service)
+
+🤖 ២. **ព័ត៌មានប្រព័ន្ធ AI & Vector Database ៖**
+   • Active Feeds ៖ 79 ស្ថាប័នរដ្ឋ ខេត្ត & សារព័ត៌មានឌីជីថលជាតិ/អន្តរជាតិ
+   • AI Engine ៖ Hugging Face (hemsinath/cfa-flash-bot / hemsinath/apex-super-brain-khmer-news) + Gemini 3.6 Flash Multi-Key API Pool (Round-Robin 0% Overhead)
+   • Graphic Banner Engine ៖ Playwright OpenType 4K HD AI Digital Cartoon Backdrop (`--ar 1:1` Square 1200x1200px & 16:9 Landscape)
+   • Vector Store ៖ SHA-256 + Atomic TF-IDF Cosine Similarity Deduplication Active
+   • Khmer Standard ៖ វចនានុក្រម សម្តេច ព្រះសង្ឃរាជ ជួន ណាត ស្ដង់ដារមាស
+   • Legal Engine ៖ រដ្ឋធម្មនុញ្ញ មាត្រា ៥១ & ច្បាប់ជាតិកម្ពុជា 249+ បញ្ញត្តិ
+
+🛡️ ៣. **ប្រព័ន្ធសុវត្ថិភាព & ភាពឯកជន ៖**
+   • Secrets Vault ៖ .env Encrypted & Secured
+   • API Connection ៖ TLS 1.3 High-Speed & Hugging Face Router Endpoints
+   • Auto-Recovery ៖ Linux OS Kernel Single-Instance Lock + systemd 24/7 Daemon Active
+   • ចំណាយ ៖ $0.00 / ឥតគិតថ្លៃ ១០០% រហូត
+
+====================================================================================================
