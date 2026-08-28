@@ -1,0 +1,26 @@
+{
+  "859271875": {
+    "chat_id": "859271875",
+    "username": "@Sokpheatonsai",
+    "full_name": "Bot Admin",
+    "role": "admin",
+    "status": "active",
+    "joined_at": "2026-08-28 15:36:56",
+    "last_active": "2026-08-28 15:36:56",
+    "total_queries": 0,
+    "ban_reason": "",
+    "notes": "System Administrator"
+  },
+  "12345678": {
+    "chat_id": "12345678",
+    "username": "@hemsoknitha",
+    "full_name": "Soknitha Hem",
+    "role": "subscriber",
+    "status": "active",
+    "joined_at": "2026-08-28 15:36:56",
+    "last_active": "2026-08-28 15:36:56",
+    "total_queries": 1,
+    "ban_reason": "",
+    "notes": ""
+  }
+}

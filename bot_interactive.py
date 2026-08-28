@@ -160,6 +160,25 @@ class SuperSmartTelegramBot:
         except Exception as e:
             logger.error(f"Error editing reply markup for message {message_id}: {e}")
             return None
+
+    async def edit_message_text(self, chat_id: int, message_id: int, text: str, reply_markup: dict = None):
+        """Updates Telegram message text and reply_markup dynamically."""
+        payload = {
+            "chat_id": chat_id,
+            "message_id": message_id,
+            "text": text,
+            "parse_mode": "Markdown"
+        }
+        if reply_markup is not None:
+            payload["reply_markup"] = reply_markup
+        try:
+            session = await self.get_session()
+            async with session.post(f"{self.api_url}/editMessageText", json=payload, timeout=aiohttp.ClientTimeout(total=5)) as resp:
+                return await resp.json()
+        except Exception as e:
+            logger.error(f"Error editing message text {message_id} in chat {chat_id}: {e}")
+            return None
+
     async def send_photo(self, chat_id: int, photo: str, caption: str = "", reply_markup: dict = None):
         """Sends photo via Telegram sendPhoto API (supports file_id, URL or file path)."""
         payload = {
@@ -574,9 +593,22 @@ class SuperSmartTelegramBot:
                 chat_id = msg["chat"]["id"]
                 message_id = msg.get("message_id")
                 
-                # Auto register user chat_id in subscriber database
+                # Auto register user in user database & subscriber tracker
                 user_info = msg.get("from", {})
                 self.register_subscriber(user_info)
+                from user_manager import user_manager
+                user_manager.register_or_update_user(user_info)
+
+                # Layer 8 Security Check: Banned User Gatekeeper
+                if security_sentinel.is_user_banned(chat_id):
+                    logger.warning(f"🚫 [BANNED USER BLOCKED] Chat ID {chat_id} attempted access.")
+                    await self.send_message(
+                        chat_id,
+                        "🚫 *[ACCOUNT SUSPENDED ៖ គណនីត្រូវបិទសិទ្ធិ]*\n\n"
+                        "គណនីរបស់អ្នកត្រូវបានបិទសិទ្ធិប្រើប្រាស់ជាបណ្តោះអាសន្ន ឬរហូតដោយ Admin ប្រព័ន្ធ។\n\n"
+                        "💡 *ប្រសិនបើមានចម្ងល់ សូមទាក់ទង Admin ៖* `@Sokpheatonsai`"
+                    )
+                    return
 
                 is_admin = security_sentinel.verify_admin_access(chat_id)
                 raw_text = msg.get("text", msg.get("caption", "")).strip()
@@ -673,6 +705,73 @@ class SuperSmartTelegramBot:
                         await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
                         return
                     await self.execute_admin_broadcast(chat_id, msg, text)
+
+                # Admin User Management Suite
+                elif text.startswith("/users_stats") or text.startswith("/user_stats"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    from user_manager import user_manager
+                    await self.send_message(chat_id, user_manager.get_telemetry_stats())
+
+                elif text.startswith("/users") or text.startswith("/users_list"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    from user_manager import user_manager
+                    report, pagination_btns = user_manager.get_users_list(page=1)
+                    await self.send_message(chat_id, report, reply_markup={"inline_keyboard": pagination_btns} if pagination_btns else None)
+
+                elif text.startswith("/user_info") or text.startswith("/user"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    query = text.replace("/user_info", "").replace("/user", "").strip()
+                    if not query:
+                        await self.send_message(chat_id, "💡 *របៀបប្រើប្រាស់ ៖* `/user_info <Chat_ID ឬ @username>`")
+                        return
+                    from user_manager import user_manager
+                    await self.send_message(chat_id, user_manager.get_user_detail_info(query))
+
+                elif text.startswith("/ban_user") or text.startswith("/ban"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    parts = text.replace("/ban_user", "").replace("/ban", "").strip().split(" ", 1)
+                    query = parts[0].strip() if parts else ""
+                    reason = parts[1].strip() if len(parts) > 1 else "Violation of Community Guidelines"
+                    if not query:
+                        await self.send_message(chat_id, "💡 *របៀបប្រើប្រាស់ ៖* `/ban_user <Chat_ID ឬ @username> <មូលហេតុ>`")
+                        return
+                    from user_manager import user_manager
+                    ok, res_msg = user_manager.ban_user(query, reason)
+                    await self.send_message(chat_id, res_msg)
+
+                elif text.startswith("/unban_user") or text.startswith("/unban"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    query = text.replace("/unban_user", "").replace("/unban", "").strip()
+                    if not query:
+                        await self.send_message(chat_id, "💡 *របៀបប្រើប្រាស់ ៖* `/unban_user <Chat_ID ឬ @username>`")
+                        return
+                    from user_manager import user_manager
+                    ok, res_msg = user_manager.unban_user(query)
+                    await self.send_message(chat_id, res_msg)
+
+                elif text.startswith("/set_role") or text.startswith("/role"):
+                    if not is_admin:
+                        await self.send_message(chat_id, "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ!*")
+                        return
+                    parts = text.replace("/set_role", "").replace("/role", "").strip().split(" ", 1)
+                    query = parts[0].strip() if len(parts) > 0 else ""
+                    role = parts[1].strip() if len(parts) > 1 else ""
+                    if not query or not role:
+                        await self.send_message(chat_id, "💡 *របៀបប្រើប្រាស់ ៖* `/set_role <Chat_ID ឬ @username> <admin|vip|moderator|subscriber>`")
+                        return
+                    from user_manager import user_manager
+                    ok, res_msg = user_manager.set_user_role(query, role)
+                    await self.send_message(chat_id, res_msg)
 
                 elif text.startswith("/status"):
                     await self.send_message(chat_id, self.get_vps_status_report())
@@ -1166,6 +1265,13 @@ class SuperSmartTelegramBot:
                         f"សូមចុចតំណភ្ជាប់ខាងក្រោមដើម្បីចែករំលែកអត្ថបទនេះទៅកាន់ Telegram Group ឬ មិត្តភក្តិ ៖\n"
                         f"🔗 {share_url}"
                     )
+
+                elif data.startswith("usr_page_"):
+                    page_num = int(data.replace("usr_page_", "").strip())
+                    from user_manager import user_manager
+                    report, pagination_btns = user_manager.get_users_list(page=page_num)
+                    msg_id = cb["message"]["message_id"]
+                    await self.edit_message_text(chat_id, msg_id, report, reply_markup={"inline_keyboard": pagination_btns} if pagination_btns else None)
 
                 elif data.startswith("vw_info_"):
                     post_id = data.replace("vw_info_", "")

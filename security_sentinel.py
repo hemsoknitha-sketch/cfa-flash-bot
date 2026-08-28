@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 class SecuritySentinel:
     """
-    Super Smart 7-Layer Military-Grade Enterprise Security Suite V8.0 GOLD STANDARD.
+    Super Smart 8-Layer Military-Grade Enterprise Security Suite V8.0 GOLD STANDARD.
     Layer 1: Per-User Anti-Spam Sliding Window Rate Limiter & Cooldown Lock
     Layer 2: AI Anti-Prompt Injection & Jailbreak Purger
     Layer 3: Input Sanitization Engine (Anti-XSS, HTML Purger & Anti-SQL Injection)
@@ -17,6 +17,7 @@ class SecuritySentinel:
     Layer 5: Strict Admin Authentication & Role-Based Access Control (RBAC)
     Layer 6: Cryptographic Content Hash Vault (SHA-256 Anti-Replay DoS)
     Layer 7: Secret Key Masking & Log Sanitization
+    Layer 8: Banned User Security Gatekeeper (User Management Suspension)
     """
     def __init__(self):
         self.admin_chat_id = str(config.TELEGRAM_ADMIN_CHAT_ID)
@@ -78,6 +79,16 @@ class SecuritySentinel:
         if self.admin_chat_id and incoming_id == self.admin_chat_id:
             return True
         return False
+
+    def is_user_banned(self, chat_id: Union[str, int]) -> bool:
+        """
+        Layer 8: Checks if user account has been suspended by Bot Admin.
+        """
+        try:
+            from user_manager import user_manager
+            return user_manager.is_banned(chat_id)
+        except Exception:
+            return False
 
     def sanitize_input_payload(self, text: str) -> str:
         """
