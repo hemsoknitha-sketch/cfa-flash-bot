@@ -122,6 +122,10 @@ class UserManager:
         self._save_database()
         return self.users[chat_id]
 
+    def get_all_active_chat_ids(self) -> List[str]:
+        """Returns list of all active non-banned subscriber Chat IDs for Flash Alerts."""
+        return [cid for cid, u in self.users.items() if u.get("status") != "banned"]
+
     def is_banned(self, chat_id: Union[str, int]) -> bool:
         """Checks if a user is currently banned from using the bot."""
         cid = str(chat_id).strip()

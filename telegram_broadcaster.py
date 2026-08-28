@@ -192,6 +192,36 @@ class TelegramBroadcaster:
 
         return results
 
+    async def broadcast_to_all_subscribers(self, message_text: str, image_path: Optional[str] = None) -> int:
+        """
+        Broadcasting real-time Flash Alerts to ALL registered subscribers / users in database.
+        """
+        try:
+            from user_manager import user_manager
+            active_chat_ids = user_manager.get_all_active_chat_ids()
+        except Exception:
+            active_chat_ids = []
+
+        if not active_chat_ids:
+            return 0
+
+        logger.info(f"🔔 [REAL-TIME FLASH ALERT] Broadcasting to {len(active_chat_ids)} active subscribers...")
+        success_count = 0
+        for chat_id in active_chat_ids:
+            # Skip if VIP Channel / Admin already received
+            if str(chat_id) == str(self.channel_id) or str(chat_id) == str(config.TELEGRAM_ADMIN_CHAT_ID):
+                continue
+            try:
+                res = await self.broadcast_to_vip_channel(message_text, image_path, target_chat_id=chat_id)
+                if res:
+                    success_count += 1
+                await asyncio.sleep(0.04)  # Rate limiting ~25 msgs/sec max
+            except Exception as e:
+                logger.error(f"Error sending Flash Alert to user {chat_id}: {e}")
+
+        logger.info(f"✅ [FLASH ALERT COMPLETE] Delivered to {success_count}/{len(active_chat_ids)} active subscribers.")
+        return success_count
+
     async def enqueue_direct_messages(self, user_ids: List[int], message_text: str):
         """Enqueue individual DM jobs for users."""
         for uid in user_ids:

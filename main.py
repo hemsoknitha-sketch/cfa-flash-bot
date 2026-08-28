@@ -157,6 +157,16 @@ async def process_news(news_text: str, news_id: str, source_name: str = "ប្�
             image_path=image_path
         )
 
+        # 🔔 Direct Flash Alert: ផ្ញើសារ Flash News Alert ផ្ទាល់ទៅកាន់ Subscribers ទាំងអស់ក្នុង Database
+        try:
+            alert_count = await pipeline_engine.broadcaster.broadcast_to_all_subscribers(
+                message_text=processed_article.formatted_telegram_post,
+                image_path=image_path
+            )
+            logger.info(f"🔔 [SUBSCRIBER ALERTS SENT] Direct DM Alerts delivered to {alert_count} active users.")
+        except Exception as alert_err:
+            logger.error(f"Subscriber Direct Alert notice: {alert_err}")
+
         # 📲 Multi-Channel Broadcast: ផ្ញើទៅ Meta Threads
         try:
             from threads_publisher import threads_publisher
