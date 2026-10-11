@@ -1,6 +1,12 @@
+import sys
 import asyncio
 import logging
 import time
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 from scraper import IngestionEngine, RawNewsItem
 from vector_store import VectorDeduplicator
 from ai_rewriter import SuperBrainAIRewriter

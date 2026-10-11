@@ -70,17 +70,20 @@ class TelegramBroadcaster:
                     photo_data.add_field("chat_id", str(dest_chat_id))
                     
                     is_long_article = len(message_text) > 1020
+                    remaining_text = ""
                     if not is_long_article:
                         caption_text = message_text
                     else:
                         truncated = message_text[:1010]
-                        last_stop = max(truncated.rfind("។"), truncated.rfind("៕"))
+                        last_stop = max(truncated.rfind("។\n\n"), truncated.rfind("៕\n\n"), truncated.rfind("។"), truncated.rfind("៕"))
                         if last_stop > 200:
-                            caption_text = truncated[:last_stop + 1]
+                            caption_text = truncated[:last_stop + 1].strip()
                             if caption_text.endswith("។"):
                                 caption_text = caption_text[:-1] + " ៕"
+                            remaining_text = message_text[last_stop + 1:].strip()
                         else:
                             caption_text = truncated.rsplit(" ", 1)[0] + " ៕"
+                            remaining_text = message_text[len(caption_text):].strip()
 
                     photo_data.add_field("caption", caption_text)
                     photo_data.add_field("parse_mode", "Markdown")
@@ -91,17 +94,17 @@ class TelegramBroadcaster:
                         res_json = await photo_resp.json()
                         if photo_resp.status == 200 and res_json.get("ok"):
                             logger.info(f"Successfully delivered Photo Banner to Telegram Chat {dest_chat_id}.")
-                            if is_long_article:
-                                # Send second message with full un-truncated 3-4 paragraph article text
+                            if is_long_article and remaining_text:
+                                # Send second message with ONLY the continuation text (Zero duplication of headline or paragraph 1!)
                                 msg_url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
                                 msg_payload = {
                                     "chat_id": str(dest_chat_id),
-                                    "text": message_text,
+                                    "text": f"📖 *ខ្លឹមសារលម្អិតបន្ត ៖*\n\n{remaining_text}",
                                     "parse_mode": "Markdown",
                                     "reply_markup": {"inline_keyboard": inline_kb}
                                 }
                                 async with session.post(msg_url, json=msg_payload) as msg_resp:
-                                    logger.info(f"Delivered full un-truncated 3-paragraph article text to Telegram Chat {dest_chat_id}.")
+                                    logger.info(f"Delivered continuation article text to Telegram Chat {dest_chat_id}.")
                             return True
                         else:
                             logger.warning(f"sendPhoto Markdown failed ({res_json.get('description')}). Retrying sendPhoto plain text...")
@@ -114,11 +117,11 @@ class TelegramBroadcaster:
                                 plain_json = await plain_resp.json()
                                 if plain_resp.status == 200 and plain_json.get("ok"):
                                     logger.info(f"Successfully delivered Photo Banner & Plain Caption to Telegram Chat {dest_chat_id}.")
-                                    if is_long_article:
+                                    if is_long_article and remaining_text:
                                         msg_url = f"https://api.telegram.org/bot{self.bot_token}/sendMessage"
                                         msg_payload = {
                                             "chat_id": str(dest_chat_id),
-                                            "text": message_text.replace("*", "").replace("_", "").replace("`", ""),
+                                            "text": f"📖 ខ្លឹមសារលម្អិតបន្ត ៖\n\n{remaining_text}".replace("*", "").replace("_", "").replace("`", ""),
                                             "reply_markup": {"inline_keyboard": inline_kb}
                                         }
                                         await session.post(msg_url, json=msg_payload)

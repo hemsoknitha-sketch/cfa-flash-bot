@@ -86,7 +86,7 @@ class SuperBrainAIRewriter:
         client_tuple = gemini_key_pool.get_client()
         if client_tuple:
             client, active_key = client_tuple
-            models_to_try = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+            models_to_try = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
             for m_name in models_to_try:
                 try:
                     response = client.models.generate_content(
@@ -250,7 +250,7 @@ class SuperBrainAIRewriter:
         if client_tuple:
             client, active_key = client_tuple
             prompt = f"Source: {source} (Tier {source_tier})\nIs Unverified Flag: {is_unverified}\nTitle: {title}\nContent: {content}"
-            models_to_try = ["gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+            models_to_try = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
             
             for m_name in models_to_try:
                 try:
@@ -288,8 +288,8 @@ class SuperBrainAIRewriter:
                             client, active_key = new_client_tuple
                         continue
                     else:
-                        logger.warning(f"Gemini API model [{m_name}] error: {e}")
-                        break
+                        logger.warning(f"Gemini API model [{m_name}] unavailable ({e}). Trying next model...")
+                        continue
 
         # Option B.2: Hugging Face Fine-Tuned Model (hemsinath/cfa-flash-bot) Failover
         try:

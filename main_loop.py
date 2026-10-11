@@ -4,6 +4,11 @@ import time
 import asyncio
 import logging
 import threading
+
+if hasattr(sys.stdout, "reconfigure"):
+    sys.stdout.reconfigure(encoding="utf-8")
+if hasattr(sys.stderr, "reconfigure"):
+    sys.stderr.reconfigure(encoding="utf-8")
 from main import process_batch_news
 from bot_interactive import SuperSmartTelegramBot
 

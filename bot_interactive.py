@@ -500,19 +500,29 @@ class SuperSmartTelegramBot:
         try:
             import psutil
             ram = psutil.virtual_memory()
-            disk = psutil.disk_usage('/')
-            cpu_load = os.getloadavg()[0] if hasattr(os, "getloadavg") else 0.07
+            disk_path = '/' if os.name != 'nt' else 'C:\\'
+            disk = psutil.disk_usage(disk_path)
+            cpu_load = os.getloadavg()[0] if hasattr(os, "getloadavg") else round(psutil.cpu_percent(interval=0.1) / 100.0, 2)
             ram_used_mb = int(ram.used / (1024 * 1024))
             ram_total_mb = int(ram.total / (1024 * 1024))
             ram_percent = ram.percent
             disk_used_gb = round(disk.used / (1024 * 1024 * 1024), 1)
-            raw_disk_total = round(disk.total / (1024 * 1024 * 1024), 1)
-            disk_total_gb = 30.0 if raw_disk_total < 30.0 else raw_disk_total
+            disk_total_gb = round(disk.total / (1024 * 1024 * 1024), 1)
             disk_percent = round((disk_used_gb / disk_total_gb) * 100, 1)
         except Exception:
             ram_used_mb, ram_total_mb, ram_percent = 546, 964, 56.6
             disk_used_gb, disk_total_gb, disk_percent = 3.7, 30.0, 12.3
             cpu_load = 0.04
+
+        # Dynamic OS & Host Environment Detection
+        current_os = f"{platform.system()} {platform.release()}"
+        hostname = platform.node().lower()
+        if "gce" in hostname or "google" in hostname or os.path.exists("/etc/google_system"):
+            env_label = "Google Cloud VM"
+        elif os.name == 'nt':
+            env_label = "Local Windows Workstation"
+        else:
+            env_label = "Cloud VPS Linux"
 
         from national_ingestion_registry import get_all_national_feeds
         feed_count = len(get_all_national_feeds())
@@ -520,11 +530,11 @@ class SuperSmartTelegramBot:
         return (
             "🟢 *CFA FLASH FEED — VPS SERVER TELEMETRY*\n\n"
             "💻 *១. ស្ថានភាពម៉ាស៊ីន VPS (Server Telemetry) ៖*\n"
-            f"• *OS System ៖* `Linux {platform.release()}`\n"
-            f"• *CPU Usage ៖* `Load: {cpu_load:.2f} (Google Cloud VM)`\n"
+            f"• *OS System ៖* `{current_os}`\n"
+            f"• *CPU Usage ៖* `Load: {cpu_load:.2f} ({env_label})`\n"
             f"• *RAM Memory ៖* `{ram_used_mb} MB / {ram_total_mb} MB ({ram_percent}%)`\n"
             f"• *Disk Storage ៖* `{disk_used_gb} GB / {disk_total_gb} GB ({disk_percent}% Used)`\n"
-            "• *Server Status ៖* `Active 24/7 365 (Google Cloud VM)`\n\n\n"
+            f"• *Server Status ៖* `Active 24/7 365 ({env_label})`\n\n\n"
             "🤖 *២. ព័ត៌មានប្រព័ន្ធ AI & Vector Database ៖*\n"
             f"• *Active Feeds ៖* `{feed_count} ស្ថាប័នរដ្ឋ ខេត្ត & សារព័ត៌មានឌីជីថល`\n"
             "• *AI Engine ៖* `Hugging Face (hemsinath/cfa-flash-bot) + Gemini 3.6 Flash`\n"

@@ -138,13 +138,15 @@ class KhmerLanguageAuditor:
     def protect_khmer_grapheme_clusters(self, text: str) -> str:
         """
         Khmer Unicode Grapheme Cluster Protection V8.0 GOLD STANDARD.
-        Ensures dependent vowels (\u17b4-\u17d3) and subscript coeng sign (\u17d2) 
-        NEVER dangle at string ends or line breaks. Strips dotted circle (\u25cc).
+        Ensures incomplete subscript coeng sign (\u17d2) NEVER dangles at string ends or line breaks.
+        Preserves all legitimate ending consonants, vowels, and signs like Bantoc (\u17cb '់') and Reahmuk (\u17c7 'ះ').
+        Strips dotted circle (\u25cc).
         """
         if not text:
             return ""
         text = text.replace("\u25cc", "")
-        text = re.sub(r'[\u17b4-\u17d3\u17d2]+$', '', text)
+        # Only strip incomplete dangling coeng sign ('\u17d2') at string end
+        text = re.sub(r'\u17d2+$', '', text)
         return text.strip()
 
 
