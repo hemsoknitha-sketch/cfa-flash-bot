@@ -91,7 +91,14 @@ class SuperSmartTelegramBot:
         Super Smart RBAC Keyboard.
         Public users get Public Menu. Admin gets Full System Control Menu.
         """
+        mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
         keyboard = [
+            [
+                {
+                    "text": "📱 បើក CFA Web Mini App (24/7 Hub)",
+                    "web_app": {"url": mini_app_url}
+                }
+            ],
             [
                 {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍", "callback_data": "cmd_latest"},
                 {"text": "🛡️ ក្រសួងការពារជាតិ & MFAIC", "callback_data": "cmd_defense_news"}
@@ -747,6 +754,21 @@ class SuperSmartTelegramBot:
 
                 if text.startswith("/start"):
                     await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard(is_admin=is_admin))
+
+                elif text.startswith("/app") or text.startswith("/miniapp"):
+                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+                    app_kb = {
+                        "inline_keyboard": [
+                            [{"text": "📱 បើក CFA Web Mini App 24/7", "web_app": {"url": mini_app_url}}]
+                        ]
+                    }
+                    await self.send_message(
+                        chat_id,
+                        "🚀 *CFA FLASH FEED — WEB MINI APP 24/7*\n\n"
+                        "សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកផ្ទាំង Mini App អានព័ត៌មានទាន់ហេតុការណ៍ "
+                        "ស្រាវជ្រាវច្បាប់ជាតិ និងតាមដានស្ថានភាពប្រព័ន្ធក្នុង Telegram ផ្ទាល់ ៖",
+                        reply_markup=app_kb
+                    )
 
                 elif text.startswith("/broadcast") or text.startswith("/announce"):
                     if not is_admin:

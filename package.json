@@ -1,0 +1,23 @@
+{
+  "name": "cfa-flash-feed-app",
+  "version": "8.0.0",
+  "description": "CFA Flash Feed — Telegram Web Mini App & Electron Desktop Hub V8.0",
+  "main": "electron_main.js",
+  "scripts": {
+    "start": "electron .",
+    "pack": "electron-builder --dir",
+    "dist": "electron-builder"
+  },
+  "keywords": [
+    "cfa",
+    "telegram-mini-app",
+    "electron",
+    "news-feed",
+    "khmer-ai"
+  ],
+  "author": "Soknitha Hem <hem.sinath@gmail.com>",
+  "license": "MIT",
+  "devDependencies": {
+    "electron": "^34.2.0"
+  }
+}

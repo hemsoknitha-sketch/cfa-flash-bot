@@ -55,4 +55,7 @@ class Config:
     CREDIBILITY_HIGH_THRESHOLD: float = 85.0
     CREDIBILITY_LEAK_THRESHOLD: float = 65.0
 
+    # Telegram Web Mini App URL (TMA)
+    TELEGRAM_MINI_APP_URL: str = os.getenv("TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+
 config = Config()
