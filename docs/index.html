@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="km">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>CFA Flash Feed — 24/7 Web Mini App</title>
+    <!-- Telegram Web App SDK v7+ -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <!-- Premium Google Fonts: Kantumruy Pro & Outfit & JetBrains Mono -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600;700&family=Kantumruy+Pro:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400&family=Outfit:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="dark-theme">
+    <div id="app" class="app-shell">
+        <!-- Floating Ambient Background Lighting -->
+        <div class="ambient-glow glow-cyan"></div>
+        <div class="ambient-glow glow-indigo"></div>
+
+        <!-- Top Header Navigation -->
+        <header class="app-header glassmorphic">
+            <div class="header-left">
+                <div class="user-pill" id="userPill" title="ព័ត៌មានគណនី Telegram">
+                    <div class="avatar-ring">
+                        <img id="userAvatar" src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%2300f2fe'%3E%3Cpath d='M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 3c1.66 0 3 1.34 3 3s-1.34 3-3 3-3-1.34-3-3 1.34-3 3-3zm0 14.2c-2.5 0-4.71-1.28-6-3.22.03-1.99 4-3.08 6-3.08 1.99 0 5.97 1.09 6 3.08-1.29 1.94-3.5 3.22-6 3.22z'/%3E%3C/svg%3E" alt="Avatar">
+                    </div>
+                    <div class="user-meta">
+                        <div class="user-name" id="userName">CFA Explorer</div>
+                        <div class="user-role-badge" id="userRoleBadge">🌟 VIP SUBSCRIBER</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="header-right">
+                <div class="live-status-pill">
+                    <span class="live-pulse"></span>
+                    <span class="live-text">24/7 APEX</span>
+                </div>
+                <button class="icon-btn" id="refreshBtn" title="ទាញយកព័ត៌មានឡើងវិញ">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <path d="M23 4v6h-6M1 20v-6h6"/>
+                        <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/>
+                    </svg>
+                </button>
+            </div>
+        </header>
+
+        <!-- Brand Bar -->
+        <div class="brand-bar">
+            <div class="brand-title">
+                <span class="brand-accent">🇰🇭 CFA FLASH FEED</span>
+                <span class="brand-sub">មជ្ឈមណ្ឌលព័ត៌មានជាតិ & AI INTELLIGENCE HUB</span>
+            </div>
+        </div>
+
+        <!-- Main Viewport Container -->
+        <main class="main-viewport">
+            <!-- TAB 1: FLASH NEWS FEED -->
+            <section id="tabNews" class="tab-pane active">
+                <div class="section-hero">
+                    <div class="hero-label">⚡ REAL-TIME FLASH WIRE</div>
+                    <h1 class="hero-title">ព័ត៌មានទាន់ហេតុការណ៍ជាតិ & អន្តរជាតិ</h1>
+                    <p class="hero-desc">ត្រួតពិនិត្យ ផ្ទៀងផ្ទាត់ និងកែច្នៃដោយខួរក្បាលឆ្លាតវៃ AI APEX Super Brain ២៤/៧/៣៦៥</p>
+                </div>
+
+                <div class="search-filter-box glassmorphic">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="newsSearchInput" placeholder="ស្វែងរកព័ត៌មានតាមពាក្យគន្លឹះ (ឧ. ព្រំដែន, រាជរដ្ឋាភិបាល...)...">
+                </div>
+
+                <div class="feed-container" id="newsFeedList">
+                    <!-- Dynamic News Cards Injected by app.js -->
+                    <div class="skeleton-card"></div>
+                    <div class="skeleton-card"></div>
+                </div>
+            </section>
+
+            <!-- TAB 2: DEFENSE & BORDER INTELLIGENCE -->
+            <section id="tabDefense" class="tab-pane">
+                <div class="section-hero">
+                    <div class="hero-label">🛡️ SOVEREIGN DEFENSE VAULT</div>
+                    <h1 class="hero-title">ក្រសួងការពារជាតិ & ការទូត MFAIC</h1>
+                    <p class="hero-desc">បណ្ណសារសេចក្តីថ្លែងការណ៍ផ្លូវការ ការពារអធិបតេយ្យភាព និងព្រំដែនកម្ពុជា</p>
+                </div>
+
+                <div class="search-filter-box glassmorphic">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="defenseSearchInput" placeholder="ស្វែងរកតាមបង្គោលព្រំដែន ឬសេចក្តីថ្លែងការណ៍...">
+                </div>
+
+                <div class="feed-container" id="defenseFeedList">
+                    <!-- Injected by app.js -->
+                </div>
+            </section>
+
+            <!-- TAB 3: CAMBODIAN LEGAL VAULT (249+ ARTICLES) -->
+            <section id="tabLaws" class="tab-pane">
+                <div class="section-hero">
+                    <div class="hero-label">⚖️ MASTER LEGAL VAULT</div>
+                    <h1 class="hero-title">ស្រាវជ្រាវច្បាប់ជាតិ និងរដ្ឋធម្មនុញ្ញ</h1>
+                    <p class="hero-desc">ឃ្លាំងមាត្រាច្បាប់ ២៤៩+ មាត្រា ៥១/៥២ រដ្ឋធម្មនុញ្ញ ក្រមព្រហ្មទណ្ឌ និងនីតិរដ្ឋ</p>
+                </div>
+
+                <div class="search-filter-box glassmorphic">
+                    <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                        <circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/>
+                    </svg>
+                    <input type="text" id="lawsSearchInput" placeholder="សួរសំណួរច្បាប់ ឬវាយលេខមាត្រា (ឧ. មាត្រា ៥១, ព្រហ្មទណ្ឌ, បរិហារកេរ្តិ៍)...">
+                </div>
+
+                <div class="quick-tags">
+                    <button class="quick-tag" onclick="quickLawSearch('មាត្រា ៥១')">📜 មាត្រា ៥១ រដ្ឋធម្មនុញ្ញ</button>
+                    <button class="quick-tag" onclick="quickLawSearch('ច្បាប់ស្តីពីរបបសារព័ត៌មាន')">📰 ច្បាប់សារព័ត៌មាន</button>
+                    <button class="quick-tag" onclick="quickLawSearch('បរិហារកេរ្តិ៍')">⚖️ បទបរិហារកេរ្តិ៍</button>
+                    <button class="quick-tag" onclick="quickLawSearch('ប្រឆាំងអំពើពុករលួយ')">🛡️ ប្រឆាំងអំពើពុករលួយ</button>
+                </div>
+
+                <div class="feed-container" id="lawsFeedList">
+                    <!-- Injected by app.js -->
+                </div>
+            </section>
+
+            <!-- TAB 4: FACT-CHECK AI SENTINEL -->
+            <section id="tabFactCheck" class="tab-pane">
+                <div class="section-hero">
+                    <div class="hero-label">🔍 ANTI-FAKE NEWS SENTINEL</div>
+                    <h1 class="hero-title">ម៉ាស៊ីនផ្ទៀងផ្ទាត់ព័ត៌មាន Fact-Check</h1>
+                    <p class="hero-desc">ផ្ទៀងផ្ទាត់ភាពជឿជាក់ (0% - 100%) ធៀបនឹងស្ថាប័នរដ្ឋទាំង ៣៧ និងរដ្ឋបាល ២៥ ខេត្ត</p>
+                </div>
+
+                <div class="factcheck-card glassmorphic">
+                    <div class="form-group">
+                        <label for="fcClaimText">📝 ខ្លឹមសារ ឬចំណងជើងដែលត្រូវផ្ទៀងផ្ទាត់ ៖</label>
+                        <textarea id="fcClaimText" rows="4" placeholder="សូមបិទភ្ជាប់ (Paste) អត្ថបទ សេចក្តីរាយការណ៍ ឬ URL ព័ត៌មានដែលលោកអ្នកសង្ស័យនៅទីនេះ..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="fcSourceInput">🏛️ ប្រភពដកស្រង់ (បើមាន) ៖</label>
+                        <input type="text" id="fcSourceInput" placeholder="ឧ. បណ្តាញសង្គម Facebook, TikTok, ក្រសួងព័ត៌មាន...">
+                    </div>
+
+                    <button class="primary-btn" id="btnRunFactCheck">
+                        <svg viewBox="0 0 24 24" width="18" height="18" stroke="currentColor" stroke-width="2" fill="none">
+                            <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/>
+                        </svg>
+                        <span>ដំណើរការវិភាគ Fact-Check ភ្លាមៗ</span>
+                    </button>
+                </div>
+
+                <div id="fcResultContainer" class="fc-result-card glassmorphic hidden">
+                    <div class="fc-meter-wrapper">
+                        <div class="fc-score-circle" id="fcScoreCircle">
+                            <span id="fcScoreVal">95%</span>
+                        </div>
+                        <div class="fc-meta-info">
+                            <div class="fc-badge" id="fcBadgeText">🟢 ភាពជឿជាក់ផ្លូវការ (៩៥% - ១០០%)</div>
+                            <div class="fc-desc" id="fcLevelText">ផ្ទៀងផ្ទាត់ដោយជោគជ័យតាមស្តង់ដារ</div>
+                        </div>
+                    </div>
+                    <div class="fc-reasons-list" id="fcReasonsList"></div>
+                </div>
+            </section>
+
+            <!-- TAB 5: 24/7 SERVER HUD & TELEMETRY -->
+            <section id="tabSystem" class="tab-pane">
+                <div class="section-hero">
+                    <div class="hero-label">💻 24/7/365 SERVER TELEMETRY</div>
+                    <h1 class="hero-title">ស្ថានភាពម៉ាស៊ីន និងខួរក្បាល AI</h1>
+                    <p class="hero-desc">តាមដានសុខភាព Hardware, CPU, RAM និងស្ថិតិនៃការផ្សាយផ្ទាល់ Real-Time</p>
+                </div>
+
+                <div class="telemetry-grid">
+                    <div class="hud-card glassmorphic">
+                        <div class="hud-header">
+                            <span>⚡ CPU LOAD</span>
+                            <span id="hudCpuPct" class="hud-val">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="hudCpuBar" class="progress-bar-fill" style="width: 15%"></div>
+                        </div>
+                        <div class="hud-sub" id="hudHostName">Host: Initializing...</div>
+                    </div>
+
+                    <div class="hud-card glassmorphic">
+                        <div class="hud-header">
+                            <span>🧠 RAM MEMORY</span>
+                            <span id="hudRamPct" class="hud-val">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="hudRamBar" class="progress-bar-fill fill-emerald" style="width: 45%"></div>
+                        </div>
+                        <div class="hud-sub" id="hudRamText">0 MB / 0 MB</div>
+                    </div>
+
+                    <div class="hud-card glassmorphic">
+                        <div class="hud-header">
+                            <span>💾 DISK STORAGE</span>
+                            <span id="hudDiskPct" class="hud-val">0.0%</span>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div id="hudDiskBar" class="progress-bar-fill fill-amber" style="width: 12%"></div>
+                        </div>
+                        <div class="hud-sub" id="hudDiskText">0 GB / 0 GB</div>
+                    </div>
+
+                    <div class="hud-card glassmorphic">
+                        <div class="hud-header">
+                            <span>🌐 INFRASTRUCTURE</span>
+                            <span class="hud-val text-emerald">100% FREE</span>
+                        </div>
+                        <div class="hud-info-list">
+                            <div class="hud-info-row">
+                                <span>Platform ៖</span>
+                                <span id="hudOsName" class="text-cyan">Linux / Cloud VM</span>
+                            </div>
+                            <div class="hud-info-row">
+                                <span>Hosting Cost ៖</span>
+                                <span class="text-emerald">$0.00 / 24/7 365</span>
+                            </div>
+                            <div class="hud-info-row">
+                                <span>National Desks ៖</span>
+                                <span class="text-gold">៧៩ ស្ថាប័នរដ្ឋ & ខេត្ត</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="hud-actions-card glassmorphic">
+                    <h3 class="card-title">🎮 MASTER BOT CONTROL CENTER</h3>
+                    <div class="action-btn-row">
+                        <button class="action-btn" onclick="testPingLatency()">
+                            ⚡ ពិនិត្យល្បឿន Ping (ms)
+                        </button>
+                        <button class="action-btn" onclick="shareMiniApp()">
+                            📤 ចែករំលែក Mini App នេះ
+                        </button>
+                    </div>
+                    <div id="pingResultText" class="ping-output"></div>
+                </div>
+            </section>
+        </main>
+
+        <!-- Floating Glassmorphic Bottom Navigation Bar -->
+        <nav class="bottom-nav glassmorphic">
+            <button class="nav-btn active" data-tab="tabNews" title="ព័ត៌មានទាន់ហេតុការណ៍">
+                <span class="nav-icon">📰</span>
+                <span class="nav-label">ព័ត៌មាន</span>
+            </button>
+            <button class="nav-btn" data-tab="tabDefense" title="ការពារជាតិ">
+                <span class="nav-icon">🛡️</span>
+                <span class="nav-label">ការពារជាតិ</span>
+            </button>
+            <button class="nav-btn" data-tab="tabLaws" title="ច្បាប់ជាតិ">
+                <span class="nav-icon">⚖️</span>
+                <span class="nav-label">ច្បាប់ជាតិ</span>
+            </button>
+            <button class="nav-btn" data-tab="tabFactCheck" title="Fact-Check">
+                <span class="nav-icon">🔍</span>
+                <span class="nav-label">Fact-Check</span>
+            </button>
+            <button class="nav-btn" data-tab="tabSystem" title="ប្រព័ន្ធ 24/7">
+                <span class="nav-icon">💻</span>
+                <span class="nav-label">ប្រព័ន្ធ 24/7</span>
+            </button>
+        </nav>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>

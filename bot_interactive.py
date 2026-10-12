@@ -88,7 +88,7 @@ class SuperSmartTelegramBot:
                     logger.info(f"Bot Admin Telegram Commands Menu Registered: {res_adm.get('ok')}")
 
             # 3. Register Native Telegram Chat Menu Button (Side Button for 1-Click Launch)
-            mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+            mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha-sketch.github.io/cfa-flash-bot/")
             if mini_app_url and mini_app_url.startswith("https://"):
                 menu_btn_payload = {
                     "menu_button": {
@@ -108,7 +108,7 @@ class SuperSmartTelegramBot:
         Super Smart RBAC Keyboard.
         Public users get Public Menu. Admin gets Full System Control Menu.
         """
-        mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+        mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha-sketch.github.io/cfa-flash-bot/")
         keyboard = [
             [
                 {
@@ -776,7 +776,7 @@ class SuperSmartTelegramBot:
                     await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard(is_admin=is_admin))
 
                 elif text.startswith("/miniapp") or text.startswith("/app"):
-                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha-sketch.github.io/cfa-flash-bot/")
                     app_kb = {
                         "inline_keyboard": [
                             [
@@ -1394,7 +1394,7 @@ class SuperSmartTelegramBot:
                     await self.answer_callback_query(cb_id, text=f"👁️ អត្ថបទនេះត្រូវបានអានចំនួន {views_cnt} លើក!")
 
                 elif data == "cmd_miniapp":
-                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha-sketch.github.io/cfa-flash-bot/")
                     app_kb = {
                         "inline_keyboard": [
                             [
