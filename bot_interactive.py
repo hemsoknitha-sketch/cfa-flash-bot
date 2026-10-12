@@ -43,9 +43,11 @@ class SuperSmartTelegramBot:
     async def set_commands_menu(self):
         """
         Registers separate Telegram Bot Command Menus for Public Users vs Bot Admin using setMyCommands API scopes.
+        Also registers native Chat Menu Button for 1-click Web Mini App opening.
         """
         public_commands = [
             {"command": "start", "description": "🏠 បើកម៉ឺនុយមេ (Main Menu)"},
+            {"command": "miniapp", "description": "📱 បើក Web Mini App (24/7 Flash Hub)"},
             {"command": "latest", "description": "📡 ព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយ"},
             {"command": "laws", "description": "⚖️ ស្រាវជ្រាវច្បាប់ជាតិ & រដ្ឋធម្មនុញ្ញ"},
             {"command": "defense_news", "description": "🛡️ សេចក្តីថ្លែងការណ៍ ក្រសួងការពារជាតិ & MFAIC"},
@@ -56,6 +58,7 @@ class SuperSmartTelegramBot:
 
         admin_commands = [
             {"command": "start", "description": "🏠 បើកម៉ឺនុយមេ Admin (Admin Main Menu)"},
+            {"command": "miniapp", "description": "📱 បើក Web Mini App (Admin 24/7 Hub)"},
             {"command": "users", "description": "👥 គ្រប់គ្រងអ្នកប្រើប្រាស់ (User Dashboard)"},
             {"command": "users_stats", "description": "📊 ស្ថិតិអ្នកប្រើប្រាស់សរុប (User Stats)"},
             {"command": "user_info", "description": "👤 ព័ត៌មានលម្អិតអ្នកប្រើប្រាស់ (User Profile)"},
@@ -83,6 +86,20 @@ class SuperSmartTelegramBot:
                 async with session.post(f"{self.api_url}/setMyCommands", json={"commands": admin_commands, "scope": {"type": "chat", "chat_id": int(admin_id)}}) as resp_adm:
                     res_adm = await resp_adm.json()
                     logger.info(f"Bot Admin Telegram Commands Menu Registered: {res_adm.get('ok')}")
+
+            # 3. Register Native Telegram Chat Menu Button (Side Button for 1-Click Launch)
+            mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+            if mini_app_url and mini_app_url.startswith("https://"):
+                menu_btn_payload = {
+                    "menu_button": {
+                        "type": "web_app",
+                        "text": "📱 CFA App",
+                        "web_app": {"url": mini_app_url}
+                    }
+                }
+                async with session.post(f"{self.api_url}/setChatMenuButton", json=menu_btn_payload) as resp_btn:
+                    res_btn = await resp_btn.json()
+                    logger.info(f"Chat Menu Button (/miniapp) Registered: {res_btn.get('ok')}")
         except Exception as e:
             logger.error(f"Failed to register bot command menus: {e}")
 
@@ -431,24 +448,26 @@ class SuperSmartTelegramBot:
         )
 
     def get_help_text(self) -> str:
-        """Generates Super Smart /help guide detailing 7 Public Menu commands with official CFA Footnote."""
+        """Generates Super Smart /help guide detailing 8 Public Menu commands with official CFA Footnote."""
         return (
             "❓ *ការណែនាំ និងរបៀបប្រើប្រាស់ប្រព័ន្ធ (CFA FLASH FEED HELP GUIDE)*\n\n"
             "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធព័ត៌មានជាតិ និងខួរក្បាលឆ្លាតវៃ APEX Super Brain! "
-            "លោកអ្នកអាចប្រើប្រាស់ **Menu សាធារណៈទាំង ៧** ខាងក្រោមបានដោយសេរី ២៤/៧ ៖\n\n"
-            "១. 📰 *ព័ត៌មានទាន់ហេតុការណ៍ (/latest) ៖*\n"
+            "លោកអ្នកអាចប្រើប្រាស់ **Menu សាធារណៈទាំង ៨** ខាងក្រោមបានដោយសេរី ២៤/៧ ៖\n\n"
+            "១. 📱 *Web Mini App (/miniapp ឬ /app) ៖*\n"
+            "  └ បើកផ្ទាំង Dashboard Mini App ទំនើប 24/7 Flash Hub អានព័ត៌មាន ស្រាវជ្រាវច្បាប់ជាតិ ផ្ទៀងផ្ទាត់ Fact-Check និងពិនិត្យស្ថានភាព Server ក្នុង Telegram ផ្ទាល់។\n\n"
+            "២. 📰 *ព័ត៌មានទាន់ហេតុការណ៍ (/latest) ៖*\n"
             "  └ អានអត្ថបទព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយបំផុត ដែលត្រូវបានទាញយក និងផ្ទៀងផ្ទាត់ដោយ AI។\n\n"
-            "២. 🛡️ *ក្រសួងការពារជាតិ & MFAIC (/defense_news) ៖*\n"
+            "៣. 🛡️ *ក្រសួងការពារជាតិ & MFAIC (/defense_news) ៖*\n"
             "  └ អានសេចក្តីថ្លែងការណ៍ និងសេចក្តីប្រកាសព័ត៌មានផ្លូវការរបស់ ក្រសួងការពារជាតិ និងក្រសួងការបរទេសកម្ពុជា។\n\n"
-            "៣. 🔍 *Fact-Check (0-100%) (/factcheck) ៖*\n"
+            "៤. 🔍 *Fact-Check (0-100%) (/factcheck) ៖*\n"
             "  └ ផ្ទៀងផ្ទាត់ភាពជឿជាក់ និងស្កេនរកព័ត៌មានក្លែងក្លាយ (Anti-Fake News Index) ដោយប្រើបញ្ជា `/factcheck <អត្ថបទ/URL>`។\n\n"
-            "៤. ⚖️ *ស្រាវជ្រាវច្បាប់ជាតិ (/laws) ៖*\n"
+            "៥. ⚖️ *ស្រាវជ្រាវច្បាប់ជាតិ (/laws) ៖*\n"
             "  └ ស្រាវជ្រាវក្រមច្បាប់ រដ្ឋធម្មនុញ្ញ (មាត្រា ៥១/៥២) និងនីតិរដ្ឋកម្ពុជា ដោយប្រើបញ្ជា `/laws <សំណួរច្បាប់>`។\n\n"
-            "៥. 🇰🇭 *ប័ណ្ណសារព្រំដែនជាតិ (/border_archive) ៖*\n"
+            "៦. 🇰🇭 *ប័ណ្ណសារព្រំដែនជាតិ (/border_archive) ៖*\n"
             "  └ ស្វែងរកកំណត់ត្រាប្រវត្តិសាស្ត្រយោធា ការទូត និងការការពារអធិបតេយ្យភាពដែនដីកម្ពុជា។\n\n"
-            "៦. ⚡ *ពិនិត្យល្បឿន Ping (/ping) ៖*\n"
+            "៧. ⚡ *ពិនិត្យល្បឿន Ping (/ping) ៖*\n"
             "  └ ពិនិត្យមើលល្បឿនឆ្លើយតប (Response Time Latency) របស់ប្រព័ន្ធ AI ក្នុងកម្រិត milliseconds (ms)។\n\n"
-            "៧. ❓ *ការណែនាំប្រើប្រាស់ (/help) ៖*\n"
+            "៨. ❓ *ការណែនាំប្រើប្រាស់ (/help) ៖*\n"
             "  └ បង្ហាញសៀវភៅណែនាំ និងរបៀបប្រើប្រាស់ប្រព័ន្ធព័ត៌មានទាំងមូល។\n\n"
             "💡 *ជំនួយបន្ថែម ៖* លោកអ្នកអាចផ្ញើសារសួរសំណួរ (Text) ដោយសេរី ឬផ្ញើ URL Facebook (Reels/Videos) ចូលក្នុង Telegram Bot នេះដោយផ្ទាល់ ឥតបាច់ប្រើ slash (`/`) ឡើយ!\n\n"
             "----------------------------------\n"
@@ -741,8 +760,9 @@ class SuperSmartTelegramBot:
                     await self.send_message(
                         chat_id,
                         "🔒 *ពាក្យបញ្ជានេះសម្រាប់តែ Admin ប្រព័ន្ធប៉ុណ្ណោះ។*\n\n"
-                        "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជាសាធារណៈទាំង ៧ ខាងក្រោមបាន ៖*\n"
+                        "💡 *លោកអ្នកអាចប្រើប្រាស់ពាក្យបញ្ជាសាធារណៈទាំង ៨ ខាងក្រោមបាន ៖*\n"
                         "• /start - បើកម៉ឺនុយមេ\n"
+                        "• /miniapp - បើក Web Mini App (24/7 Flash Hub)\n"
                         "• /latest - ព័ត៌មានទាន់ហេតុការណ៍\n"
                         "• /factcheck <អត្ថបទ> - Fact-Check ព័ត៌មាន\n"
                         "• /laws <សំណួរ> - ស្រាវជ្រាវច្បាប់ជាតិកម្ពុជា\n"
@@ -755,20 +775,36 @@ class SuperSmartTelegramBot:
                 if text.startswith("/start"):
                     await self.send_message(chat_id, self.get_welcome_text(), reply_markup=self._build_inline_keyboard(is_admin=is_admin))
 
-                elif text.startswith("/app") or text.startswith("/miniapp"):
+                elif text.startswith("/miniapp") or text.startswith("/app"):
                     mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
                     app_kb = {
                         "inline_keyboard": [
-                            [{"text": "📱 បើក CFA Web Mini App 24/7", "web_app": {"url": mini_app_url}}]
+                            [
+                                {"text": "🚀 បើក CFA Web Mini App (Full Screen)", "web_app": {"url": mini_app_url}}
+                            ],
+                            [
+                                {"text": "📰 ព័ត៌មានទាន់ហេតុការណ៍", "callback_data": "cmd_latest"},
+                                {"text": "🛡️ ក្រសួងការពារជាតិ & MFAIC", "callback_data": "cmd_defense_news"}
+                            ],
+                            [
+                                {"text": "🔍 Fact-Check (0-100%)", "callback_data": "cmd_factcheck"},
+                                {"text": "⚖️ ស្រាវជ្រាវច្បាប់ជាតិ", "callback_data": "cmd_laws"}
+                            ]
                         ]
                     }
-                    await self.send_message(
-                        chat_id,
-                        "🚀 *CFA FLASH FEED — WEB MINI APP 24/7*\n\n"
-                        "សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកផ្ទាំង Mini App អានព័ត៌មានទាន់ហេតុការណ៍ "
-                        "ស្រាវជ្រាវច្បាប់ជាតិ និងតាមដានស្ថានភាពប្រព័ន្ធក្នុង Telegram ផ្ទាល់ ៖",
-                        reply_markup=app_kb
+                    miniapp_msg = (
+                        "🏛️ *CFA FLASH FEED — TELEGRAM WEB MINI APP V8.0*\n"
+                        "🇰🇭 *មជ្ឈមណ្ឌលព័ត៌មានជាតិ & AI INTELLIGENCE HUB 24/7*\n\n"
+                        "សូមស្វាគមន៍មកកាន់ប្រព័ន្ធ **Web Mini App (TMA)** ទំនើបបំផុត ដែលដំណើរការដោយផ្ទាល់នៅក្នុង Telegram ឥតគិតថ្លៃ ២៤/៧/៣៦៥ ៖\n\n"
+                        "✨ *មុខងារពិសេសទាំង ៥ ក្នុង Mini App ៖*\n"
+                        "  • 📰 *Flash News Wire ៖* អានព័ត៌មានទាន់ហេតុការណ៍ជាតិ និងអន្តរជាតិ\n"
+                        "  • 🛡️ *Defense & Border ៖* បណ្ណសារក្រសួងការពារជាតិ & MFAIC\n"
+                        "  • ⚖️ *Legal Vault ៖* ស្រាវជ្រាវមាត្រាច្បាប់ ២៤៩+ និងរដ្ឋធម្មនុញ្ញ\n"
+                        "  • 🔍 *Fact-Check AI ៖* ម៉ាស៊ីនស្កេន និងផ្ទៀងផ្ទាត់ភាពជឿជាក់ព័ត៌មាន\n"
+                        "  • 💻 *24/7 Server HUD ៖* ពិនិត្យសុខភាពម៉ាស៊ីន Hardware & Ping (ms)\n\n"
+                        "👉 *សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកផ្ទាំងកម្មវិធី ៖*"
                     )
+                    await self.send_message(chat_id, miniapp_msg, reply_markup=app_kb)
 
                 elif text.startswith("/broadcast") or text.startswith("/announce"):
                     if not is_admin:
@@ -1277,7 +1313,7 @@ class SuperSmartTelegramBot:
                         del self._callback_debounce_map[k]
 
                 PUBLIC_CALLBACKS = [
-                    "cmd_latest", "cmd_defense_news", "cmd_border_archive",
+                    "cmd_miniapp", "cmd_latest", "cmd_defense_news", "cmd_border_archive",
                     "cmd_factcheck", "cmd_laws", "cmd_ping", "cmd_help"
                 ]
 
@@ -1356,6 +1392,22 @@ class SuperSmartTelegramBot:
                     new_kb = engagement_engine.build_engagement_inline_keyboard(post_id)
                     await self.edit_message_reply_markup(chat_id, msg_id, {"inline_keyboard": new_kb})
                     await self.answer_callback_query(cb_id, text=f"👁️ អត្ថបទនេះត្រូវបានអានចំនួន {views_cnt} លើក!")
+
+                elif data == "cmd_miniapp":
+                    mini_app_url = getattr(config, "TELEGRAM_MINI_APP_URL", "https://hemsoknitha.github.io/cfa-flash-bot/")
+                    app_kb = {
+                        "inline_keyboard": [
+                            [
+                                {"text": "🚀 បើក CFA Web Mini App (Full Screen)", "web_app": {"url": mini_app_url}}
+                            ]
+                        ]
+                    }
+                    await self.send_message(
+                        chat_id,
+                        "📱 *[CFA FLASH FEED — WEB MINI APP 24/7]*\n\n"
+                        "សូមចុចប៊ូតុងខាងក្រោមដើម្បីបើកផ្ទាំង Mini App ពេញអេក្រង់ ៖",
+                        reply_markup=app_kb
+                    )
 
                 elif data == "cmd_latest" or data == "/latest":
                     await self.send_message(chat_id, "📡 *ប្រព័ន្ធកំពុងស្កេន និងទាញយកព័ត៌មានទាន់ហេតុការណ៍ចុងក្រោយបំផុត...*")

@@ -83,6 +83,23 @@ async def run_news_ingestion_loop(interval_seconds: int = 60):
             logger.error(f"❌ Error in news processing cycle: {e}")
         await asyncio.sleep(interval_seconds)
 
+def start_web_api_thread():
+    """Runs the Web API & Mini App Server on port 8080 in its own thread with graceful fallback."""
+    try:
+        from aiohttp import web
+        from web_api_server import create_app
+        app = create_app()
+        runner = web.AppRunner(app)
+        loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(loop)
+        loop.run_until_complete(runner.setup())
+        site = web.TCPSite(runner, host='0.0.0.0', port=8080)
+        loop.run_until_complete(site.start())
+        logger.info("🌐 [WEB API & MINI APP SERVER LAUNCHED] Running on http://0.0.0.0:8080")
+        loop.run_forever()
+    except Exception as e:
+        logger.error(f"Error launching web API server thread: {e}")
+
 from backup_engine import run_daily_2am_backup_loop
 
 async def main():
@@ -93,6 +110,11 @@ async def main():
     bot_thread = threading.Thread(target=start_interactive_bot_thread, daemon=True)
     bot_thread.start()
     logger.info("⚡ [INTERACTIVE BOT THREAD LAUNCHED] Bot commands respond in <10ms!")
+
+    # Start Web API & Mini App Server in dedicated thread on port 8080
+    api_thread = threading.Thread(target=start_web_api_thread, daemon=True)
+    api_thread.start()
+    logger.info("🌐 [WEB API & MINI APP THREAD LAUNCHED] Port 8080 ready!")
 
     # Run news ingestion loop and daily 2:00 AM Phnom Penh time backup scheduler concurrently
     await asyncio.gather(
