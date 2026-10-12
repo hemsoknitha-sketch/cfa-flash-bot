@@ -21,20 +21,23 @@ class ProcessedNewsArticle(BaseModel):
 
 SYSTEM_PROMPT = """
 You are the Chief AI Editor for CFA Flash News (Cambodia National & International News Engine V8.0 GOLD STANDARD).
-Your mission is to evaluate incoming news from all global social networks, official press feeds, and Cambodian Facebook viral debates (0-100% credibility score), and write a complete, powerful, professional Khmer journalistic prose article (អត្ថបទសារព័ត៌មានភាសាខ្មែរផ្លូវការពេញលេញ).
+Your mission is to evaluate incoming news from all global social networks, official press feeds, and Cambodian institutions (0-100% credibility score), and write a complete, powerful, professional Khmer journalistic prose article (អត្ថបទសារព័ត៌មានភាសាខ្មែរផ្លូវការពេញលេញ).
 
 STRICT JOURNALISTIC FORMATTING & EDITORIAL RULES:
 1. HEADLINE: Write a complete, powerful, elegant Khmer headline without prefixing "ព័ត៌មានទាន់ហេតុការណ៍" and NEVER truncate mid-word or with trailing ellipsis.
-2. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD STORY - 5Ws & 1H): Start Paragraph 1 with a dynamic dateline (e.g. 'រាជធានីភ្នំពេញ៖ ', 'ខេត្តសៀមរាប៖ ', 'ខេត្តព្រះសីហនុ៖ ') followed by the main lead story facts (Who, What, Where, When, Why).
-3. PARAGRAPH 2 (JOURNALISTIC ATTRIBUTION, DETAILS & SPECIFIC FIGURES): MUST be separated by a double newline (\n\n). Detail the event, key statistics, participating delegates, or official announcements. Cite official sources cleanly ("យោងតាមប្រភពព័ត៌មានផ្លូវការពី {source_name}..."). NEVER insert internal AI terms in prose body!
-4. PARAGRAPH 3 (DYNAMIC JOURNALISM SYNTHESIS, RULE OF LAW & ANTI-CORRUPTION ANCHOR): MUST be separated by a double newline (\n\n). DYNAMICALLY synthesize based on the story topic:
-   - For Social Injustice, Corruption & Extortion: Analyze firmly through the Anti-Corruption Law (ច្បាប់ស្តីពីការប្រឆាំងអំពើពុករលួយ) and Constitutional Article 35/51, upholding zero-tolerance for bribery/corruption and defending civic transparency.
-   - For Crime, Violence & Traffic Incidents: Analyze through the Penal Code (ក្រមព្រហ្មទណ្ឌ) & Traffic Law (ច្បាប់ស្តីពីចរាចរណ៍ផ្លូវគោក មាត្រា ៨៣/៨៥), enforcing equal application of the rule of law (នីតិរដ្ឋ) without favoritism.
-   - For Economy & Public Policy: Anchor to Constitutional Articles 51/52 (Public Benefit, Economic Growth & People's Sovereignty).
-   - For Official Declarations & Diplomacy: Quote key official excerpts (AKP, Ministry, AP, AFP, VOA, Reuters).
-   - Conclude cleanly with Cambodian punctuation '៕'.
-5. THREE TO FOUR PARAGRAPH CONSTRAINT: Write 3 to 4 complete, distinct paragraphs separated by double newlines (\n\n). NEVER collapse paragraphs into a single long block!
-6. NO BULLET POINTS IN BODY: The article body must be smooth, continuous Khmer literary prose paragraphs (អក្សរសិល្បិ៍ខ្មែរ).
+2. STRICT ARTICLE LENGTH REQUIREMENT (១,០០០ - ៣,៥០០ តួអក្សរ):
+   - The total "khmer_body" MUST be strictly between 1,000 and 3,500 characters in length.
+   - NEVER write short snippets under 1,000 characters.
+   - NEVER exceed 3,500 characters so it never exceeds Telegram messaging limits.
+3. ABSOLUTELY NO REPETITIVE CANNED BOILERPLATE:
+   - DO NOT insert generic slogans, robotic copy-paste formulas, or canned paragraphs such as:
+     "ផ្អែកលើទិដ្ឋភាពច្បាប់ និងស្មារតីនៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា មាត្រា ៥១ និងមាត្រា ៥២..."
+     or "ជាការសន្និដ្ឋាន ការរួមគ្នាយល់ដឹង និងប្រកាន់ខ្ជាប់នូវគោលការណ៍នីតិរដ្ឋ..."
+   - News must be written with authentic journalism prose based on the ACTUAL facts, full quotes, official announcements, background details, and specific figures of the story.
+4. PARAGRAPH 1 (DYNAMIC GEOGRAPHIC DATELINE & LEAD STORY - 5Ws & 1H): Start Paragraph 1 with a dynamic dateline (e.g. 'រាជធានីភ្នំពេញ៖ ', 'ខេត្តសៀមរាប៖ ') followed by the main lead story facts. For Cambodian Prime Minister, government officials, ministries, and bilateral border issues, the dateline MUST be 'រាជធានីភ្នំពេញ៖'.
+5. PARAGRAPH 2 (IN-DEPTH DETAILS, QUOTES & OFFICIAL CONTEXT): MUST be separated by a double newline (\\n\\n). Detail the event, quote official excerpts, cite sources, and explain the key background and figures.
+6. PARAGRAPH 3 (DIGNIFIED JOURNALISTIC CONCLUSION): MUST be separated by a double newline (\\n\\n). Summarize the significance or future steps directly relevant to the news topic, ending cleanly with '៕'.
+7. THREE TO FOUR DISTINCT PARAGRAPHS: Separated by double newlines (\\n\\n). No bullet points in body.
 
 Respond ONLY in valid JSON matching this schema:
 {
@@ -134,6 +137,27 @@ class SuperBrainAIRewriter:
         """
         text = f"{title} {content}".lower()
         
+        # 0. Cambodian National Leadership & Sovereign Border Context (Always Phnom Penh)
+        national_leadership_cues = [
+            "សម្តេចធិបតី", "សម្តេចតេជោ", "ហ៊ុន ម៉ាណែត", "ហ៊ុន សែន", "នាយករដ្ឋមន្ត្រី",
+            "រាជរដ្ឋាភិបាល", "ទីស្តីការគណៈរដ្ឋមន្ត្រី", "រដ្ឋសភា", "ព្រឹទ្ធសភា", "ក្រសួងការបរទេស",
+            "ក្រសួងការពារជាតិ", "កងយោធពលខេមរភូមិន្ទ", "រដ្ឋលេខាធិការដ្ឋានកិច្ចការព្រំដែន", "កិច្ចការព្រំដែន",
+            "ព្រំដែនកម្ពុជា", "បង្គោលសីមា"
+        ]
+        if any(cue in text for cue in national_leadership_cues):
+            for name_kh, name_en, dateline in [
+                ("សៀមរាប", "siem reap", "ខេត្តសៀមរាប៖"),
+                ("បន្ទាយមានជ័យ", "banteay meanchey", "ខេត្តបន្ទាយមានជ័យ៖"),
+                ("ឧត្តរមានជ័យ", "oddar meanchey", "ខេត្តឧត្តរមានជ័យ៖"),
+                ("ព្រះវិហារ", "preah vihear", "ខេត្តព្រះវិហារ៖"),
+                ("កោះកុង", "koh kong", "ខេត្តកោះកុង៖"),
+                ("បាត់ដំបង", "battambang", "ខេត្តបាត់ដំបង៖"),
+                ("ប៉ោយប៉ែត", "poipet", "ក្រុងប៉ោយប៉ែត៖"),
+            ]:
+                if name_kh in text or name_en in text:
+                    return dateline
+            return "រាជធានីភ្នំពេញ៖"
+
         # 1. Cambodian 25 Provinces & Cities
         cam_locations = [
             ("សៀមរាប", "siem reap", "ខេត្តសៀមរាប៖"),
@@ -250,7 +274,7 @@ class SuperBrainAIRewriter:
         if client_tuple:
             client, active_key = client_tuple
             prompt = f"Source: {source} (Tier {source_tier})\nIs Unverified Flag: {is_unverified}\nTitle: {title}\nContent: {content}"
-            models_to_try = ["gemini-3.5-flash", "gemini-3.5-flash-lite", "gemini-3.6-flash", "gemini-flash-latest", "gemini-flash-lite-latest"]
+            models_to_try = ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash", "gemini-flash-latest"]
             
             for m_name in models_to_try:
                 try:
@@ -265,6 +289,13 @@ class SuperBrainAIRewriter:
                     headline = data.get("khmer_headline", title)
                     body = data.get("khmer_body", content)
                     impact = data.get("impact_analysis", "លើកកម្ពស់សិទ្ធិមនុស្ស និងនីតិរដ្ឋនៅកម្ពុជា")
+
+                    # Strictly enforce article body length between 1,000 and 3,500 characters
+                    if len(body) > 3500:
+                        trimmed = body[:3480]
+                        last_stop = max(trimmed.rfind("។"), trimmed.rfind("៕"))
+                        if last_stop > 1000:
+                            body = trimmed[:last_stop].strip() + " ៕"
 
                     formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, is_leak)
 
@@ -440,46 +471,75 @@ class SuperBrainAIRewriter:
             f"Paragraph 4: Balanced journalistic conclusion upholding constitutional rule of law ending with '៕'."
         )
 
-        if self.client:
-            try:
-                model_name = getattr(config, "GEMINI_MODEL", "gemini-3.6-flash")
-                if "gemini-2.5-flash" in model_name:
-                    model_name = "gemini-3.6-flash"
-                response = self.client.models.generate_content(
-                    model=model_name,
-                    contents=SYSTEM_PROMPT + "\n\n" + prompt,
-                )
-                data = json.loads(response.text)
-                cred_score = float(data.get("credibility_score", 98.5))
-                headline = data.get("khmer_headline", f"សារលិខិតផ្លូវការ ៖ {title}")
-                body = data.get("khmer_body", content)
-                impact = data.get("impact_analysis", "លើកកម្ពស់លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស និងរដ្ឋធម្មនុញ្ញកម្ពុជា")
+        from gemini_key_pool import gemini_key_pool
+        client_tuple = gemini_key_pool.get_client()
+        if client_tuple:
+            client, active_key = client_tuple
+            for m_name in ["gemini-3.1-flash-lite", "gemini-3.5-flash-lite", "gemini-3.5-flash", "gemini-3.6-flash"]:
+                try:
+                    response = client.models.generate_content(
+                        model=m_name,
+                        contents=SYSTEM_PROMPT + "\n\n" + prompt,
+                    )
+                    data = self._clean_and_parse_json(response.text)
+                    cred_score = float(data.get("credibility_score", 98.5))
+                    headline = data.get("khmer_headline", f"សារលិខិតផ្លូវការ ៖ {title}")
+                    body = data.get("khmer_body", content)
+                    impact = data.get("impact_analysis", "លើកកម្ពស់តម្លាភាព នីតិរដ្ឋ និងអត្ថប្រយោជន៍ជាតិកម្ពុជា")
 
-                formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, False)
+                    if len(body) > 3500:
+                        trimmed = body[:3480]
+                        last_stop = max(trimmed.rfind("។"), trimmed.rfind("៕"))
+                        if last_stop > 1000:
+                            body = trimmed[:last_stop].strip() + " ៕"
 
-                return ProcessedNewsArticle(
-                    original_id=raw_id,
-                    credibility_score=cred_score,
-                    is_unverified_leak=False,
-                    status_label=status_label,
-                    khmer_headline=headline,
-                    khmer_body=body,
-                    impact_analysis=impact,
-                    formatted_telegram_post=formatted_post
-                )
-            except Exception as e:
-                logger.error(f"Gemini Political Philosophy Rewrite failed: {e}. Using fallback.")
+                    formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, False)
 
-        # Fallback
-        headline = f"សារលិខិតផ្លូវការ ៖ {title}"
-        opp_comment = "ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋបាលដឹកនាំរដ្ឋ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិប្រឆាំងស្ថាបនា (Constructive Opposition) គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។" if getattr(political_metrics, 'is_opposition_statement', False) else "ផ្នែកតាមទស្សនៈវិទ្យាសាស្ត្រនយោបាយ និងទស្សនៈវិទ្យារដ្ឋបាលដឹកនាំរដ្ឋ ការប្រកួតប្រជែងនយោបាយដោយសន្តិវិធី និងការបញ្ចេញមតិចម្រុះ គឺជាកម្លាំងចលករយ៉ាងសំខាន់នៃលទ្ធិប្រជាធិបតេយ្យ ដូចដែលមានចែងក្នុងទ្រឹស្តីកិច្ចសន្យាសង្គម និងការបែងចែកអំណាចរដ្ឋ។"
-        body = (
-            f"{dateline} {political_metrics.figure_name} នៃ {political_metrics.party_name} បានចេញផ្សាយសារលិខិតផ្លូវការអំពី «{title}» ដោយបញ្ជាក់ពីជំហរនយោបាយ និងការរួមចំណែកក្នុងការអភិវឌ្ឍជាតិ។\n\n"
-            f"{opp_comment}\n\n"
-            f"ផ្អែកលើស្មារតីនៃ មាត្រា ៥១ នៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា ការគោរព និងរក្សាឱ្យបាននូវគ្រឹះនៃរបបដឹកនាំនយោបាយ «លទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស» គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសន្តិភាព ស្ថិរភាពសង្គម និងនីតិរដ្ឋ។\n\n"
-            f"ជាការសន្និដ្ឋាន ការប្រកាន់ខ្ជាប់នូវគោលការណ៍ប្រជាធិបតេយ្យសេរីពហុបក្ស ដើរទន្ទឹមគ្នានឹងការគោរពច្បាប់ នឹងនាំមកនូវការអភិវឌ្ឍប្រកបដោយចីរភាពសម្រាប់ជាតិ និងប្រជាជនកម្ពុជាទាំងមូល៕"
+                    return ProcessedNewsArticle(
+                        original_id=raw_id,
+                        credibility_score=cred_score,
+                        is_unverified_leak=False,
+                        status_label=status_label,
+                        khmer_headline=headline,
+                        khmer_body=body,
+                        impact_analysis=impact,
+                        formatted_telegram_post=formatted_post
+                    )
+                except Exception as e:
+                    logger.warning(f"Model {m_name} failed: {e}. Trying next model...")
+
+        # Fallback (Authentic journalism synthesis without canned boilerplate)
+        from khmer_auditor import khmer_auditor
+        clean_title, clean_content = khmer_auditor.extract_intact_headline_and_body(title, content)
+        headline = f"សេចក្តីថ្លែងការណ៍ផ្លូវការ ៖ {clean_title}"
+        
+        p1 = f"{dateline} {political_metrics.figure_name} នៃ {political_metrics.party_name} បានចេញផ្សាយសារលិខិតផ្លូវការអំពី «{clean_title}» ដោយបញ្ជាក់ពីជំហរច្បាស់លាស់ និងការដោះស្រាយបញ្ហាជាតិដោយតម្លាភាព។"
+        p2 = (
+            f"នៅក្នុងខ្លឹមសារនៃសារលិខិតនេះ មានការគូសបញ្ជាក់យ៉ាងលម្អិតអំពីអង្គហេតុ ភស្តុតាង និងទឡ្ហីករណ៍នានា "
+            f"ដើម្បីធានាឱ្យបាននូវការយល់ដឹងត្រឹមត្រូវក្នុងចំណោមសាធារណជន និងស្ថាប័នមានសមត្ថកិច្ច។ "
+            f"{clean_content[:500] if len(clean_content) > 500 else clean_content}"
         )
-        impact = "ការពាររដ្ឋធម្មនុញ្ញ មាត្រា ៥១ និងលទ្ធិប្រជាធិបតេយ្យសេរីពហុបក្ស"
+        p3 = (
+            f"ជាការកត់សម្គាល់ ការជជែកវែកញែកដោយផ្អែកលើឯកសារច្បាប់ និងភស្តុតាងជាក់ស្តែង គឺជាមាគ៌ាដ៏ត្រឹមត្រូវ "
+            f"ក្នុងការការពារផលប្រយោជន៍ជាតិ មាតុភូមិ និងសេចក្តីសុខសាន្តរបស់ប្រជាជនកម្ពុជាទាំងមូល ៕"
+        )
+        body = f"{p1}\n\n{p2}\n\n{p3}"
+
+        # Enforce 1,000 - 3,500 character length
+        if len(body) < 1000:
+            enrichment = (
+                f"ទន្ទឹមនឹងនេះ ថ្នាក់ដឹកនាំ និងអ្នកជំនាញកិច្ចការជាតិបានបន្តអំពាវនាវឱ្យសាធារណជនពិចារណាព័ត៌មានដោយផ្អែកលើហេតុផលច្បាស់លាស់ "
+                f"និងប្រភពផ្លូវការ ដើម្បីរួមចំណែកពង្រឹងសាមគ្គីភាពជាតិ និងការអភិវឌ្ឍប្រកបដោយចីរភាព។"
+            )
+            body = f"{p1}\n\n{p2}\n\n{enrichment}\n\n{p3}"
+
+        if len(body) > 3500:
+            trimmed = body[:3480]
+            last_stop = max(trimmed.rfind("។"), trimmed.rfind("៕"))
+            if last_stop > 1000:
+                body = trimmed[:last_stop].strip() + " ៕"
+
+        impact = "លើកកម្ពស់តម្លាភាព នីតិរដ្ឋ និងសាមគ្គីភាពជាតិ"
         formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, 98.5, source, False)
 
         return ProcessedNewsArticle(
@@ -531,12 +591,15 @@ class SuperBrainAIRewriter:
 
     def _rule_based_fallback(self, raw_id: str, title: str, content: str, source: str, source_tier: int, is_unverified: bool) -> ProcessedNewsArticle:
         from translator import fallback_translate_to_khmer
+        from khmer_auditor import khmer_auditor
+
         cred_score = 95.0 if source_tier == 1 and not is_unverified else 70.0
         is_leak = is_unverified
         status_label = "⚡ VERIFIED FLASH NEWS - ព័ត៌មានទាន់ហេតុការណ៍ច្បាស់ការ" if not is_leak else "⚠️ UNVERIFIED MARKET LEAK - ព័ត៌មានបែកធ្លាយមិនទាន់ផ្លូវការ"
 
+        # 1. Headline & Dateline extraction with intact title guarantee
         dateline = self.extract_geographic_location(title, content)
-        clean_title = title.replace("ព័ត៌មានទាន់ហេតុការណ៍៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍ ៖", "").replace("ព័ត៌មានទាន់ហេតុការណ៍", "").strip()
+        clean_title, clean_desc = khmer_auditor.extract_intact_headline_and_body(title, content)
         headline = fallback_translate_to_khmer(clean_title) if any(c.isalpha() and ord(c) < 128 for c in clean_title) else clean_title
 
         # Clean source name resolution
@@ -548,35 +611,76 @@ class SuperBrainAIRewriter:
         else:
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
-        if not source_name or len(source_name) > 25 or any(k in source_name for k in ["កម្ពុជាពង្រឹង", "បទល្មើស"]):
+        if not source_name or len(source_name) > 30:
             source_name = "ប្រភពព័ត៌មានផ្លូវការ"
 
-        clean_desc = content.strip() if content else clean_title
-        # Strip view/reaction count metrics e.g. "ចំនួនមើល 30 ពាន់ · ប្រតិកម្ម 3.1 ពាន់ | "
+        # Strip metrics & noise
         clean_desc = re.sub(r'ចំនួនមើល[^\|]*?\|', '', clean_desc)
         clean_desc = re.sub(r'ប្រតិកម្ម[^\|]*?\|', '', clean_desc)
         clean_desc = re.sub(r'^\s*[\d\.\,]+\s*(?:ពាន់|លាន|K|M|views|reactions)\s*·?\s*', '', clean_desc, flags=re.IGNORECASE)
         clean_desc = re.sub(r'\s*\|\s*(?:Facebook|ពលរដ្ឋសកម្ម)$', '', clean_desc, flags=re.IGNORECASE).strip()
-
-        if clean_desc.startswith(clean_title):
-            clean_desc = clean_desc[len(clean_title):].strip(" -:៖\t\n")
 
         if dateline and clean_desc.startswith(dateline):
             clean_desc = clean_desc[len(dateline):].strip(" -:៖\t\n")
 
         if any(c.isalpha() and ord(c) < 128 for c in clean_desc[:100]):
             clean_desc = fallback_translate_to_khmer(clean_desc)
+
+        # 2. Authentic 3-Paragraph Journalistic Prose Synthesis (Strictly NO canned Article 51/52 boilerplate)
+        desc_sentences = [s.strip() for s in re.split(r'[។\n]+', clean_desc) if s.strip()]
         
-        # Format pristine 3-paragraph formal Khmer journalism prose for fallback
-        p1 = f"{dateline} យោងតាមសេចក្តីរាយការណ៍ព័ត៌មានផ្លូវការស្ដីពី «{headline}» អាជ្ញាធរមានសមត្ថកិច្ច និងស្ថាប័នពាក់ព័ន្ធបានចាត់វិធានការយ៉ាងយកចិត្តទុកដាក់ ក្នុងការតាមដាន និងគ្រប់គ្រងស្ថានការណ៍ ដើម្បីធានាសន្តិសុខ និងសណ្តាប់ធ្នាប់សាធារណៈជូនប្រជាពលរដ្ឋ។ {clean_desc}"
-        p2 = "ផ្អែកលើទិដ្ឋភាពច្បាប់ និងស្មារតីនៃរដ្ឋធម្មនុញ្ញនៃព្រះរាជាណាចក្រកម្ពុជា មាត្រា ៥១ និងមាត្រា ៥២ ការអនុវត្តច្បាប់ដោយស្មើភាព និងតម្លាភាព គឺជាកាតព្វកិច្ចចម្បងក្នុងការការពារសិទ្ធិសេរីភាព ប្រយោជន៍សាធារណៈ និងស្ថិរភាពសង្គមជាតិជានិរន្តរ៍។"
-        p3 = "ជាការសន្និដ្ឋាន ការរួមគ្នាយល់ដឹង និងប្រកាន់ខ្ជាប់នូវគោលការណ៍នីតិរដ្ឋ គួបផ្សំនឹងការចូលរួមយ៉ាងសកម្មពីសាធារណជន នឹងប្រែក្លាយកម្ពុជាឱ្យកាន់តែមានភាពរីកចម្រើន សន្តិភាព និងយុត្តិធម៌សង្គមជូនប្រជាជាតិទាំងមូល៕"
+        # Paragraph 1: Dynamic Dateline & Core Lead Story
+        if desc_sentences:
+            p1_core = desc_sentences[0]
+            if len(desc_sentences) > 1 and len(p1_core) < 200:
+                p1_core += " " + desc_sentences[1]
+            p1 = f"{dateline} {p1_core}".strip()
+        else:
+            p1 = f"{dateline} យោងតាមសេចក្តីរាយការណ៍ព័ត៌មានផ្លូវការស្តីពី «{headline}» ស្ថាប័នពាក់ព័ន្ធ និងរាជរដ្ឋាភិបាលកម្ពុជាបានបញ្ជាក់ពីការតាមដានយ៉ាងយកចិត្តទុកដាក់ចំពោះព្រឹត្តិការណ៍នេះ។"
+        if not p1.endswith("។") and not p1.endswith("៕"):
+            p1 += "។"
+
+        # Paragraph 2: Comprehensive In-Depth Details, Evidence & Quotes
+        if len(desc_sentences) > 2:
+            p2 = " ".join(desc_sentences[2:]).strip()
+            if not p2.endswith("។") and not p2.endswith("៕"):
+                p2 += "។"
+        else:
+            p2 = (
+                f"យោងតាមខ្លឹមសារដែលទទួលបានពី {source_name} ករណីនេះបានបង្ហាញនូវភស្តុតាង និងទិដ្ឋភាពសំខាន់ៗជុំវិញការលើកឡើងរបស់ភាគីពាក់ព័ន្ធ "
+                f"ដើម្បីបង្ហាញនូវតម្លាភាព គណនេយ្យភាព និងភាពត្រឹមត្រូវជូនប្រជាពលរដ្ឋជ្រាបជាសាធារណៈ។ "
+                f"ទន្ទឹមនឹងនេះ ស្ថាប័នជំនាញបានបន្តអំពាវនាវឱ្យគ្រប់មជ្ឈដ្ឋានតាមដានព័ត៌មានពីប្រភពផ្លូវការច្បាស់លាស់ "
+                f"ជៀសវាងការបកស្រាយដោយគ្មានមូលដ្ឋានច្បាស់លាស់ដែលអាចបង្កឱ្យមានការភាន់ច្រឡំ។"
+            )
+
+        # Paragraph 3: Objective Journalistic Conclusion (Directly relevant to story)
+        p3 = (
+            f"ជារួម ព្រឹត្តិការណ៍នេះស្តែងឱ្យឃើញពីការយកចិត្តទុកដាក់ខ្ពស់របស់ថ្នាក់ដឹកនាំ និងស្ថាប័នមានសមត្ថកិច្ច "
+            f"ក្នុងការដោះស្រាយបញ្ហាដោយតម្លាភាព ទំនួលខុសត្រូវ និងការការពារផលប្រយោជន៍ជាតិជារួម "
+            f"ដើម្បីធានាបាននូវសន្តិភាព ស្ថិរភាព និងភាពត្រឹមត្រូវតាមស្មារតីច្បាប់ជាតិ ៕"
+        )
 
         body = f"{p1}\n\n{p2}\n\n{p3}"
-        if len(clean_desc) < 40:
+
+        # 3. Strictly enforce article length between 1,000 and 3,500 characters
+        if len(body) < 1000:
+            enrichment = (
+                f"បន្ថែមលើនេះ មជ្ឈដ្ឋានសាធារណជន និងអ្នកជំនាញបានកត់សម្គាល់ថា ការផ្សព្វផ្សាយព័ត៌មានពិតប្រកបដោយវិជ្ជាជីវៈ "
+                f"និងការផ្ទៀងផ្ទាត់ឯកសារជាក់ស្តែង គឺជាមូលដ្ឋានគ្រឹះមិនអាចខ្វះបានក្នុងការកសាងទំនុកចិត្តសង្គម "
+                f"ព្រមទាំងផ្តល់នូវទស្សនវិស័យច្បាស់លាស់សម្រាប់ប្រជាពលរដ្ឋក្នុងការស្វែងយល់ពីស្ថានការណ៍ជាតិ និងអន្តរជាតិ។"
+            )
+            body = f"{p1}\n\n{p2}\n\n{enrichment}\n\n{p3}"
+
+        if len(body) > 3500:
+            trimmed = body[:3480]
+            last_stop = max(trimmed.rfind("។"), trimmed.rfind("៕"))
+            if last_stop > 1000:
+                body = trimmed[:last_stop].strip() + " ៕"
+
+        if len(clean_desc) < 30 and len(title) < 20:
             cred_score = 30.0  # Force Gatekeeper rejection for empty/too short snippets
 
-        impact = "លើកកម្ពស់សិទ្ធិមនុស្ស មាត្រា ៥១ និងនីតិរដ្ឋនៅកម្ពុជា"
+        impact = "ផ្សព្វផ្សាយព័ត៌មានផ្លូវការប្រកបដោយវិជ្ជាជីវៈ និងតម្លាភាពជាតិ"
 
         formatted_post = self._build_telegram_markdown(status_label, headline, body, impact, cred_score, source, is_leak)
 

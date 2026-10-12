@@ -1225,10 +1225,11 @@ class SuperSmartTelegramBot:
                             page_name = "ប្រភព Facebook ផ្លូវការ" if not raw_page or "Facebook Page / User Source" in raw_page else raw_page
 
                             rewriter = SuperBrainAIRewriter()
+                            fb_title, fb_body = khmer_auditor.extract_intact_headline_and_body("", extracted_content)
                             processed = rewriter.process_news(
                                 raw_id=f"fb_{int(time.time())}",
-                                title=extracted_content[:100],
-                                content=extracted_content,
+                                title=fb_title,
+                                content=fb_body,
                                 source=page_name,
                                 source_tier=1
                             )

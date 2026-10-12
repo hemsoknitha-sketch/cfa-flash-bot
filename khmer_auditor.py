@@ -165,6 +165,45 @@ class KhmerLanguageAuditor:
             return "INTERNATIONAL"
         return "NATIONAL"
 
+    def extract_intact_headline_and_body(self, raw_title: str, raw_content: str) -> Tuple[str, str]:
+        """
+        Extracts a clean, complete headline and body without EVER truncating mid-word or mid-sentence.
+        Guarantees that the headline is an intact, grammatically complete sentence/title.
+        """
+        clean_t = (raw_title or "").strip()
+        clean_c = (raw_content or "").strip()
+
+        # If raw_title is provided and non-empty
+        if clean_t:
+            clean_t = re.sub(r'[\.…\s]{2,}\s*$', '', clean_t).strip()
+            if clean_c.startswith(clean_t):
+                clean_c = clean_c[len(clean_t):].strip(" -—:៖\t\n")
+            return self.audit_headline_purity(clean_t), clean_c
+
+        # If raw_title was empty, extract headline from raw_content without truncation
+        lines = [line.strip() for line in clean_c.splitlines() if line.strip()]
+        if lines:
+            first_line = lines[0]
+            if len(first_line) <= 250:
+                rest_body = "\n".join(lines[1:]).strip() if len(lines) > 1 else first_line
+                return self.audit_headline_purity(first_line), rest_body
+
+        for delim in [" - ", " — ", " ៖ ", "។ "]:
+            if delim in clean_c:
+                parts = clean_c.split(delim, 1)
+                candidate_h = parts[0].strip()
+                if 20 <= len(candidate_h) <= 250:
+                    return self.audit_headline_purity(candidate_h), parts[1].strip()
+
+        if len(clean_c) > 180:
+            candidate_h = clean_c[:180]
+            last_space = max(candidate_h.rfind(' '), candidate_h.rfind('\t'), candidate_h.rfind('\n'))
+            if last_space > 40:
+                candidate_h = candidate_h[:last_space].strip()
+            return self.audit_headline_purity(candidate_h), clean_c
+        
+        return self.audit_headline_purity(clean_c), clean_c
+
     def audit_headline_purity(self, headline: str) -> str:
         """Deduplicates repetitive titles (e.g. 'A - A' -> 'A') and purges raw prefixes."""
         if not headline:

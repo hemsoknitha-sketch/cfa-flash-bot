@@ -45,7 +45,7 @@ class FlashNewsSuperBrainPipeline:
 # Global pipeline instance
 pipeline_engine = FlashNewsSuperBrainPipeline()
 
-async def process_news(news_text: str, news_id: str, source_name: str = "ប្រភពព័ត៌មានផ្លូវការ", url: str = "", timestamp: float = 0.0):
+async def process_news(news_text: str, news_id: str, source_name: str = "ប្រភពព័ត៌មានផ្លូវការ", url: str = "", timestamp: float = 0.0, raw_title: str = "", raw_content: str = ""):
     """
     Unified 5-Step Async Production Pipeline:
     1. ត្រង Breaking News (XLM-RoBERTa Zero-Shot NLP)
@@ -75,9 +75,10 @@ async def process_news(news_text: str, news_id: str, source_name: str = "ប្�
 
     # 3. សង្ខេបអត្ថបទ (Local Qwen 2.5 3B / Gemini AI) & 4. បកប្រែខ្មែរ (Meta NLLB-200)
     from khmer_auditor import khmer_auditor
+    extracted_title, extracted_body = khmer_auditor.extract_intact_headline_and_body(raw_title, raw_content or news_text)
     is_valid, quality_score, clean_h, clean_b, verified_src, dateline_str = khmer_auditor.evaluate_news_quality_score(
-        headline=news_text[:100],
-        body=news_text,
+        headline=extracted_title,
+        body=extracted_body,
         source_name=source_name,
         url=url,
         timestamp=timestamp
@@ -233,10 +234,12 @@ async def process_public_opinion_news(news_text: str, comments: list, news_id: s
     logger.info(f"Step 1: Sentiment Analysis -> Support: {sentiment_metrics.support_pct}% | Concern: {sentiment_metrics.concern_pct}% | Trending Score: {sentiment_metrics.trending_score}")
 
     # 2. Public Opinion Journalistic Rewriting
+    from khmer_auditor import khmer_auditor
+    extracted_title, extracted_body = khmer_auditor.extract_intact_headline_and_body("", news_text)
     processed_article = pipeline_engine.ai_rewriter.rewrite_public_opinion_news(
         raw_id=news_id,
-        title=news_text[:100],
-        content=news_text,
+        title=extracted_title,
+        content=extracted_body,
         source=source,
         sentiment_metrics=sentiment_metrics
     )
@@ -294,10 +297,12 @@ async def process_political_news(news_text: str, news_id: str, source: str = "Of
     logger.info(f"Step 1: Political Analysis -> Party: {political_metrics.party_name} | Constitutional Alignment: {political_metrics.democratic_alignment_score}%")
 
     # 2. Political Science Rewriting
+    from khmer_auditor import khmer_auditor
+    extracted_title, extracted_body = khmer_auditor.extract_intact_headline_and_body("", news_text)
     processed_article = pipeline_engine.ai_rewriter.rewrite_political_philosophy_news(
         raw_id=news_id,
-        title=news_text[:100],
-        content=news_text,
+        title=extracted_title,
+        content=extracted_body,
         source=source,
         political_metrics=political_metrics
     )
@@ -347,7 +352,15 @@ async def process_batch_news():
     # Process top 5 newest items per 60s cycle to preserve API quota and prevent Telegram flooding
     for item in news_items[:5]:
         full_text = f"{item.title} - {item.content}"
-        await process_news(news_text=full_text, news_id=item.id, source_name=item.source, url=item.url, timestamp=item.timestamp)
+        await process_news(
+            news_text=full_text,
+            news_id=item.id,
+            source_name=item.source,
+            url=item.url,
+            timestamp=item.timestamp,
+            raw_title=item.title,
+            raw_content=item.content
+        )
         await asyncio.sleep(5)  # 5s Pacing delay to guarantee zero 429 rate limit errors
 
 async def main():
